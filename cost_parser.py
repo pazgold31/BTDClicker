@@ -2,7 +2,7 @@ import dataclasses
 import json
 import re
 from dataclasses import dataclass
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 import requests
 from bs4 import BeautifulSoup
@@ -108,12 +108,14 @@ def parse_costs() -> List[TowerCost]:
     return towers
 
 
+TOWER_COSTS: Dict[str, TowerCost] = {i.name: i for i in parse_costs()}
+
+
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
         return super().default(o)
 
-
-with open("costs.json", "w") as of:
-    json.dump(parse_costs(), of, indent=4, cls=EnhancedJSONEncoder)
+# with open("costs.json", "w") as of:
+#     json.dump(parse_costs(), of, indent=4, cls=EnhancedJSONEncoder)

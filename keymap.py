@@ -31,3 +31,30 @@ class Keymap:
     Pause = "{Esc}"
     ChangePriority = "{Tab}"
     SpecialPriority = "{PgDn}"
+
+
+MonkeyKeymapMap = {
+    "Hero": Keymap.Hero,
+    "Dart Monkey": Keymap.DartMonkey,
+    "Boomerang": Keymap.Boomerang,
+    "Bomb Shooter": Keymap.BombShooter,
+    "Tack Shooter": Keymap.TackShooter,
+    "Ice Monkey": Keymap.IceMonkey,
+    "Glue Gunner": Keymap.GlueGunner,
+    "Sniper Monkey": Keymap.SniperMonkey,
+    "Monkey Sub": Keymap.MonkeySub,
+    "Monkey Buccaneer": Keymap.MonkeyBuccaneer,
+    "Monkey Ace": Keymap.MonkeyAce,
+    "Heli Pilot": Keymap.HeliPilot,
+    "Mortar Monkey": Keymap.MortarMonkey,
+    "Dartling Gunner": Keymap.DartlingGunner,
+    "Wizard Monkey": Keymap.WizardMonkey,
+    "Super Monkey": Keymap.SuperMonkey,
+    "Ninja Monkey": Keymap.NinjaMonkey,
+    "Alchemist": Keymap.Alchemist,
+    "Druid": Keymap.Druid,
+    "Banana Farm": Keymap.BananaFarm,
+    "Spike Factory": Keymap.SpikeFactory,
+    "Monkey Village": Keymap.MonkeyVillage,
+    "Engineer Monkey": Keymap.EngineerMonkey
+}

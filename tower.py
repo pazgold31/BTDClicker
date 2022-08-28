@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Tower:
+    name: str
     x: int
     y: int
     top: int = 0
