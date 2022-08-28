@@ -7,7 +7,7 @@ from money_extracter import get_amount_of_money
 from tower import Tower
 
 
-class PlaceTowerActions(IAction):
+class PlaceTowerAction(IAction):
 
     def __init__(self, ahk: AHK, tower: Tower):
         self._ahk = ahk
@@ -20,4 +20,4 @@ class PlaceTowerActions(IAction):
 
     def can_act(self) -> bool:
         # TODO: fix for every difficulty
-        return get_amount_of_money() == TOWER_COSTS[self._tower.name].base_cost.easy
+        return get_amount_of_money() >= TOWER_COSTS[self._tower.name].base_cost.easy

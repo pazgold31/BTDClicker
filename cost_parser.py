@@ -54,12 +54,14 @@ cost_re = re.compile(r"([\w .]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**
 
 def parse_single_upgrade(data: str) -> Upgrade:
     match = cost_re.search(data)
-    return Upgrade(match.group(1), Cost(match.group(2), match.group(3), match.group(4), match.group(5)))
+    cost_args = (int(match.group(i).replace(",", "")) for i in range(2, 6))
+    return Upgrade(match.group(1), Cost(*cost_args))
 
 
 def parse_tower_base(data: str) -> Tuple[str, Cost]:
     match = cost_re.search(data)
-    return match.group(1), Cost(match.group(2), match.group(3), match.group(4), match.group(5))
+    cost_args = (int(match.group(i).replace(",", "")) for i in range(2, 6))
+    return match.group(1), Cost(*cost_args)
 
 
 def parse_upgrades_tier(data: List[str]) -> UpgradeTierCost:
