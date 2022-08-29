@@ -31,4 +31,12 @@ class UpgradeTowerAction(IAction):
 
     def can_act(self) -> bool:
         # TODO: fix for every difficulty
-        return get_amount_of_money() >= TOWER_COSTS[self._tower.name].base_cost.easy
+
+        try:
+            m = {1: self._tower.top, 2: self._tower.middle, 3: self._tower.bottom}
+            upgrade_cost = TOWER_COSTS[self._tower.name].upgrades.get_mapping()[self._tier + 1].get_mapping()[
+                m[self._tier + 1] + 1].cost.get_mapping()[1]
+            return get_amount_of_money() >= upgrade_cost
+        except Exception as e:
+            # TODO: add max tries
+            print(e)

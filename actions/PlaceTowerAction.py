@@ -1,3 +1,5 @@
+import time
+
 from ahk import AHK
 
 from actions.IAction import IAction
@@ -20,4 +22,8 @@ class PlaceTowerAction(IAction):
 
     def can_act(self) -> bool:
         # TODO: fix for every difficulty
-        return get_amount_of_money() >= TOWER_COSTS[self._tower.name].base_cost.easy
+        try:
+            return get_amount_of_money() >= TOWER_COSTS[self._tower.name].base_cost.easy
+        except Exception:
+            # TODO: add max tries
+            pass

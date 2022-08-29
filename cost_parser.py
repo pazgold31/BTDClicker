@@ -18,6 +18,9 @@ class Cost:
     hard: int
     chimps: int
 
+    def get_mapping(self) -> Dict[int, int]:
+        return {1: self.easy, 2: self.medium, 3: self.hard, 4: self.chimps}
+
 
 @dataclass
 class Upgrade:
@@ -34,12 +37,18 @@ class UpgradeTierCost:
     Five: Cost
     Six: Optional[Cost]
 
+    def get_mapping(self) -> Dict[int, Cost]:
+        return {1: self.One, 2: self.Two, 3: self.Three, 4: self.Four, 5: self.Five, 6: self.Six}
+
 
 @dataclass
 class UpgradesCost:
     top: UpgradeTierCost
     mid: UpgradeTierCost
     bottom: UpgradeTierCost
+
+    def get_mapping(self) -> Dict[int, UpgradeTierCost]:
+        return {1: self.top, 2: self.mid, 3: self.top}
 
 
 @dataclass

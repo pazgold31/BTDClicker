@@ -10,7 +10,7 @@ from tower import Tower
 
 
 def main():
-    with open("dummy_config.json", "r") as of:
+    with open("exported.json", "r") as of:
         data = json.load(of)
 
     ahk = AHK()
