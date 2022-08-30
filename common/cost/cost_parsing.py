@@ -1,5 +1,3 @@
-import dataclasses
-import json
 import re
 from typing import List, Tuple, Dict
 
@@ -57,7 +55,7 @@ def parse_costs() -> List[TowerCost]:
     soup = BeautifulSoup(page.content, "html.parser")
     tables = soup.find_all("table", class_="article-table")
     towers = []
-    for table in tables[:4]:
+    for table in tables[:4]:  # First 4 tables (primary, military, magic and support)
         data = []
         table_body = table.find('tbody')
 
@@ -67,19 +65,9 @@ def parse_costs() -> List[TowerCost]:
             cols = [ele.text.strip() for ele in cols]
             data.append([ele for ele in cols if ele])  # Get rid of empty values
 
-        towers += parse_data(data=data[1:])
+        towers += parse_data(data=data[1:])  # remove the tower name item
 
     return towers
 
 
 TOWER_COSTS: Dict[str, TowerCost] = {i.name: i for i in parse_costs()}
-
-
-class EnhancedJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
-        return super().default(o)
-
-# with open("costs.json", "w") as of:
-#     json.dump(parse_costs(), of, indent=4, cls=EnhancedJSONEncoder)
