@@ -45,27 +45,28 @@ class Upgrade:
 
 @dataclass
 class UpgradeTierCost:
-    One: Cost
-    Two: Cost
-    Three: Cost
-    Four: Cost
-    Five: Cost
-    Six: Optional[Cost]
+    first: Cost
+    second: Cost
+    third: Cost
+    fourth: Cost
+    fifth: Cost
+    paragon: Optional[Cost]
 
     def get_mapping(self) -> Dict[int, Cost]:
-        return {UpgradeTierCostIndex.first: self.One, UpgradeTierCostIndex.second: self.Two,
-                UpgradeTierCostIndex.third: self.Three, UpgradeTierCostIndex.fourth: self.Four,
-                UpgradeTierCostIndex.fifth: self.Five, UpgradeTierCostIndex.paragon: self.Six}
+        return {UpgradeTierCostIndex.first: self.first, UpgradeTierCostIndex.second: self.second,
+                UpgradeTierCostIndex.third: self.third, UpgradeTierCostIndex.fourth: self.fourth,
+                UpgradeTierCostIndex.fifth: self.fifth, UpgradeTierCostIndex.paragon: self.paragon}
 
 
 @dataclass
 class UpgradesCost:
     top: UpgradeTierCost
-    mid: UpgradeTierCost
+    middle: UpgradeTierCost
     bottom: UpgradeTierCost
 
     def get_mapping(self) -> Dict[int, UpgradeTierCost]:
-        return {UpgradeCostIndex.top: self.top, UpgradeCostIndex.middle: self.mid, UpgradeCostIndex.bottom: self.bottom}
+        return {UpgradeCostIndex.top: self.top, UpgradeCostIndex.middle: self.middle,
+                UpgradeCostIndex.bottom: self.bottom}
 
 
 @dataclass
