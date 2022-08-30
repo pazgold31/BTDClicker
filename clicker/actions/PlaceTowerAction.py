@@ -1,12 +1,10 @@
-import time
-
 from ahk import AHK
 
-from actions.IAction import IAction
-from cost_parser import TOWER_COSTS
-from keymap import MonkeyKeymapMap
-from money_extracter import get_amount_of_money
-from tower import Tower
+from clicker.actions.IAction import IAction
+from common.cost_parser import TOWER_COSTS
+from common.keymap import MonkeyKeymapMap
+from clicker.money_extracter import get_amount_of_money
+from common.tower import Tower
 
 
 class PlaceTowerAction(IAction):

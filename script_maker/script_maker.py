@@ -6,9 +6,9 @@ from typing import List, Dict, Any
 import PySimpleGUI as sg
 from ahk import AHK
 
-from cost_parser import TOWER_COSTS
-from hotkeys import Hotkeys
-from tower import Tower
+from common.cost_parser import TOWER_COSTS
+from common.hotkeys import Hotkeys
+from common.tower import Tower
 
 
 def get_layout() -> List[List[Any]]:
@@ -209,7 +209,7 @@ def main():
             update_box_from_script(window["script_box"], script)
 
         if event == "export_button":
-            with open("exported.json", "w") as of:
+            with open("../exported.json", "w") as of:
                 json.dump(script, of)
 
         if event == sg.WIN_CLOSED:

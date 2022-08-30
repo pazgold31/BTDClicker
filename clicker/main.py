@@ -6,11 +6,11 @@ from ahk import AHK
 
 from actions.PlaceTowerAction import PlaceTowerAction
 from actions.UpgradeTowerAction import UpgradeTowerAction
-from tower import Tower
+from common.tower import Tower
 
 
 def main():
-    with open("exported.json", "r") as of:
+    with open("../exported.json", "r") as of:
         data = json.load(of)
 
     ahk = AHK()
