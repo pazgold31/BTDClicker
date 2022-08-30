@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 import PySimpleGUI as sg
 from ahk import AHK
 
-from common.cost_parser import TOWER_COSTS
+from common.cost.cost_parser import TOWER_COSTS
 from common.hotkeys import Hotkeys
 from common.tower import Tower
 
