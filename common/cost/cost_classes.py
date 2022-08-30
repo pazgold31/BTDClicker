@@ -1,28 +1,7 @@
 from dataclasses import dataclass
-from enum import IntEnum
 from typing import Dict, Optional
 
-
-class CostIndex(IntEnum):
-    easy = 1,
-    medium = 2,
-    hard = 3,
-    chimps = 4
-
-
-class UpgradeTierCostIndex(IntEnum):
-    first = 1,
-    second = 2,
-    third = 3,
-    fourth = 4
-    fifth = 5
-    paragon = 6
-
-
-class UpgradeCostIndex(IntEnum):
-    top = 1,
-    middle = 2,
-    bottom = 3
+from common.enums import Difficulty, TierLevel, UpgradeTier
 
 
 @dataclass
@@ -32,9 +11,9 @@ class Cost:
     hard: int
     chimps: int
 
-    def get_mapping(self) -> Dict[CostIndex, int]:
-        return {CostIndex.easy: self.easy, CostIndex.medium: self.medium,
-                CostIndex.hard: self.hard, CostIndex.chimps: self.chimps}
+    def get_mapping(self) -> Dict[Difficulty, int]:
+        return {Difficulty.easy: self.easy, Difficulty.medium: self.medium,
+                Difficulty.hard: self.hard, Difficulty.chimps: self.chimps}
 
 
 @dataclass
@@ -52,10 +31,10 @@ class UpgradeTierCost:
     fifth: Cost
     paragon: Optional[Cost]
 
-    def get_mapping(self) -> Dict[int, Cost]:
-        return {UpgradeTierCostIndex.first: self.first, UpgradeTierCostIndex.second: self.second,
-                UpgradeTierCostIndex.third: self.third, UpgradeTierCostIndex.fourth: self.fourth,
-                UpgradeTierCostIndex.fifth: self.fifth, UpgradeTierCostIndex.paragon: self.paragon}
+    def get_mapping(self) -> Dict[TierLevel, Cost]:
+        return {TierLevel.first: self.first, TierLevel.second: self.second,
+                TierLevel.third: self.third, TierLevel.fourth: self.fourth,
+                TierLevel.fifth: self.fifth, TierLevel.paragon: self.paragon}
 
 
 @dataclass
@@ -64,9 +43,9 @@ class UpgradesCost:
     middle: UpgradeTierCost
     bottom: UpgradeTierCost
 
-    def get_mapping(self) -> Dict[int, UpgradeTierCost]:
-        return {UpgradeCostIndex.top: self.top, UpgradeCostIndex.middle: self.middle,
-                UpgradeCostIndex.bottom: self.bottom}
+    def get_mapping(self) -> Dict[UpgradeTier, UpgradeTierCost]:
+        return {UpgradeTier.top: self.top, UpgradeTier.middle: self.middle,
+                UpgradeTier.bottom: self.bottom}
 
 
 @dataclass

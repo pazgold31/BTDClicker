@@ -9,7 +9,7 @@ from common.cost.cost_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCos
 
 URL = r"https://bloons.fandom.com/wiki/Tower_Price_Lists"
 
-cost_re = re.compile(r"([\w .]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**\nI\$([,\d]+)\**")
+cost_re = re.compile(r"([\w .-]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**\nI\$([,\d]+)\**")
 
 
 def parse_single_upgrade(data: str) -> Upgrade:
@@ -25,11 +25,11 @@ def parse_tower_base(data: str) -> Tuple[str, Cost]:
 
 
 def parse_upgrades_tier(data: List[str]) -> UpgradeTierCost:
-    return UpgradeTierCost(parse_single_upgrade(data[0]),
-                           parse_single_upgrade(data[1]),
-                           parse_single_upgrade(data[2]),
-                           parse_single_upgrade(data[3]),
-                           parse_single_upgrade(data[4]),
+    return UpgradeTierCost(parse_single_upgrade(data[-6]),
+                           parse_single_upgrade(data[-5]),
+                           parse_single_upgrade(data[-4]),
+                           parse_single_upgrade(data[-3]),
+                           parse_single_upgrade(data[-2]),
                            None)  # TODO: support paragons
 
 

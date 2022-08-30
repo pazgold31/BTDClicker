@@ -6,6 +6,7 @@ from ahk import AHK
 
 from actions.PlaceTowerAction import PlaceTowerAction
 from actions.UpgradeTowerAction import UpgradeTowerAction
+from common.enums import Difficulty, UpgradeTier
 from common.tower import Tower
 
 
@@ -21,9 +22,10 @@ def main():
         if action["action"] == "create":
             tower = Tower(name=action["name"], x=action["x"], y=action["y"])
             tower_map[action["id"]] = tower
-            script.append(PlaceTowerAction(ahk=ahk, tower=tower))
+            script.append(PlaceTowerAction(ahk=ahk, tower=tower, difficulty=Difficulty.easy))
         elif action["action"] == "upgrade":
-            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action["id"]], tier=action["tier"]))
+            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action["id"]], tier=UpgradeTier(action["tier"]),
+                                             difficulty=Difficulty.easy))
 
     pass
 

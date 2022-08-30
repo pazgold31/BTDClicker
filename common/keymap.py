@@ -1,3 +1,6 @@
+from common.enums import UpgradeTier
+
+
 class Keymap:
     hero = "U"
     dart_monkey = "Q"
@@ -57,4 +60,10 @@ MONKEY_KEY_MAP = {
     "Spike Factory": Keymap.spike_factory,
     "Monkey Village": Keymap.monkey_village,
     "Engineer Monkey": Keymap.engineer_monkey
+}
+
+UPGRADE_TIER_MAPPING = {
+    UpgradeTier.top: Keymap.upgrade_top,
+    UpgradeTier.middle: Keymap.upgrade_middle,
+    UpgradeTier.bottom: Keymap.upgrade_bottom,
 }
