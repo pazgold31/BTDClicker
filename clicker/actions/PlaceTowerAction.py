@@ -2,7 +2,7 @@ from ahk import AHK
 
 from clicker.actions.IAction import IAction
 from common.cost.cost_parsing import TOWER_COSTS
-from common.keymap import MonkeyKeymapMap
+from common.keymap import MONKEY_KEY_MAP
 from clicker.money_extracter import get_amount_of_money
 from common.tower import Tower
 
@@ -15,7 +15,7 @@ class PlaceTowerAction(IAction):
 
     def act(self):
         self._ahk.mouse_position = (self._tower.x, self._tower.y)
-        self._ahk.key_press(MonkeyKeymapMap[self._tower.name])
+        self._ahk.key_press(MONKEY_KEY_MAP[self._tower.name])
         self._ahk.click()
 
     def can_act(self) -> bool:

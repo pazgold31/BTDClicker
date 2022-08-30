@@ -16,8 +16,8 @@ class UpgradeTowerAction(IAction):
         self._tier = tier
 
     def act(self) -> Tower:
-        key = Keymap.UpgradeTop if self._tier == 0 else Keymap.UpgradeMiddle if self._tier == 1 else \
-            Keymap.UpgradeBottom if self._tier == 2 else -1
+        key = Keymap.upgrade_top if self._tier == 0 else Keymap.upgrade_middle if self._tier == 1 else \
+            Keymap.upgrade_bottom if self._tier == 2 else -1
         if key == -1:
             raise RuntimeError("Invalid tier")
 
@@ -25,9 +25,6 @@ class UpgradeTowerAction(IAction):
         self._ahk.click()
         time.sleep(0.2)
         self._ahk.key_press(key)
-        time.sleep(0.2)
-        self._ahk.send(Keymap.Pause)
-        time.sleep(0.2)
 
     def can_act(self) -> bool:
         # TODO: fix for every difficulty

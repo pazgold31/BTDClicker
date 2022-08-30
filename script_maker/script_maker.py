@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 from ahk import AHK
 
 from common.cost.cost_parsing import TOWER_COSTS
-from common.hotkeys import Hotkeys
+from script_maker.hotkeys import Hotkeys
 from common.tower import Tower
 
 
