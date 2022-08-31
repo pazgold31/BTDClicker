@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 from ahk import AHK
 
 from common.cost.cost_parsing import TOWER_COSTS
-from common.enums import UpgradeTier
+from common.enums import UpgradeTier, Difficulty
 from common.tower import Tower
 from hotkeys import Hotkeys
 
@@ -31,11 +31,15 @@ class GuiKeys:
     ScriptBox = "-script_box-"
 
 
+DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
+                  "hard": Difficulty.hard, "chimps": Difficulty.chimps}
+
+
 def get_layout() -> List[List[Any]]:
     left_col = [
         [sg.Text("Choose difficulty", size=(20, 1), font="Lucida", justification="left")],
-        [sg.Combo(["Easy", "Medium", "Hard", "Chimps"],
-                  default_value="Easy", key=GuiKeys.DifficultyListBox, enable_events=True)],
+        [sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
+                  key=GuiKeys.DifficultyListBox, enable_events=True)],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
         [sg.Listbox(values=get_monkey_options(),
                     select_mode="extended", key=GuiKeys.TowerTypesListBox, size=(30, 25), enable_events=True),
@@ -90,21 +94,23 @@ class AdditionalTowerInfo:
     s_targeting: int = 0
 
 
-def get_monkey_options(difficulty: str = "Easy") -> List[str]:
-    return [f"{name}: {cost.base_cost.__getattribute__(difficulty.lower())}$" for name, cost in TOWER_COSTS.items()]
+def get_monkey_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
+    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
 
 
-def convert_targeting(targeting: int):
+def convert_targeting(targeting: int) -> str:
     # TODO: support elite targeting and such
+    targeting = targeting % 4
     return "First" if targeting == 0 else "Last" if targeting == 1 else "Close" if \
-        targeting == 2 else "Strong" if targeting == 3 else "ERROR"
+        targeting == 2 else "Strong"
 
 
 def get_existing_towers(towers: Dict[int, Tower], additional_info: Dict[int, AdditionalTowerInfo]) -> List[str]:
     return [
-        f"{tower_id}: {tower.name} | x:{tower.x} y:{tower.y} | {tower.tier_map[UpgradeTier.top]}-{tower.tier_map[UpgradeTier.middle]}-{tower.tier_map[UpgradeTier.bottom]} | " \
-        f"Targeting: {convert_targeting(additional_info.get(tower_id, AdditionalTowerInfo()).targeting)} | " \
-        f"S.Targeting: {additional_info.get(tower_id, AdditionalTowerInfo()).s_targeting}" \
+        f"{tower_id}: {tower.name} | x:{tower.x} y:{tower.y} | {tower.tier_map[UpgradeTier.top]}-"
+        f"{tower.tier_map[UpgradeTier.middle]}-{tower.tier_map[UpgradeTier.bottom]} | "
+        f"Targeting: {convert_targeting(additional_info.get(tower_id, AdditionalTowerInfo()).targeting)} | "
+        f"S.Targeting: {additional_info.get(tower_id, AdditionalTowerInfo()).s_targeting}"
         f"{' SOLD' if additional_info.get(tower_id, AdditionalTowerInfo()).sold else ''}" for
         tower_id, tower in towers.items()]
 
@@ -121,7 +127,7 @@ def update_towers_from_list(exiting_towers: sg.Listbox, towers_list: Dict[int, T
     exiting_towers.update(get_existing_towers(towers_list, additional_info), set_to_index=exiting_towers.get_indexes())
 
 
-def update_box_from_script(script_box: sg.Listbox, script_list: List[Dict[str, Any]]):
+def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]]):
     output = []
     for line in script_list:
         if line["action"] == "create":
@@ -159,19 +165,18 @@ def main():
     script = []
     id_generator = itertools.count()
 
-    # sg.theme("DarkBlue")
-
     window = sg.Window(title="BTD Scripter", layout=get_layout())
+    Hotkeys(ahk=AHK(), x_pos=window[GuiKeys.XPositionInput], y_pos=window[GuiKeys.YPositionInput])
 
-    hkeys = Hotkeys(ahk=AHK(), x_pos=window[GuiKeys.XPositionInput], y_pos=window[GuiKeys.YPositionInput])
-    # Create an event loop
+    difficulty = Difficulty.easy
+
     while True:
         event, values = window.read()
-        # End program if user closes window or
-        # presses the OK button
 
-        if event == GuiKeys.DifficultyListBox:
-            window[GuiKeys.TowerTypesListBox].update(get_monkey_options(values[GuiKeys.DifficultyListBox]), )
+        if event == GuiKeys.DifficultyListBox:  # changed difficulty
+            difficulty_value = values[GuiKeys.DifficultyListBox]
+            difficulty = DIFFICULTY_MAP[difficulty_value]
+            window[GuiKeys.TowerTypesListBox].update(get_monkey_options(difficulty), )
 
         if event == GuiKeys.TowerTypesListBox:
             window[GuiKeys.NewMonkeyTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
@@ -193,7 +198,7 @@ def main():
             update_towers_from_list(window[GuiKeys.ExistingTowersListBox], towers_list, additional_tower_information)
             script.append(
                 {"action": "create", "name": new_tower.name, "id": tower_id, "x": new_tower.x, "y": new_tower.y})
-            update_box_from_script(window[GuiKeys.ScriptBox], script)
+            update_script_box(window[GuiKeys.ScriptBox], script)
 
         if event in (GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
                      GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton):
@@ -228,7 +233,7 @@ def main():
 
             script.append(action)
             update_towers_from_list(window[GuiKeys.ExistingTowersListBox], towers_list, additional_tower_information)
-            update_box_from_script(window[GuiKeys.ScriptBox], script)
+            update_script_box(window[GuiKeys.ScriptBox], script)
 
         if event == "export_button":
             with open("../exported.json", "w") as of:
