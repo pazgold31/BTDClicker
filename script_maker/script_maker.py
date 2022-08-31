@@ -7,13 +7,13 @@ import PySimpleGUI as sg
 from ahk import AHK
 
 from common.cost.cost_parsing import TOWER_COSTS
-from script_maker.hotkeys import Hotkeys
+from common.enums import UpgradeTier
 from common.tower import Tower
+from hotkeys import Hotkeys
 
 
 def get_layout() -> List[List[Any]]:
     left_col = [
-
         [sg.Text("Choose difficulty", size=(20, 1), font="Lucida", justification="left")],
         [sg.Combo(["Easy", "Medium", "Hard", "Chimps"], default_value="Easy", key="difficulty", enable_events=True)],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
@@ -21,7 +21,6 @@ def get_layout() -> List[List[Any]]:
                     select_mode="extended", key="chosen_monkey_type", size=(30, 25), enable_events=True),
          sg.Listbox(values=[],
                     select_mode="extended", key="exsiting_towers", size=(75, 25), enable_events=True),
-
          ]
     ]
 
@@ -82,11 +81,12 @@ def convert_targeting(targeting: int):
 
 
 def get_existing_towers(towers: Dict[int, Tower], additional_info: Dict[int, AdditionalTowerInfo]) -> List[str]:
-    return [f"{tower_id}: {tower.name} | x:{tower.x} y:{tower.y} | {tower.top}-{tower.middle}-{tower.bottom} | " \
-            f"Targeting: {convert_targeting(additional_info.get(tower_id, AdditionalTowerInfo()).targeting)} | " \
-            f"S.Targeting: {additional_info.get(tower_id, AdditionalTowerInfo()).s_targeting}" \
-            f"{' SOLD' if additional_info.get(tower_id, AdditionalTowerInfo()).sold else ''}" for
-            tower_id, tower in towers.items()]
+    return [
+        f"{tower_id}: {tower.name} | x:{tower.x} y:{tower.y} | {tower.tier_map[UpgradeTier.top]}-{tower.tier_map[UpgradeTier.middle]}-{tower.tier_map[UpgradeTier.bottom]} | " \
+        f"Targeting: {convert_targeting(additional_info.get(tower_id, AdditionalTowerInfo()).targeting)} | " \
+        f"S.Targeting: {additional_info.get(tower_id, AdditionalTowerInfo()).s_targeting}" \
+        f"{' SOLD' if additional_info.get(tower_id, AdditionalTowerInfo()).sold else ''}" for
+        tower_id, tower in towers.items()]
 
 
 def get_additional_information(tower_id: int, d: Dict[int, AdditionalTowerInfo]):
@@ -181,13 +181,13 @@ def main():
 
             selected_tower_id = int(values["exsiting_towers"][0].split(":")[0])
             if event == "top_upgrade_button":
-                towers_list[selected_tower_id].top += 1  # TODO: overflow
+                towers_list[selected_tower_id].tier_map[UpgradeTier.top] += 1  # TODO: overflow
                 action = create_upgrade_action(tower_id=selected_tower_id, tier=0)
             elif event == "middle_upgrade_button":
-                towers_list[selected_tower_id].middle += 1  # TODO: overflow
+                towers_list[selected_tower_id].tier_map[UpgradeTier.middle] += 1  # TODO: overflow
                 action = create_upgrade_action(tower_id=selected_tower_id, tier=1)
             elif event == "bottom_upgrade_button":
-                towers_list[selected_tower_id].bottom += 1  # TODO: overflow
+                towers_list[selected_tower_id].tier_map[UpgradeTier.bottom] += 1  # TODO: overflow
                 action = create_upgrade_action(tower_id=selected_tower_id, tier=2)
             elif event == "sell_button":
                 # TODO: warn about updating sold towers
