@@ -12,15 +12,35 @@ from common.tower import Tower
 from hotkeys import Hotkeys
 
 
+class GuiKeys:
+    DifficultyListBox = "-difficulty-"
+    TowerTypesListBox = "-chosen_monkey_type-"
+    ExistingTowersListBox = "-existing_towers-"
+    XPositionInput = "-xpos-"
+    YPositionInput = "-ypos-"
+    NewMonkeyTypeInput = "-new_monkey_type_input-"
+    SaveMonkeyButton = '-save_button-'
+    ExistingMonkeyName = "-existing_monkey_name-"
+    TopUpgradeButton = "-top_upgrade_button-"
+    MiddleUpgradeButton = "-middle_upgrade_button-"
+    BottomUpgradeButton = "-bottom_upgrade_button-"
+    SellButton = "-sell_button-"
+    TargetingButton = "-targeting_button-"
+    SpecialTargetingButton = "-s_targeting_button-"
+    ExportButton = "-export_button-"
+    ScriptBox = "-script_box-"
+
+
 def get_layout() -> List[List[Any]]:
     left_col = [
         [sg.Text("Choose difficulty", size=(20, 1), font="Lucida", justification="left")],
-        [sg.Combo(["Easy", "Medium", "Hard", "Chimps"], default_value="Easy", key="difficulty", enable_events=True)],
+        [sg.Combo(["Easy", "Medium", "Hard", "Chimps"],
+                  default_value="Easy", key=GuiKeys.DifficultyListBox, enable_events=True)],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
         [sg.Listbox(values=get_monkey_options(),
-                    select_mode="extended", key="chosen_monkey_type", size=(30, 25), enable_events=True),
+                    select_mode="extended", key=GuiKeys.TowerTypesListBox, size=(30, 25), enable_events=True),
          sg.Listbox(values=[],
-                    select_mode="extended", key="exsiting_towers", size=(75, 25), enable_events=True),
+                    select_mode="extended", key=GuiKeys.ExistingTowersListBox, size=(75, 25), enable_events=True),
          ]
     ]
 
@@ -28,33 +48,33 @@ def get_layout() -> List[List[Any]]:
         [sg.Text("Click Ctrl + Shift + R to capture mouse position.")],
         [
             sg.Text("X"),
-            sg.In(size=(5, 1), enable_events=True, key="x_pos"),
+            sg.In(size=(5, 1), enable_events=True, key=GuiKeys.XPositionInput),
             sg.Text("Y"),
-            sg.In(size=(5, 1), enable_events=True, key="y_pos")
+            sg.In(size=(5, 1), enable_events=True, key=GuiKeys.YPositionInput)
         ],
         [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key="new_monkey_name")],
-        [sg.Button("Save", enable_events=True, key="save_button")],
+         sg.In(size=(40, 1), disabled=True, key=GuiKeys.NewMonkeyTypeInput)],
+        [sg.Button("Save", enable_events=True, key=GuiKeys.SaveMonkeyButton)],
         [sg.HSeparator()],
         [sg.Text("Existing Monkeys upgrades")],
         [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key="existing_monkey_name")],
+         sg.In(size=(40, 1), disabled=True, key=GuiKeys.ExistingMonkeyName)],
         [
-            sg.Button("Upgrade Top", size=(15, 1), enable_events=True, key="top_upgrade_button"),
-            sg.Button("Upgrade Middle", size=(15, 1), enable_events=True, key="middle_upgrade_button"),
-            sg.Button("Upgrade Bottom", size=(15, 1), enable_events=True, key="bottom_upgrade_button")
+            sg.Button("Upgrade Top", size=(15, 1), enable_events=True, key=GuiKeys.TopUpgradeButton),
+            sg.Button("Upgrade Middle", size=(15, 1), enable_events=True, key=GuiKeys.MiddleUpgradeButton),
+            sg.Button("Upgrade Bottom", size=(15, 1), enable_events=True, key=GuiKeys.BottomUpgradeButton)
         ],
         [
-            sg.Button("Sell", size=(15, 1), enable_events=True, key="sell_button"),
-            sg.Button("Targeting", size=(15, 1), enable_events=True, key="targeting_button"),
-            sg.Button("S. Targeting", size=(15, 1), enable_events=True, key="s_targeting_button")
+            sg.Button("Sell", size=(15, 1), enable_events=True, key=GuiKeys.SellButton),
+            sg.Button("Targeting", size=(15, 1), enable_events=True, key=GuiKeys.TargetingButton),
+            sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
         ],
         [sg.HSeparator()],
-        [sg.Button("Export", size=(15, 1), enable_events=True, key="export_button")]
+        [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton)]
     ]
 
     script_layout = [[sg.Text("Script:")],
-                     [sg.Listbox(values=[], select_mode="extended", key="script_box", size=(150, 12),
+                     [sg.Listbox(values=[], select_mode="extended", key=GuiKeys.ScriptBox, size=(150, 12),
                                  enable_events=True)]]
 
     return [[sg.Column(left_col),
@@ -143,61 +163,63 @@ def main():
 
     window = sg.Window(title="BTD Scripter", layout=get_layout())
 
-    hkeys = Hotkeys(ahk=AHK(), x_pos=window["x_pos"], y_pos=window["y_pos"])
+    hkeys = Hotkeys(ahk=AHK(), x_pos=window[GuiKeys.XPositionInput], y_pos=window[GuiKeys.YPositionInput])
     # Create an event loop
     while True:
         event, values = window.read()
         # End program if user closes window or
         # presses the OK button
 
-        if event == "difficulty":
-            window["chosen_monkey_type"].update(get_monkey_options(values["difficulty"]), )
+        if event == GuiKeys.DifficultyListBox:
+            window[GuiKeys.TowerTypesListBox].update(get_monkey_options(values[GuiKeys.DifficultyListBox]), )
 
-        if event == "chosen_monkey_type":
-            window["new_monkey_name"].update(values["chosen_monkey_type"][0].split(":")[0], )
+        if event == GuiKeys.TowerTypesListBox:
+            window[GuiKeys.NewMonkeyTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
 
-        if event == "exsiting_towers":
-            window["existing_monkey_name"].update(values["exsiting_towers"][0].split("|")[0], )
+        if event == GuiKeys.ExistingTowersListBox:
+            window[GuiKeys.ExistingMonkeyName].update(values[GuiKeys.ExistingTowersListBox][0].split("|")[0], )
 
-        if event == "save_button":
-            if not values["new_monkey_name"] or not values["x_pos"] or not values["y_pos"]:
+        if event == GuiKeys.SaveMonkeyButton:
+            if not values[GuiKeys.NewMonkeyTypeInput] or not values[GuiKeys.XPositionInput] \
+                    or not values[GuiKeys.YPositionInput]:
                 sg.popup("You didn't fill all of the data!")
                 continue
 
             tower_id = next(id_generator)
-            new_tower = Tower(values["new_monkey_name"], int(values["x_pos"]), int(values["y_pos"]))
+            new_tower = Tower(name=values[GuiKeys.NewMonkeyTypeInput],
+                              x=int(values[GuiKeys.XPositionInput]),
+                              y=int(values[GuiKeys.YPositionInput]))
             towers_list[tower_id] = new_tower
-            update_towers_from_list(window["exsiting_towers"], towers_list, additional_tower_information)
+            update_towers_from_list(window[GuiKeys.ExistingTowersListBox], towers_list, additional_tower_information)
             script.append(
                 {"action": "create", "name": new_tower.name, "id": tower_id, "x": new_tower.x, "y": new_tower.y})
-            update_box_from_script(window["script_box"], script)
+            update_box_from_script(window[GuiKeys.ScriptBox], script)
 
-        if event == "top_upgrade_button" or event == "middle_upgrade_button" or \
-                event == "bottom_upgrade_button" or event == "sell_button" or \
-                event == "targeting_button" or event == "s_targeting_button":
-            if not values["existing_monkey_name"]:
+        if event in (GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
+                     GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton):
+            if not values[GuiKeys.ExistingMonkeyName]:
                 sg.popup("You must chose a monkey first!")
                 continue
 
-            selected_tower_id = int(values["exsiting_towers"][0].split(":")[0])
-            if event == "top_upgrade_button":
+            selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
+            if event == GuiKeys.TopUpgradeButton:
                 towers_list[selected_tower_id].tier_map[UpgradeTier.top] += 1  # TODO: overflow
                 action = create_upgrade_action(tower_id=selected_tower_id, tier=0)
-            elif event == "middle_upgrade_button":
+            elif event == GuiKeys.MiddleUpgradeButton:
                 towers_list[selected_tower_id].tier_map[UpgradeTier.middle] += 1  # TODO: overflow
                 action = create_upgrade_action(tower_id=selected_tower_id, tier=1)
-            elif event == "bottom_upgrade_button":
+            elif event == GuiKeys.BottomUpgradeButton:
                 towers_list[selected_tower_id].tier_map[UpgradeTier.bottom] += 1  # TODO: overflow
                 action = create_upgrade_action(tower_id=selected_tower_id, tier=2)
-            elif event == "sell_button":
+            elif event == GuiKeys.SellButton:
                 # TODO: warn about updating sold towers
                 get_additional_information(selected_tower_id, additional_tower_information).sold = True
                 action = create_modify_action(tower_id=selected_tower_id, action="sell")
-            elif event == "targeting_button":
+            elif event == GuiKeys.TargetingButton:
                 # TODO: overflow
                 get_additional_information(selected_tower_id, additional_tower_information).targeting += 1
                 action = create_modify_action(tower_id=selected_tower_id, action="change_targeting")
-            elif event == "s_targeting_button":
+            elif event == GuiKeys.SpecialTargetingButton:
                 # TODO: overflow
                 get_additional_information(selected_tower_id, additional_tower_information).s_targeting += 1
                 action = create_modify_action(tower_id=selected_tower_id, action="change_special_targeting")
@@ -205,8 +227,8 @@ def main():
                 raise RuntimeError
 
             script.append(action)
-            update_towers_from_list(window["exsiting_towers"], towers_list, additional_tower_information)
-            update_box_from_script(window["script_box"], script)
+            update_towers_from_list(window[GuiKeys.ExistingTowersListBox], towers_list, additional_tower_information)
+            update_box_from_script(window[GuiKeys.ScriptBox], script)
 
         if event == "export_button":
             with open("../exported.json", "w") as of:
