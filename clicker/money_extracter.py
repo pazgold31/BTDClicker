@@ -29,18 +29,14 @@ def get_amount_of_money() -> int:
     return int(re_text.replace(",", ""))
 
 
-def safe_get_amount_of_money():
+def safe_get_amount_of_money(amount_of_reads: int = 4):
     results = []
-    for i in range(3):
+    for i in range(amount_of_reads):
         results.append(get_amount_of_money())
-        time.sleep(0.1)
+        time.sleep(0.3)
 
-    if abs(results[0] - results[1]) > 150 or abs(results[1] - results[2]) > 150:
-        print("Failed to get money")
-        raise RuntimeError("Failed to get money")
+    for i in range(amount_of_reads - 1):
+        if abs(results[i] - results[i + 1]) > 150:
+            raise RuntimeError("Failed to get money")
 
-    print(results[-1])
     return results[-1]
-
-
-get_screenshot().save("tmp.png")
