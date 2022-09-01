@@ -7,9 +7,13 @@ from ahk import AHK
 
 from actions.PlaceTowerAction import PlaceTowerAction
 from actions.UpgradeTowerAction import UpgradeTowerAction
+from clicker.actions.ChangeSpecialTargetingAction import ChangeSpecialTargetingAction
+from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
+from clicker.actions.SellTowerAction import SellTowerAction
 from common.enums import Difficulty, UpgradeTier
-from common.script.script_dataclasses import CreateAction, ACTION_KEYWORD, Actions, UpgradeAction
+from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
+    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.tower import Tower
 
 
@@ -23,22 +27,34 @@ def create_script(ahk: AHK, script_dict: Dict) -> Tuple[List[IAction], Dict[int,
     tower_map: Dict[int, Tower] = {}
     for action in script_dict:
         if action[ACTION_KEYWORD] == Actions.create:
-            create_action: CreateAction = CreateAction.from_dict(action)
-            tower = Tower(name=create_action.name, x=create_action.x, y=create_action.y)
-            tower_map[create_action.id] = tower
+            action_class: CreateTowerEntry = CreateTowerEntry.from_dict(action)
+            tower = Tower(name=action_class.name, x=action_class.x, y=action_class.y)
+            tower_map[action_class.id] = tower
             script.append(PlaceTowerAction(ahk=ahk, tower=tower, difficulty=Difficulty.easy))
         elif action[ACTION_KEYWORD] == Actions.upgrade:
-            upgrade_action: UpgradeAction = UpgradeAction.from_dict(action)
-            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[upgrade_action.id],
-                                             tier=UpgradeTier(upgrade_action.tier),
+            action_class: UpgradeTowerEntry = UpgradeTowerEntry.from_dict(action)
+            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action_class.id],
+                                             tier=UpgradeTier(action_class.tier),
                                              difficulty=Difficulty.easy))
+        elif action[ACTION_KEYWORD] == Actions.sell:
+            action_class: SellTowerEntry = SellTowerEntry.from_dict(action)
+            script.append(SellTowerAction(ahk=ahk, tower=tower_map[action_class.id]))
+        elif action[ACTION_KEYWORD] == Actions.change_targeting:
+            action_class: ChangeTargetingEntry = ChangeTargetingEntry.from_dict(action)
+            script.append(ChangeTargetingAction(ahk=ahk, tower=tower_map[action_class.id]))
+        elif action[ACTION_KEYWORD] == Actions.change_special_targeting:
+            action_class: ChangeSpecialTargetingEntry = ChangeSpecialTargetingEntry.from_dict(action)
+            script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=tower_map[action_class.id]))
 
     return script, tower_map
 
 
 def main():
     ahk = AHK()
-    script, tower_map = create_script(ahk=ahk, script_dict=load_script_dict())
+    total_dict = load_script_dict()
+    metadata = total_dict["metadata"]
+    script_dict = total_dict["script"]
+    script, tower_map = create_script(ahk=ahk, script_dict=script_dict)
     time.sleep(2)
 
     for action in script:

@@ -7,8 +7,8 @@ from ahk import AHK
 
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier, Difficulty
-from common.script.script_dataclasses import UpgradeAction, SellAction, ChangeTargetingAction, \
-    ChangeSpecialTargetingAction, CreateAction, IAction
+from common.script.script_dataclasses import UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
+    ChangeSpecialTargetingEntry, CreateTowerEntry, IScriptEntry
 from common.tower import Tower
 from hotkeys import Hotkeys
 from additional_tower_info import AdditionalTowerInfo, get_additional_information
@@ -49,15 +49,15 @@ def update_towers_from_list(exiting_towers: sg.Listbox, towers_list: Dict[int, T
 def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]]):
     output = []
     for action in script_list:
-        if isinstance(action, CreateAction):
+        if isinstance(action, CreateTowerEntry):
             output.append(f"Create: {action.name}({action.id}) | X: {action.x} Y: {action.y}")
-        elif isinstance(action, UpgradeAction):
+        elif isinstance(action, UpgradeTowerEntry):
             output.append(f"Upgrade: ({action.id}) | tier: {action.tier}")
-        elif isinstance(action, SellAction):
+        elif isinstance(action, SellTowerEntry):
             output.append(f"Sell: ({action.id})")
-        elif isinstance(action, ChangeTargetingAction):
+        elif isinstance(action, ChangeTargetingEntry):
             output.append(f"Change targeting: ({action.id})")
-        elif isinstance(action, ChangeSpecialTargetingAction):
+        elif isinstance(action, ChangeSpecialTargetingEntry):
             output.append(f"Change special targeting: ({action.id})")
 
     script_box.update(output, )
@@ -65,7 +65,7 @@ def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]])
 
 class ScriptJsonEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, IAction):
+        if isinstance(obj, IScriptEntry):
             return obj.to_dict()
 
         return json.JSONEncoder.default(self, obj)
@@ -111,15 +111,15 @@ class GuiHandlers:
         self._towers_list[tower_id] = new_tower
         update_towers_from_list(self._window[GuiKeys.ExistingTowersListBox], self._towers_list,
                                 self._additional_tower_information)
-        self._script.append(CreateAction(name=new_tower.name, id=tower_id, x=new_tower.x, y=new_tower.y))
+        self._script.append(CreateTowerEntry(name=new_tower.name, id=tower_id, x=new_tower.x, y=new_tower.y))
         update_script_box(script_box=self._window[GuiKeys.ScriptBox], script_list=self._script)
 
-    def _handle_tower_upgrade(self, tower_id: int, tier: UpgradeTier) -> IAction:
+    def _handle_tower_upgrade(self, tower_id: int, tier: UpgradeTier) -> IScriptEntry:
         if not is_tier_upgradeable(tower=self._towers_list[tower_id], tier=tier):
             sg.popup("The tower is at max level!")
 
         self._towers_list[tower_id].tier_map[tier] += 1
-        return UpgradeAction(id=tower_id, tier=tier)
+        return UpgradeTowerEntry(id=tower_id, tier=tier)
 
     def handle_tower_modification(self, event: Dict[str, Any], values: List[Any]):
         if not values[GuiKeys.ExistingTowerName]:
@@ -140,13 +140,13 @@ class GuiHandlers:
                 return
 
             additional_tower_info.sold = True
-            action = SellAction(id=selected_tower_id)
+            action = SellTowerEntry(id=selected_tower_id)
         elif event == GuiKeys.TargetingButton:
             get_additional_information(selected_tower_id, self._additional_tower_information).targeting += 1
-            action = ChangeTargetingAction(id=selected_tower_id)
+            action = ChangeTargetingEntry(id=selected_tower_id)
         elif event == GuiKeys.SpecialTargetingButton:
             get_additional_information(selected_tower_id, self._additional_tower_information).s_targeting += 1
-            action = ChangeSpecialTargetingAction(id=selected_tower_id)
+            action = ChangeSpecialTargetingEntry(id=selected_tower_id)
         else:
             raise RuntimeError
 

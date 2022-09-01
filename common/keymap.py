@@ -32,14 +32,14 @@ class Keymap:
     sell = "{BackSpace}"
     start = "{Space}"
     pause = "{Esc}"
-    change_priority = "{Tab}"
-    change_special_priority = "{PgDn}"
+    change_targeting = "{Tab}"
+    change_special_targeting = "{PgDn}"
 
 
 TOWER_KEY_MAP = {
     "Hero": Keymap.hero,
     "Dart Monkey": Keymap.dart_monkey,
-    "Boomerang": Keymap.boomerang,
+    "Boomerang Monkey": Keymap.boomerang,
     "Bomb Shooter": Keymap.bomb_shooter,
     "Tack Shooter": Keymap.tack_shooter,
     "Ice Monkey": Keymap.ice_monkey,

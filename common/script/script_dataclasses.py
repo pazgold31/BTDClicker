@@ -16,13 +16,13 @@ class Actions:
 
 @dataclass_json
 @dataclass
-class IAction:
+class IScriptEntry:
     pass
 
 
 @dataclass_json
 @dataclass
-class CreateAction(IAction):
+class CreateTowerEntry(IScriptEntry):
     name: str
     id: int
     x: int
@@ -32,7 +32,7 @@ class CreateAction(IAction):
 
 @dataclass_json
 @dataclass
-class UpgradeAction(IAction):
+class UpgradeTowerEntry(IScriptEntry):
     id: int
     tier: UpgradeTier
     action: str = Actions.upgrade
@@ -40,20 +40,20 @@ class UpgradeAction(IAction):
 
 @dataclass_json
 @dataclass
-class SellAction(IAction):
+class SellTowerEntry(IScriptEntry):
     id: int
     action: str = Actions.sell
 
 
 @dataclass_json
 @dataclass
-class ChangeTargetingAction(IAction):
+class ChangeTargetingEntry(IScriptEntry):
     id: int
     action: str = Actions.change_targeting
 
 
 @dataclass_json
 @dataclass
-class ChangeSpecialTargetingAction(IAction):
+class ChangeSpecialTargetingEntry(IScriptEntry):
     id: int
     action: str = Actions.change_special_targeting
