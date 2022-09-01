@@ -16,13 +16,13 @@ from hotkeys import Hotkeys
 
 class GuiKeys:
     DifficultyListBox = "-difficulty-"
-    TowerTypesListBox = "-chosen_monkey_type-"
+    TowerTypesListBox = "-chosen_tower_type-"
     ExistingTowersListBox = "-existing_towers-"
     XPositionInput = "-xpos-"
     YPositionInput = "-ypos-"
-    NewMonkeyTypeInput = "-new_monkey_type_input-"
-    SaveMonkeyButton = '-save_button-'
-    ExistingMonkeyName = "-existing_monkey_name-"
+    NewTowerTypeInput = "-new_tower_type_input-"
+    SaveTowerButton = '-save_tower_button-'
+    ExistingTowerName = "-existing_tower_name-"
     TopUpgradeButton = "-top_upgrade_button-"
     MiddleUpgradeButton = "-middle_upgrade_button-"
     BottomUpgradeButton = "-bottom_upgrade_button-"
@@ -43,7 +43,7 @@ def get_layout() -> List[List[Any]]:
         [sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
                   key=GuiKeys.DifficultyListBox, enable_events=True)],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
-        [sg.Listbox(values=get_monkey_options(),
+        [sg.Listbox(values=get_tower_options(),
                     select_mode="extended", key=GuiKeys.TowerTypesListBox, size=(30, 25), enable_events=True),
          sg.Listbox(values=[],
                     select_mode="extended", key=GuiKeys.ExistingTowersListBox, size=(75, 25), enable_events=True),
@@ -59,12 +59,12 @@ def get_layout() -> List[List[Any]]:
             sg.In(size=(5, 1), enable_events=True, key=GuiKeys.YPositionInput)
         ],
         [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key=GuiKeys.NewMonkeyTypeInput)],
-        [sg.Button("Save", enable_events=True, key=GuiKeys.SaveMonkeyButton)],
+         sg.In(size=(40, 1), disabled=True, key=GuiKeys.NewTowerTypeInput)],
+        [sg.Button("Save", enable_events=True, key=GuiKeys.SaveTowerButton)],
         [sg.HSeparator()],
-        [sg.Text("Existing Monkeys upgrades")],
+        [sg.Text("Existing tower upgrades")],
         [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key=GuiKeys.ExistingMonkeyName)],
+         sg.In(size=(40, 1), disabled=True, key=GuiKeys.ExistingTowerName)],
         [
             sg.Button("Upgrade Top", size=(15, 1), enable_events=True, key=GuiKeys.TopUpgradeButton),
             sg.Button("Upgrade Middle", size=(15, 1), enable_events=True, key=GuiKeys.MiddleUpgradeButton),
@@ -96,7 +96,7 @@ class AdditionalTowerInfo:
     s_targeting: int = 0
 
 
-def get_monkey_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
+def get_tower_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
     return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
 
 
@@ -161,28 +161,28 @@ class GuiHandlers:
     def handle_change_difficulty(self, event: Dict[str, Any], values: List[Any]):
         difficulty_value = values[GuiKeys.DifficultyListBox]
         difficulty = DIFFICULTY_MAP[difficulty_value]
-        self._window[GuiKeys.TowerTypesListBox].update(get_monkey_options(difficulty), )
+        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(difficulty), )
 
     def handle_select_tower_type(self, event: Dict[str, Any], values: List[Any]):
         try:
-            self._window[GuiKeys.NewMonkeyTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
+            self._window[GuiKeys.NewTowerTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
         except IndexError:
             pass
 
     def handle_select_existing_tower(self, event: Dict[str, Any], values: List[Any]):
         try:
-            self._window[GuiKeys.ExistingMonkeyName].update(values[GuiKeys.ExistingTowersListBox][0].split("|")[0], )
+            self._window[GuiKeys.ExistingTowerName].update(values[GuiKeys.ExistingTowersListBox][0].split("|")[0], )
         except IndexError:
             pass
 
     def handle_save_tower(self, event: Dict[str, Any], values: List[Any]):
-        if not values[GuiKeys.NewMonkeyTypeInput] or not values[GuiKeys.XPositionInput] \
+        if not values[GuiKeys.NewTowerTypeInput] or not values[GuiKeys.XPositionInput] \
                 or not values[GuiKeys.YPositionInput]:
             sg.popup("You didn't fill all of the data!")
             return
 
         tower_id = next(self._id_generator)
-        new_tower = Tower(name=values[GuiKeys.NewMonkeyTypeInput],
+        new_tower = Tower(name=values[GuiKeys.NewTowerTypeInput],
                           x=int(values[GuiKeys.XPositionInput]),
                           y=int(values[GuiKeys.YPositionInput]))
         self._towers_list[tower_id] = new_tower
@@ -192,8 +192,8 @@ class GuiHandlers:
         update_script_box(script_box=self._window[GuiKeys.ScriptBox], script_list=self._script)
 
     def handle_tower_modification(self, event: Dict[str, Any], values: List[Any]):
-        if not values[GuiKeys.ExistingMonkeyName]:
-            sg.popup("You must chose a monkey first!")
+        if not values[GuiKeys.ExistingTowerName]:
+            sg.popup("You must chose a tower first!")
             return
 
         selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
@@ -247,7 +247,7 @@ def main():
         if event == GuiKeys.ExistingTowersListBox:
             gui_handler.handle_select_existing_tower(event=event, values=values)
 
-        if event == GuiKeys.SaveMonkeyButton:
+        if event == GuiKeys.SaveTowerButton:
             gui_handler.handle_save_tower(event=event, values=values)
 
         if event in (GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,

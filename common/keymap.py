@@ -36,7 +36,7 @@ class Keymap:
     change_special_priority = "{PgDn}"
 
 
-MONKEY_KEY_MAP = {
+TOWER_KEY_MAP = {
     "Hero": Keymap.hero,
     "Dart Monkey": Keymap.dart_monkey,
     "Boomerang": Keymap.boomerang,
