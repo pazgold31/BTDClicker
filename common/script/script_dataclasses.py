@@ -16,7 +16,13 @@ class Actions:
 
 @dataclass_json
 @dataclass
-class CreateAction:
+class IAction:
+    pass
+
+
+@dataclass_json
+@dataclass
+class CreateAction(IAction):
     name: str
     id: int
     x: int
@@ -26,7 +32,7 @@ class CreateAction:
 
 @dataclass_json
 @dataclass
-class UpgradeAction:
+class UpgradeAction(IAction):
     id: int
     tier: UpgradeTier
     action: str = Actions.upgrade
@@ -34,20 +40,20 @@ class UpgradeAction:
 
 @dataclass_json
 @dataclass
-class SellAction:
+class SellAction(IAction):
     id: int
     action: str = Actions.sell
 
 
 @dataclass_json
 @dataclass
-class ChangeTargetingAction:
+class ChangeTargetingAction(IAction):
     id: int
     action: str = Actions.change_targeting
 
 
 @dataclass_json
 @dataclass
-class ChangeSpecialTargetingAction:
+class ChangeSpecialTargetingAction(IAction):
     id: int
     action: str = Actions.change_special_targeting

@@ -9,7 +9,7 @@ from ahk import AHK
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier, Difficulty
 from common.script.script_dataclasses import UpgradeAction, SellAction, ChangeTargetingAction, \
-    ChangeSpecialTargetingAction, CreateAction
+    ChangeSpecialTargetingAction, CreateAction, IAction
 from common.tower import Tower
 from hotkeys import Hotkeys
 
@@ -146,6 +146,14 @@ def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]])
     script_box.update(output, )
 
 
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, IAction):
+            return obj.to_dict()
+
+        return json.JSONEncoder.default(self, obj)
+
+
 class GuiHandlers:
     def __init__(self, window: sg.Window):
         self._window = window
@@ -153,15 +161,13 @@ class GuiHandlers:
         self._towers_list: Dict[int, Tower] = {}
         self._additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
         self._script = []
+        self._difficulty = Difficulty.easy
         self._id_generator = itertools.count()
-
-    def get_script(self) -> List:
-        return self._script
 
     def handle_change_difficulty(self, event: Dict[str, Any], values: List[Any]):
         difficulty_value = values[GuiKeys.DifficultyListBox]
-        difficulty = DIFFICULTY_MAP[difficulty_value]
-        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(difficulty), )
+        self._difficulty = DIFFICULTY_MAP[difficulty_value]
+        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._difficulty), )
 
     def handle_select_tower_type(self, event: Dict[str, Any], values: List[Any]):
         try:
@@ -226,12 +232,15 @@ class GuiHandlers:
                                 self._additional_tower_information)
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
+    def handle_export_button(self, event: Dict[str, Any], values: List[Any]):
+        with open("../exported.json", "w") as of:  # TODO: move to actual path
+            json.dump({"metadata": {"difficulty": self._difficulty.value}, "script": self._script}, of,
+                      cls=ComplexEncoder)
+
 
 def main():
     window = sg.Window(title="BTD Scripter", layout=get_layout())
     Hotkeys(ahk=AHK(), x_pos=window[GuiKeys.XPositionInput], y_pos=window[GuiKeys.YPositionInput])
-
-    difficulty = Difficulty.easy
 
     gui_handler = GuiHandlers(window=window)
 
@@ -240,23 +249,27 @@ def main():
 
         if event == GuiKeys.DifficultyListBox:
             gui_handler.handle_change_difficulty(event=event, values=values)
+            continue
 
         if event == GuiKeys.TowerTypesListBox:
             gui_handler.handle_select_tower_type(event=event, values=values)
+            continue
 
         if event == GuiKeys.ExistingTowersListBox:
             gui_handler.handle_select_existing_tower(event=event, values=values)
+            continue
 
         if event == GuiKeys.SaveTowerButton:
             gui_handler.handle_save_tower(event=event, values=values)
+            continue
 
         if event in (GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
                      GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton):
             gui_handler.handle_tower_modification(event=event, values=values)
+            continue
 
-        if event == "export_button":
-            with open("../exported.json", "w") as of:
-                json.dump({"metadata": {"difficulty": difficulty.value}, "script": gui_handler.get_script()}, of)
+        if event == GuiKeys.ExportButton:
+            gui_handler.handle_export_button(event=event, values=values)
 
         if event == sg.WIN_CLOSED:
             break
