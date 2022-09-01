@@ -5,9 +5,11 @@ import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
-from common.cost.cost_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerCost
+from common.cost.cost_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerCost, HeroCost
 
-URL = r"https://bloons.fandom.com/wiki/Tower_Price_Lists"
+BASE_WIKI_URL = r"https://bloons.fandom.com"
+TOWERS_PRICES_URL = r"https://bloons.fandom.com/wiki/Tower_Price_Lists"
+HERO_PRICES_URL = r"https://bloons.fandom.com/wiki/Heroes"
 
 cost_re = re.compile(r"([\w .-]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**\nI\$([,\d]+)\**")
 
@@ -49,10 +51,14 @@ def parse_data(data: List[List[str]]) -> List[TowerCost]:
     return output
 
 
-def parse_costs() -> List[TowerCost]:
+def _get_page_soup(url: str) -> BeautifulSoup:
     fake_ua = UserAgent()
-    page = requests.get(URL, headers={"User-Agent": fake_ua.chrome})
-    soup = BeautifulSoup(page.content, "html.parser")
+    page = requests.get(url, headers={"User-Agent": fake_ua.chrome})
+    return BeautifulSoup(page.content, "html.parser")
+
+
+def parse_costs() -> List[TowerCost]:
+    soup = _get_page_soup(TOWERS_PRICES_URL)
     tables = soup.find_all("table", class_="article-table")
     towers = []
     for table in tables[:4]:  # First 4 tables (primary, military, magic and support)
@@ -70,4 +76,54 @@ def parse_costs() -> List[TowerCost]:
     return towers
 
 
+def parse_hero_costs() -> List[HeroCost]:
+    soup = _get_page_soup(HERO_PRICES_URL)
+    the_heroes_headline = None
+    for headline in soup.find_all("h2"):
+        if "The Heroes" in headline.text:
+            the_heroes_headline = headline
+            break
+
+    if not the_heroes_headline:
+        raise RuntimeError("Failed to find headline")
+
+    prices_regex = re.compile(
+        r"Default:\$([\d,]+) \(Easy\)\$([\d,]+) \(Medium\)\$([\d,]+) \(Hard\)\$([\d,]+) \(Impoppable\)")
+
+    heroes = []
+    for table in the_heroes_headline.find_all_next("table")[::2]:
+
+        skins_headline = None
+        for headline in table.find_previous_siblings("h2"):
+            if "Hero Skins" in headline.text:
+                skins_headline = headline
+                break
+
+        if skins_headline:
+            break
+
+        table_body = table.find('tbody')
+        rows = table_body.find_all('tr')
+        link_element = rows[0].find("a")
+        hero_name = link_element.text
+        new_url = BASE_WIKI_URL + link_element.attrs["href"]
+
+        try:
+            hero_soup = _get_page_soup(new_url + "_(BTD6)")
+            prices_box_text = hero_soup.find_all("div", class_="pi-data-value")[2].text
+        except IndexError:
+            hero_soup = _get_page_soup(new_url)
+            prices_box_text = hero_soup.find_all("div", class_="pi-data-value")[2].text
+
+        re_search = prices_regex.search(prices_box_text)
+        heroes.append(HeroCost(name=hero_name, base_cost=Cost(int(re_search.group(1).replace(",", "")),
+                                                              int(re_search.group(2).replace(",", "")),
+                                                              int(re_search.group(3).replace(",", "")),
+                                                              int(re_search.group(4).replace(",", "")))))
+
+    return heroes
+
+
+# TODO: move to some singleton
+HERO_COSTS: Dict[str, HeroCost] = {i.name: i for i in parse_hero_costs()}
 TOWER_COSTS: Dict[str, TowerCost] = {i.name: i for i in parse_costs()}

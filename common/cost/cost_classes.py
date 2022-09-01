@@ -53,3 +53,9 @@ class TowerCost:
     name: str
     base_cost: Cost
     upgrades: UpgradesCost
+
+
+@dataclass
+class HeroCost:
+    name: str
+    base_cost: Cost
