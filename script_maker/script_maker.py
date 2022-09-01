@@ -8,6 +8,8 @@ from ahk import AHK
 
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier, Difficulty
+from common.script.script_dataclasses import UpgradeAction, SellAction, ChangeTargetingAction, \
+    ChangeSpecialTargetingAction, CreateAction
 from common.tower import Tower
 from hotkeys import Hotkeys
 
@@ -129,115 +131,132 @@ def update_towers_from_list(exiting_towers: sg.Listbox, towers_list: Dict[int, T
 
 def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]]):
     output = []
-    for line in script_list:
-        if line["action"] == "create":
-            output.append(f"Create: {line['name']}({line['id']}) | X: {line['x']} Y: {line['y']}")
-        elif line["action"] == "upgrade":
-            output.append(f"Upgrade: ({line['id']}) | tier: {line['tier']}")
-        elif line["action"] == "sell":
-            output.append(f"Sell: ({line['id']})")
-        elif line["action"] == "change_targeting":
-            output.append(f"Change targeting: ({line['id']})")
-        elif line["action"] == "change_special_targeting":
-            output.append(f"Change special targeting: ({line['id']})")
+    for action in script_list:
+        if isinstance(action, CreateAction):
+            output.append(f"Create: {action.name}({action.id}) | X: {action.x} Y: {action.y}")
+        elif isinstance(action, UpgradeAction):
+            output.append(f"Upgrade: ({action.id}) | tier: {action.tier}")
+        elif isinstance(action, SellAction):
+            output.append(f"Sell: ({action.id})")
+        elif isinstance(action, ChangeTargetingAction):
+            output.append(f"Change targeting: ({action.id})")
+        elif isinstance(action, ChangeSpecialTargetingAction):
+            output.append(f"Change special targeting: ({action.id})")
 
     script_box.update(output, )
 
 
-def create_upgrade_action(tower_id: int, tier: int) -> Dict:
-    return {
-        "action": "upgrade",
-        "id": tower_id,
-        "tier": tier
-    }
+class GuiHandlers:
+    def __init__(self, window: sg.Window):
+        self._window = window
 
+        self._towers_list: Dict[int, Tower] = {}
+        self._additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
+        self._script = []
+        self._id_generator = itertools.count()
 
-def create_modify_action(tower_id: int, action: str) -> Dict:
-    return {
-        "action": action,
-        "id": tower_id,
-    }
+    def get_script(self) -> List:
+        return self._script
+
+    def handle_change_difficulty(self, event: Dict[str, Any], values: List[Any]):
+        difficulty_value = values[GuiKeys.DifficultyListBox]
+        difficulty = DIFFICULTY_MAP[difficulty_value]
+        self._window[GuiKeys.TowerTypesListBox].update(get_monkey_options(difficulty), )
+
+    def handle_select_tower_type(self, event: Dict[str, Any], values: List[Any]):
+        try:
+            self._window[GuiKeys.NewMonkeyTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
+        except IndexError:
+            pass
+
+    def handle_select_existing_tower(self, event: Dict[str, Any], values: List[Any]):
+        try:
+            self._window[GuiKeys.ExistingMonkeyName].update(values[GuiKeys.ExistingTowersListBox][0].split("|")[0], )
+        except IndexError:
+            pass
+
+    def handle_save_tower(self, event: Dict[str, Any], values: List[Any]):
+        if not values[GuiKeys.NewMonkeyTypeInput] or not values[GuiKeys.XPositionInput] \
+                or not values[GuiKeys.YPositionInput]:
+            sg.popup("You didn't fill all of the data!")
+            return
+
+        tower_id = next(self._id_generator)
+        new_tower = Tower(name=values[GuiKeys.NewMonkeyTypeInput],
+                          x=int(values[GuiKeys.XPositionInput]),
+                          y=int(values[GuiKeys.YPositionInput]))
+        self._towers_list[tower_id] = new_tower
+        update_towers_from_list(self._window[GuiKeys.ExistingTowersListBox], self._towers_list,
+                                self._additional_tower_information)
+        self._script.append(CreateAction(name=new_tower.name, id=tower_id, x=new_tower.x, y=new_tower.y))
+        update_script_box(script_box=self._window[GuiKeys.ScriptBox], script_list=self._script)
+
+    def handle_tower_modification(self, event: Dict[str, Any], values: List[Any]):
+        if not values[GuiKeys.ExistingMonkeyName]:
+            sg.popup("You must chose a monkey first!")
+            return
+
+        selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
+        if event == GuiKeys.TopUpgradeButton:
+            self._towers_list[selected_tower_id].tier_map[UpgradeTier.top] += 1  # TODO: overflow
+            action = UpgradeAction(id=selected_tower_id, tier=UpgradeTier.top)
+        elif event == GuiKeys.MiddleUpgradeButton:
+            self._towers_list[selected_tower_id].tier_map[UpgradeTier.middle] += 1  # TODO: overflow
+            action = UpgradeAction(id=selected_tower_id, tier=UpgradeTier.middle)
+        elif event == GuiKeys.BottomUpgradeButton:
+            self._towers_list[selected_tower_id].tier_map[UpgradeTier.bottom] += 1  # TODO: overflow
+            action = UpgradeAction(id=selected_tower_id, tier=UpgradeTier.bottom)
+        elif event == GuiKeys.SellButton:
+            # TODO: warn about updating sold towers
+            get_additional_information(selected_tower_id, self._additional_tower_information).sold = True
+            action = SellAction(id=selected_tower_id)
+        elif event == GuiKeys.TargetingButton:
+            # TODO: overflow
+            get_additional_information(selected_tower_id, self._additional_tower_information).targeting += 1
+            action = ChangeTargetingAction(id=selected_tower_id)
+        elif event == GuiKeys.SpecialTargetingButton:
+            # TODO: overflow
+            get_additional_information(selected_tower_id, self._additional_tower_information).s_targeting += 1
+            action = ChangeSpecialTargetingAction(id=selected_tower_id)
+        else:
+            raise RuntimeError
+
+        self._script.append(action)
+        update_towers_from_list(self._window[GuiKeys.ExistingTowersListBox], self._towers_list,
+                                self._additional_tower_information)
+        update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
 
 def main():
-    towers_list: Dict[int, Tower] = {}
-    additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
-    script = []
-    id_generator = itertools.count()
-
     window = sg.Window(title="BTD Scripter", layout=get_layout())
     Hotkeys(ahk=AHK(), x_pos=window[GuiKeys.XPositionInput], y_pos=window[GuiKeys.YPositionInput])
 
     difficulty = Difficulty.easy
 
+    gui_handler = GuiHandlers(window=window)
+
     while True:
         event, values = window.read()
 
-        if event == GuiKeys.DifficultyListBox:  # changed difficulty
-            difficulty_value = values[GuiKeys.DifficultyListBox]
-            difficulty = DIFFICULTY_MAP[difficulty_value]
-            window[GuiKeys.TowerTypesListBox].update(get_monkey_options(difficulty), )
+        if event == GuiKeys.DifficultyListBox:
+            gui_handler.handle_change_difficulty(event=event, values=values)
 
         if event == GuiKeys.TowerTypesListBox:
-            window[GuiKeys.NewMonkeyTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
+            gui_handler.handle_select_tower_type(event=event, values=values)
 
         if event == GuiKeys.ExistingTowersListBox:
-            window[GuiKeys.ExistingMonkeyName].update(values[GuiKeys.ExistingTowersListBox][0].split("|")[0], )
+            gui_handler.handle_select_existing_tower(event=event, values=values)
 
         if event == GuiKeys.SaveMonkeyButton:
-            if not values[GuiKeys.NewMonkeyTypeInput] or not values[GuiKeys.XPositionInput] \
-                    or not values[GuiKeys.YPositionInput]:
-                sg.popup("You didn't fill all of the data!")
-                continue
-
-            tower_id = next(id_generator)
-            new_tower = Tower(name=values[GuiKeys.NewMonkeyTypeInput],
-                              x=int(values[GuiKeys.XPositionInput]),
-                              y=int(values[GuiKeys.YPositionInput]))
-            towers_list[tower_id] = new_tower
-            update_towers_from_list(window[GuiKeys.ExistingTowersListBox], towers_list, additional_tower_information)
-            script.append(
-                {"action": "create", "name": new_tower.name, "id": tower_id, "x": new_tower.x, "y": new_tower.y})
-            update_script_box(window[GuiKeys.ScriptBox], script)
+            gui_handler.handle_save_tower(event=event, values=values)
 
         if event in (GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
                      GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton):
-            if not values[GuiKeys.ExistingMonkeyName]:
-                sg.popup("You must chose a monkey first!")
-                continue
-
-            selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
-            if event == GuiKeys.TopUpgradeButton:
-                towers_list[selected_tower_id].tier_map[UpgradeTier.top] += 1  # TODO: overflow
-                action = create_upgrade_action(tower_id=selected_tower_id, tier=0)
-            elif event == GuiKeys.MiddleUpgradeButton:
-                towers_list[selected_tower_id].tier_map[UpgradeTier.middle] += 1  # TODO: overflow
-                action = create_upgrade_action(tower_id=selected_tower_id, tier=1)
-            elif event == GuiKeys.BottomUpgradeButton:
-                towers_list[selected_tower_id].tier_map[UpgradeTier.bottom] += 1  # TODO: overflow
-                action = create_upgrade_action(tower_id=selected_tower_id, tier=2)
-            elif event == GuiKeys.SellButton:
-                # TODO: warn about updating sold towers
-                get_additional_information(selected_tower_id, additional_tower_information).sold = True
-                action = create_modify_action(tower_id=selected_tower_id, action="sell")
-            elif event == GuiKeys.TargetingButton:
-                # TODO: overflow
-                get_additional_information(selected_tower_id, additional_tower_information).targeting += 1
-                action = create_modify_action(tower_id=selected_tower_id, action="change_targeting")
-            elif event == GuiKeys.SpecialTargetingButton:
-                # TODO: overflow
-                get_additional_information(selected_tower_id, additional_tower_information).s_targeting += 1
-                action = create_modify_action(tower_id=selected_tower_id, action="change_special_targeting")
-            else:
-                raise RuntimeError
-
-            script.append(action)
-            update_towers_from_list(window[GuiKeys.ExistingTowersListBox], towers_list, additional_tower_information)
-            update_script_box(window[GuiKeys.ScriptBox], script)
+            gui_handler.handle_tower_modification(event=event, values=values)
 
         if event == "export_button":
             with open("../exported.json", "w") as of:
-                json.dump(script, of)
+                json.dump({"metadata": {"difficulty": difficulty.value}, "script": gui_handler.get_script()}, of)
 
         if event == sg.WIN_CLOSED:
             break
