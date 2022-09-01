@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import itertools
 import json
 from typing import List, Dict, Any
@@ -12,92 +11,17 @@ from common.script.script_dataclasses import UpgradeAction, SellAction, ChangeTa
     ChangeSpecialTargetingAction, CreateAction, IAction
 from common.tower import Tower
 from hotkeys import Hotkeys
+from additional_tower_info import AdditionalTowerInfo, get_additional_information
+from gui import GuiKeys, DIFFICULTY_MAP, get_layout, get_tower_options
 
 
-class GuiKeys:
-    DifficultyListBox = "-difficulty-"
-    TowerTypesListBox = "-chosen_tower_type-"
-    ExistingTowersListBox = "-existing_towers-"
-    XPositionInput = "-xpos-"
-    YPositionInput = "-ypos-"
-    NewTowerTypeInput = "-new_tower_type_input-"
-    SaveTowerButton = '-save_tower_button-'
-    ExistingTowerName = "-existing_tower_name-"
-    TopUpgradeButton = "-top_upgrade_button-"
-    MiddleUpgradeButton = "-middle_upgrade_button-"
-    BottomUpgradeButton = "-bottom_upgrade_button-"
-    SellButton = "-sell_button-"
-    TargetingButton = "-targeting_button-"
-    SpecialTargetingButton = "-s_targeting_button-"
-    ExportButton = "-export_button-"
-    ScriptBox = "-script_box-"
-
-
-DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
-                  "hard": Difficulty.hard, "chimps": Difficulty.chimps}
-
-
-def get_layout() -> List[List[Any]]:
-    left_col = [
-        [sg.Text("Choose difficulty", size=(20, 1), font="Lucida", justification="left")],
-        [sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
-                  key=GuiKeys.DifficultyListBox, enable_events=True)],
-        [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
-        [sg.Listbox(values=get_tower_options(),
-                    select_mode="extended", key=GuiKeys.TowerTypesListBox, size=(30, 25), enable_events=True),
-         sg.Listbox(values=[],
-                    select_mode="extended", key=GuiKeys.ExistingTowersListBox, size=(75, 25), enable_events=True),
-         ]
-    ]
-
-    right_col = [
-        [sg.Text("Click Ctrl + Shift + R to capture mouse position.")],
-        [
-            sg.Text("X"),
-            sg.In(size=(5, 1), enable_events=True, key=GuiKeys.XPositionInput),
-            sg.Text("Y"),
-            sg.In(size=(5, 1), enable_events=True, key=GuiKeys.YPositionInput)
-        ],
-        [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key=GuiKeys.NewTowerTypeInput)],
-        [sg.Button("Save", enable_events=True, key=GuiKeys.SaveTowerButton)],
-        [sg.HSeparator()],
-        [sg.Text("Existing tower upgrades")],
-        [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key=GuiKeys.ExistingTowerName)],
-        [
-            sg.Button("Upgrade Top", size=(15, 1), enable_events=True, key=GuiKeys.TopUpgradeButton),
-            sg.Button("Upgrade Middle", size=(15, 1), enable_events=True, key=GuiKeys.MiddleUpgradeButton),
-            sg.Button("Upgrade Bottom", size=(15, 1), enable_events=True, key=GuiKeys.BottomUpgradeButton)
-        ],
-        [
-            sg.Button("Sell", size=(15, 1), enable_events=True, key=GuiKeys.SellButton),
-            sg.Button("Targeting", size=(15, 1), enable_events=True, key=GuiKeys.TargetingButton),
-            sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
-        ],
-        [sg.HSeparator()],
-        [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton)]
-    ]
-
-    script_layout = [[sg.Text("Script:")],
-                     [sg.Listbox(values=[], select_mode="extended", key=GuiKeys.ScriptBox, size=(150, 12),
-                                 enable_events=True)]]
-
-    return [[sg.Column(left_col),
-             sg.VSeparator(),
-             sg.Column(right_col)],
-            script_layout]
-
-
-@dataclass
-class AdditionalTowerInfo:
-    sold: bool = False
-    targeting: int = 0
-    s_targeting: int = 0
-
-
-def get_tower_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
-    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
+def is_tier_upgradeable(tower: Tower, tier: UpgradeTier) -> bool:
+    current_upgrade = tower.tier_map[tier]
+    try:
+        new_cost = TOWER_COSTS[tower.name].upgrades.get_mapping()[tier].get_mapping()[current_upgrade + 1]
+        return new_cost
+    except KeyError:
+        return False
 
 
 def convert_targeting(targeting: int) -> str:
@@ -115,13 +39,6 @@ def get_existing_towers(towers: Dict[int, Tower], additional_info: Dict[int, Add
         f"S.Targeting: {additional_info.get(tower_id, AdditionalTowerInfo()).s_targeting}"
         f"{' SOLD' if additional_info.get(tower_id, AdditionalTowerInfo()).sold else ''}" for
         tower_id, tower in towers.items()]
-
-
-def get_additional_information(tower_id: int, d: Dict[int, AdditionalTowerInfo]):
-    if tower_id not in d:
-        d[tower_id] = AdditionalTowerInfo()
-
-    return d[tower_id]
 
 
 def update_towers_from_list(exiting_towers: sg.Listbox, towers_list: Dict[int, Tower],
@@ -146,7 +63,7 @@ def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]])
     script_box.update(output, )
 
 
-class ComplexEncoder(json.JSONEncoder):
+class ScriptJsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, IAction):
             return obj.to_dict()
@@ -197,6 +114,13 @@ class GuiHandlers:
         self._script.append(CreateAction(name=new_tower.name, id=tower_id, x=new_tower.x, y=new_tower.y))
         update_script_box(script_box=self._window[GuiKeys.ScriptBox], script_list=self._script)
 
+    def _handle_tower_upgrade(self, tower_id: int, tier: UpgradeTier) -> IAction:
+        if not is_tier_upgradeable(tower=self._towers_list[tower_id], tier=tier):
+            sg.popup("The tower is at max level!")
+
+        self._towers_list[tower_id].tier_map[tier] += 1
+        return UpgradeAction(id=tower_id, tier=tier)
+
     def handle_tower_modification(self, event: Dict[str, Any], values: List[Any]):
         if not values[GuiKeys.ExistingTowerName]:
             sg.popup("You must chose a tower first!")
@@ -204,24 +128,23 @@ class GuiHandlers:
 
         selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
         if event == GuiKeys.TopUpgradeButton:
-            self._towers_list[selected_tower_id].tier_map[UpgradeTier.top] += 1  # TODO: overflow
-            action = UpgradeAction(id=selected_tower_id, tier=UpgradeTier.top)
+            action = self._handle_tower_upgrade(tower_id=selected_tower_id, tier=UpgradeTier.top)
         elif event == GuiKeys.MiddleUpgradeButton:
-            self._towers_list[selected_tower_id].tier_map[UpgradeTier.middle] += 1  # TODO: overflow
-            action = UpgradeAction(id=selected_tower_id, tier=UpgradeTier.middle)
+            action = self._handle_tower_upgrade(tower_id=selected_tower_id, tier=UpgradeTier.middle)
         elif event == GuiKeys.BottomUpgradeButton:
-            self._towers_list[selected_tower_id].tier_map[UpgradeTier.bottom] += 1  # TODO: overflow
-            action = UpgradeAction(id=selected_tower_id, tier=UpgradeTier.bottom)
+            action = self._handle_tower_upgrade(tower_id=selected_tower_id, tier=UpgradeTier.bottom)
         elif event == GuiKeys.SellButton:
-            # TODO: warn about updating sold towers
-            get_additional_information(selected_tower_id, self._additional_tower_information).sold = True
+            additional_tower_info = get_additional_information(selected_tower_id, self._additional_tower_information)
+            if additional_tower_info.sold:
+                sg.popup("The tower is already sold!")
+                return
+
+            additional_tower_info.sold = True
             action = SellAction(id=selected_tower_id)
         elif event == GuiKeys.TargetingButton:
-            # TODO: overflow
             get_additional_information(selected_tower_id, self._additional_tower_information).targeting += 1
             action = ChangeTargetingAction(id=selected_tower_id)
         elif event == GuiKeys.SpecialTargetingButton:
-            # TODO: overflow
             get_additional_information(selected_tower_id, self._additional_tower_information).s_targeting += 1
             action = ChangeSpecialTargetingAction(id=selected_tower_id)
         else:
@@ -235,7 +158,7 @@ class GuiHandlers:
     def handle_export_button(self, event: Dict[str, Any], values: List[Any]):
         with open("../exported.json", "w") as of:  # TODO: move to actual path
             json.dump({"metadata": {"difficulty": self._difficulty.value}, "script": self._script}, of,
-                      cls=ComplexEncoder)
+                      cls=ScriptJsonEncoder)
 
 
 def main():
