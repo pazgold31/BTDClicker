@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Type
 
 from ahk import AHK
+from pydantic import parse_raw_as
 
 from actions.PlaceTowerAction import PlaceTowerAction
 from actions.UpgradeTowerAction import UpgradeTowerAction
@@ -28,7 +29,7 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
     tower_map: Dict[int, Tower] = {}
     for action in script_dict:
         if action[ACTION_KEYWORD] == Actions.create:
-            action_class: CreateTowerEntry = CreateTowerEntry.from_dict(action)
+            action_class: CreateTowerEntry = CreateTowerEntry.parse_obj(action)
             if "Hero" == action_class.name:
                 tower = Hero(name=metadata.hero_type, x=action_class.x, y=action_class.y)
                 created_action = PlaceHeroAction(ahk=ahk, hero=tower, difficulty=Difficulty.easy)
@@ -39,18 +40,18 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
             tower_map[action_class.id] = tower
             script.append(created_action)
         elif action[ACTION_KEYWORD] == Actions.upgrade:
-            action_class: UpgradeTowerEntry = UpgradeTowerEntry.from_dict(action)
+            action_class: UpgradeTowerEntry = UpgradeTowerEntry.parse_obj(action)
             script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action_class.id],
                                              tier=UpgradeTier(action_class.tier),
                                              difficulty=Difficulty.easy))
         elif action[ACTION_KEYWORD] == Actions.sell:
-            action_class: SellTowerEntry = SellTowerEntry.from_dict(action)
+            action_class: SellTowerEntry = SellTowerEntry.parse_obj(action)
             script.append(SellTowerAction(ahk=ahk, tower=tower_map[action_class.id]))
         elif action[ACTION_KEYWORD] == Actions.change_targeting:
-            action_class: ChangeTargetingEntry = ChangeTargetingEntry.from_dict(action)
+            action_class: ChangeTargetingEntry = ChangeTargetingEntry.parse_obj(action)
             script.append(ChangeTargetingAction(ahk=ahk, tower=tower_map[action_class.id]))
         elif action[ACTION_KEYWORD] == Actions.change_special_targeting:
-            action_class: ChangeSpecialTargetingEntry = ChangeSpecialTargetingEntry.from_dict(action)
+            action_class: ChangeSpecialTargetingEntry = ChangeSpecialTargetingEntry.parse_obj(action)
             script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=tower_map[action_class.id]))
 
     return script, tower_map
@@ -59,9 +60,8 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
 def main():
     ahk = AHK()
     total_dict = load_script_dict()
-    metadata = GameMetadata.from_dict(total_dict["metadata"])
-    script_dict = total_dict["script"]
-    script, tower_map = create_script(ahk=ahk, script_dict=script_dict, metadata=metadata)
+    metadata = GameMetadata.parse_obj(total_dict["metadata"])
+    script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
     time.sleep(2)
 
     for action in script:

@@ -1,5 +1,6 @@
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json
+from typing import List
+
+from pydantic import BaseModel
 
 from common.enums import UpgradeTier, Difficulty
 
@@ -14,21 +15,18 @@ class Actions:
     change_special_targeting = "change_special_targeting"
 
 
-@dataclass_json
-@dataclass
-class GameMetadata:
+class GameMetadata(BaseModel):
     difficulty: Difficulty
     hero_type: str
 
-
-@dataclass_json
-@dataclass
-class IScriptEntry:
-    pass
+    class Config:
+        use_enum_values = True
 
 
-@dataclass_json
-@dataclass
+class IScriptEntry(BaseModel):
+    action: str
+
+
 class CreateTowerEntry(IScriptEntry):
     name: str
     id: int
@@ -37,30 +35,30 @@ class CreateTowerEntry(IScriptEntry):
     action: str = Actions.create
 
 
-@dataclass_json
-@dataclass
 class UpgradeTowerEntry(IScriptEntry):
     id: int
     tier: UpgradeTier
     action: str = Actions.upgrade
 
+    class Config:
+        use_enum_values = True
 
-@dataclass_json
-@dataclass
+
 class SellTowerEntry(IScriptEntry):
     id: int
     action: str = Actions.sell
 
 
-@dataclass_json
-@dataclass
 class ChangeTargetingEntry(IScriptEntry):
     id: int
     action: str = Actions.change_targeting
 
 
-@dataclass_json
-@dataclass
 class ChangeSpecialTargetingEntry(IScriptEntry):
     id: int
     action: str = Actions.change_special_targeting
+
+
+class Script(BaseModel):
+    metadata: GameMetadata
+    script: List[BaseModel]

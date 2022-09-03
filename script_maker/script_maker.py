@@ -4,11 +4,12 @@ from typing import List, Dict, Any
 
 import PySimpleGUI as sg
 from ahk import AHK
+from pydantic.json import pydantic_encoder
 
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier, Difficulty
 from common.script.script_dataclasses import UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry, CreateTowerEntry, IScriptEntry, GameMetadata
+    ChangeSpecialTargetingEntry, CreateTowerEntry, IScriptEntry, GameMetadata, Script
 from common.tower import Tower
 from hotkeys import Hotkeys
 from additional_tower_info import AdditionalTowerInfo, get_additional_information
@@ -63,14 +64,6 @@ def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]])
     script_box.update(output, )
 
 
-class ScriptJsonEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, IScriptEntry) or isinstance(obj, GameMetadata):
-            return obj.to_dict()
-
-        return json.JSONEncoder.default(self, obj)
-
-
 class GuiHandlers:
     def __init__(self, window: sg.Window):
         self._window = window
@@ -78,7 +71,7 @@ class GuiHandlers:
         self._towers_list: Dict[int, Tower] = {}
         self._additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
         self._script: List[IScriptEntry] = []
-        self._metadata = GameMetadata(Difficulty.easy, None)
+        self._metadata = GameMetadata(difficulty=Difficulty.easy, hero_type="")
         self._id_generator = itertools.count()
 
     def handle_change_difficulty(self, event: Dict[str, Any], values: List[Any]):
@@ -183,8 +176,7 @@ class GuiHandlers:
             return
 
         with open("../exported.json", "w") as of:  # TODO: move to actual path
-            json.dump({"metadata": self._metadata, "script": self._script}, of,
-                      cls=ScriptJsonEncoder)
+            json.dump(Script(metadata=self._metadata, script=self._script), of, default=pydantic_encoder)
 
 
 def main():
