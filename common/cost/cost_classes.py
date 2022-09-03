@@ -1,35 +1,39 @@
-from dataclasses import dataclass
 from typing import Dict, Optional
+
+from pydantic import BaseModel
 
 from common.enums import Difficulty, TierLevel, UpgradeTier
 
 
-@dataclass
-class Cost:
+class Cost(BaseModel):
     easy: int
     medium: int
     hard: int
     chimps: int
+
+    class Config:
+        use_enum_values = True
 
     def get_mapping(self) -> Dict[Difficulty, int]:
         return {Difficulty.easy: self.easy, Difficulty.medium: self.medium,
                 Difficulty.hard: self.hard, Difficulty.chimps: self.chimps}
 
 
-@dataclass
-class Upgrade:
+class Upgrade(BaseModel):
     name: str
     cost: Cost
 
 
-@dataclass
-class UpgradeTierCost:
-    first: Cost
-    second: Cost
-    third: Cost
-    fourth: Cost
-    fifth: Cost
-    paragon: Optional[Cost]
+class UpgradeTierCost(BaseModel):
+    first: Upgrade
+    second: Upgrade
+    third: Upgrade
+    fourth: Upgrade
+    fifth: Upgrade
+    paragon: Optional[Upgrade]
+
+    class Config:
+        use_enum_values = True
 
     def get_mapping(self) -> Dict[TierLevel, Cost]:
         return {TierLevel.first: self.first, TierLevel.second: self.second,
@@ -37,25 +41,25 @@ class UpgradeTierCost:
                 TierLevel.fifth: self.fifth, TierLevel.paragon: self.paragon}
 
 
-@dataclass
-class UpgradesCost:
+class UpgradesCost(BaseModel):
     top: UpgradeTierCost
     middle: UpgradeTierCost
     bottom: UpgradeTierCost
+
+    class Config:
+        use_enum_values = True
 
     def get_mapping(self) -> Dict[UpgradeTier, UpgradeTierCost]:
         return {UpgradeTier.top: self.top, UpgradeTier.middle: self.middle,
                 UpgradeTier.bottom: self.bottom}
 
 
-@dataclass
-class TowerCost:
+class TowerCost(BaseModel):
     name: str
     base_cost: Cost
     upgrades: UpgradesCost
 
 
-@dataclass
-class HeroCost:
+class HeroCost(BaseModel):
     name: str
     base_cost: Cost

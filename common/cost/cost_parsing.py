@@ -1,11 +1,16 @@
+import json
 import re
-from typing import List, Tuple, Dict
+from datetime import timedelta, datetime
+from typing import List, Tuple, Dict, Union
 
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+from pydantic import parse_raw_as
+from pydantic.json import pydantic_encoder
 
 from common.cost.cost_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerCost, HeroCost
+from common.user_files import get_files_dir
 
 BASE_WIKI_URL = r"https://bloons.fandom.com"
 TOWERS_PRICES_URL = r"https://bloons.fandom.com/wiki/Tower_Price_Lists"
@@ -13,32 +18,40 @@ HERO_PRICES_URL = r"https://bloons.fandom.com/wiki/Heroes"
 
 cost_re = re.compile(r"([\w .-]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**\nI\$([,\d]+)\**")
 
+COSTS_UPDATE_TIME = timedelta(days=7)
+
 
 def parse_single_upgrade(data: str) -> Upgrade:
     match = cost_re.search(data)
-    cost_args = (int(match.group(i).replace(",", "")) for i in range(2, 6))
-    return Upgrade(match.group(1), Cost(*cost_args))
+    return Upgrade(name=match.group(1), cost=Cost(
+        easy=int(match.group(2).replace(",", "")),
+        medium=int(match.group(3).replace(",", "")),
+        hard=int(match.group(4).replace(",", "")),
+        chimps=int(match.group(5).replace(",", ""))))
 
 
 def parse_tower_base(data: str) -> Tuple[str, Cost]:
     match = cost_re.search(data)
-    cost_args = (int(match.group(i).replace(",", "")) for i in range(2, 6))
-    return match.group(1), Cost(*cost_args)
+    return match.group(1), Cost(
+        easy=int(match.group(2).replace(",", "")),
+        medium=int(match.group(3).replace(",", "")),
+        hard=int(match.group(4).replace(",", "")),
+        chimps=int(match.group(5).replace(",", "")))
 
 
 def parse_upgrades_tier(data: List[str]) -> UpgradeTierCost:
-    return UpgradeTierCost(parse_single_upgrade(data[-6]),
-                           parse_single_upgrade(data[-5]),
-                           parse_single_upgrade(data[-4]),
-                           parse_single_upgrade(data[-3]),
-                           parse_single_upgrade(data[-2]),
-                           None)  # TODO: support paragons
+    return UpgradeTierCost(first=parse_single_upgrade(data[-6]),
+                           second=parse_single_upgrade(data[-5]),
+                           third=parse_single_upgrade(data[-4]),
+                           fourth=parse_single_upgrade(data[-3]),
+                           fifth=parse_single_upgrade(data[-2]),
+                           paragon=None)  # TODO: support paragons
 
 
 def parse_upgrades(data: List[List[str]]) -> UpgradesCost:
-    return UpgradesCost(parse_upgrades_tier(data[0]),
-                        parse_upgrades_tier(data[1]),
-                        parse_upgrades_tier(data[2]))
+    return UpgradesCost(top=parse_upgrades_tier(data[0]),
+                        middle=parse_upgrades_tier(data[1]),
+                        bottom=parse_upgrades_tier(data[2]))
 
 
 def parse_data(data: List[List[str]]) -> List[TowerCost]:
@@ -116,14 +129,51 @@ def parse_hero_costs() -> List[HeroCost]:
             prices_box_text = hero_soup.find_all("div", class_="pi-data-value")[2].text
 
         re_search = prices_regex.search(prices_box_text)
-        heroes.append(HeroCost(name=hero_name, base_cost=Cost(int(re_search.group(1).replace(",", "")),
-                                                              int(re_search.group(2).replace(",", "")),
-                                                              int(re_search.group(3).replace(",", "")),
-                                                              int(re_search.group(4).replace(",", "")))))
+        heroes.append(HeroCost(name=hero_name, base_cost=Cost(easy=int(re_search.group(1).replace(",", "")),
+                                                              medium=int(re_search.group(2).replace(",", "")),
+                                                              hard=int(re_search.group(3).replace(",", "")),
+                                                              chimps=int(re_search.group(4).replace(",", "")))))
 
     return heroes
 
 
-# TODO: move to some singleton
-HERO_COSTS: Dict[str, HeroCost] = {i.name: i for i in parse_hero_costs()}
-TOWER_COSTS: Dict[str, TowerCost] = {i.name: i for i in parse_costs()}
+def convert_to_map(lst: List[Union[HeroCost, TowerCost]]) -> Dict[str, Union[HeroCost, TowerCost]]:
+    return {i.name: i for i in lst}
+
+
+def get_hero_costs() -> Dict[str, HeroCost]:
+    path = get_files_dir() / "hero_costs.json"
+    try:
+        if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < COSTS_UPDATE_TIME:
+            with path.open("r") as of:
+                return convert_to_map(parse_raw_as(List[HeroCost], of.read()))
+    except FileNotFoundError:
+        pass
+
+    costs_data = parse_hero_costs()
+
+    with path.open("w") as of:
+        json.dump(costs_data, of, default=pydantic_encoder)
+
+    return convert_to_map(costs_data)
+
+
+def get_tower_costs() -> Dict[str, TowerCost]:
+    path = get_files_dir() / "tower_costs.json"
+    try:
+        if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < COSTS_UPDATE_TIME:
+            with path.open("r") as of:
+                return convert_to_map(parse_raw_as(List[TowerCost], of.read()))
+    except FileNotFoundError:
+        pass
+
+    costs_data = parse_costs()
+
+    with path.open("w") as of:
+        json.dump(costs_data, of, default=pydantic_encoder)
+
+    return convert_to_map(costs_data)
+
+
+HERO_COSTS: Dict[str, HeroCost] = get_hero_costs()
+TOWER_COSTS: Dict[str, TowerCost] = get_tower_costs()
