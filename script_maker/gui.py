@@ -2,12 +2,13 @@ from typing import List, Any
 
 import PySimpleGUI as sg
 
-from common.cost.cost_parsing import TOWER_COSTS
+from common.cost.cost_parsing import TOWER_COSTS, HERO_COSTS
 from common.enums import Difficulty
 
 
 class GuiKeys:
     DifficultyListBox = "-difficulty-"
+    HeroListBox = "-hero-"
     TowerTypesListBox = "-chosen_tower_type-"
     ExistingTowersListBox = "-existing_towers-"
     XPositionInput = "-xpos-"
@@ -31,9 +32,12 @@ DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
 
 def get_layout() -> List[List[Any]]:
     left_col = [
-        [sg.Text("Choose difficulty", size=(20, 1), font="Lucida", justification="left")],
-        [sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
-                  key=GuiKeys.DifficultyListBox, enable_events=True)],
+        [sg.Frame("Difficulty",
+                  layout=[[sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
+                                    key=GuiKeys.DifficultyListBox, enable_events=True)]]),
+         sg.Frame("Hero",
+                  layout=[[sg.Combo(get_hero_options(), key=GuiKeys.HeroListBox, enable_events=True)],
+                          [sg.Text("(you still need to manually choose the hero before starting the game)")]])],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
         [sg.Listbox(values=get_tower_options(),
                     select_mode="extended", key=GuiKeys.TowerTypesListBox, size=(30, 25), enable_events=True),
@@ -81,5 +85,12 @@ def get_layout() -> List[List[Any]]:
             script_layout]
 
 
-def get_tower_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
-    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
+def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None) -> List[str]:
+    hero_str = "Hero" if not chosen_hero else \
+        f"Hero | {chosen_hero}: {HERO_COSTS[chosen_hero].base_cost.get_mapping()[difficulty]}"
+    return [hero_str] + \
+           [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
+
+
+def get_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
+    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in HERO_COSTS.items()]

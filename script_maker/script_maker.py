@@ -8,11 +8,11 @@ from ahk import AHK
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier, Difficulty
 from common.script.script_dataclasses import UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry, CreateTowerEntry, IScriptEntry
+    ChangeSpecialTargetingEntry, CreateTowerEntry, IScriptEntry, GameMetadata
 from common.tower import Tower
 from hotkeys import Hotkeys
 from additional_tower_info import AdditionalTowerInfo, get_additional_information
-from gui import GuiKeys, DIFFICULTY_MAP, get_layout, get_tower_options
+from gui import GuiKeys, DIFFICULTY_MAP, get_layout, get_tower_options, get_hero_options
 
 
 def is_tier_upgradeable(tower: Tower, tier: UpgradeTier) -> bool:
@@ -65,7 +65,7 @@ def update_script_box(script_box: sg.Listbox, script_list: List[Dict[str, Any]])
 
 class ScriptJsonEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, IScriptEntry):
+        if isinstance(obj, IScriptEntry) or isinstance(obj, GameMetadata):
             return obj.to_dict()
 
         return json.JSONEncoder.default(self, obj)
@@ -77,24 +77,41 @@ class GuiHandlers:
 
         self._towers_list: Dict[int, Tower] = {}
         self._additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
-        self._script = []
-        self._difficulty = Difficulty.easy
+        self._script: List[IScriptEntry] = []
+        self._metadata = GameMetadata(Difficulty.easy, None)
         self._id_generator = itertools.count()
 
     def handle_change_difficulty(self, event: Dict[str, Any], values: List[Any]):
         difficulty_value = values[GuiKeys.DifficultyListBox]
-        self._difficulty = DIFFICULTY_MAP[difficulty_value]
-        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._difficulty), )
+        self._metadata.difficulty = DIFFICULTY_MAP[difficulty_value]
+        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._metadata.difficulty,
+                                                                         chosen_hero=self._metadata.hero_type), )
+        selected_hero_index = self._window[GuiKeys.HeroListBox].Values.index(values[GuiKeys.HeroListBox])
+        hero_options = get_hero_options(self._metadata.difficulty)
+        self._window[GuiKeys.HeroListBox].update(values=hero_options, value=hero_options[selected_hero_index])
+
+    def handle_change_hero(self, event: Dict[str, Any], values: List[Any]):
+        self._metadata.hero_type = values[GuiKeys.HeroListBox].split(":")[0]
+        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._metadata.difficulty), )
+        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._metadata.difficulty,
+                                                                         chosen_hero=self._metadata.hero_type), )
 
     def handle_select_tower_type(self, event: Dict[str, Any], values: List[Any]):
         try:
-            self._window[GuiKeys.NewTowerTypeInput].update(values[GuiKeys.TowerTypesListBox][0].split(":")[0], )
+            tower_name = values[GuiKeys.TowerTypesListBox][0].split(":")[0]
+            selected_tower_text = "Hero" if "Hero" in tower_name else tower_name
+            self._window[GuiKeys.NewTowerTypeInput].update(selected_tower_text, )
         except IndexError:
             pass
 
     def handle_select_existing_tower(self, event: Dict[str, Any], values: List[Any]):
         try:
-            self._window[GuiKeys.ExistingTowerName].update(values[GuiKeys.ExistingTowersListBox][0].split("|")[0], )
+            selected_tower_value = values[GuiKeys.ExistingTowersListBox][0].split("|")[0]
+            self._window[GuiKeys.ExistingTowerName].update(selected_tower_value, )
+            is_hero = "Hero" in selected_tower_value
+            self._window[GuiKeys.TopUpgradeButton].update(disabled=is_hero)
+            self._window[GuiKeys.MiddleUpgradeButton].update(disabled=is_hero)
+            self._window[GuiKeys.BottomUpgradeButton].update(disabled=is_hero)
         except IndexError:
             pass
 
@@ -102,6 +119,11 @@ class GuiHandlers:
         if not values[GuiKeys.NewTowerTypeInput] or not values[GuiKeys.XPositionInput] \
                 or not values[GuiKeys.YPositionInput]:
             sg.popup("You didn't fill all of the data!")
+            return
+
+        if "Hero" == values[GuiKeys.NewTowerTypeInput] and \
+                any(i for i in self._script if isinstance(i, CreateTowerEntry) and i.name == "Hero"):
+            sg.popup("Your Hero is already placed!")
             return
 
         tower_id = next(self._id_generator)
@@ -156,8 +178,12 @@ class GuiHandlers:
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
     def handle_export_button(self, event: Dict[str, Any], values: List[Any]):
+        if not self._metadata.hero_type:
+            sg.popup("You must select a hero!")
+            return
+
         with open("../exported.json", "w") as of:  # TODO: move to actual path
-            json.dump({"metadata": {"difficulty": self._difficulty.value}, "script": self._script}, of,
+            json.dump({"metadata": self._metadata, "script": self._script}, of,
                       cls=ScriptJsonEncoder)
 
 
@@ -172,6 +198,10 @@ def main():
 
         if event == GuiKeys.DifficultyListBox:
             gui_handler.handle_change_difficulty(event=event, values=values)
+            continue
+
+        if event == GuiKeys.HeroListBox:
+            gui_handler.handle_change_hero(event=event, values=values)
             continue
 
         if event == GuiKeys.TowerTypesListBox:

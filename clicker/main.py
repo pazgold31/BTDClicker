@@ -1,7 +1,7 @@
 import json
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Type
 
 from ahk import AHK
 
@@ -10,11 +10,12 @@ from actions.UpgradeTowerAction import UpgradeTowerAction
 from clicker.actions.ChangeSpecialTargetingAction import ChangeSpecialTargetingAction
 from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
+from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
 from common.enums import Difficulty, UpgradeTier
 from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
-    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
-from common.tower import Tower
+    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
+from common.tower import Tower, Hero
 
 
 def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:
@@ -22,15 +23,21 @@ def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:
         return json.load(of)
 
 
-def create_script(ahk: AHK, script_dict: Dict) -> Tuple[List[IAction], Dict[int, Tower]]:
+def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, Tower]]:
     script = []
     tower_map: Dict[int, Tower] = {}
     for action in script_dict:
         if action[ACTION_KEYWORD] == Actions.create:
             action_class: CreateTowerEntry = CreateTowerEntry.from_dict(action)
-            tower = Tower(name=action_class.name, x=action_class.x, y=action_class.y)
+            if "Hero" == action_class.name:
+                tower = Hero(name=metadata.hero_type, x=action_class.x, y=action_class.y)
+                created_action = PlaceHeroAction(ahk=ahk, hero=tower, difficulty=Difficulty.easy)
+            else:
+                tower = Tower(name=action_class.name, x=action_class.x, y=action_class.y)
+                created_action = PlaceTowerAction(ahk=ahk, tower=tower, difficulty=Difficulty.easy)
+
             tower_map[action_class.id] = tower
-            script.append(PlaceTowerAction(ahk=ahk, tower=tower, difficulty=Difficulty.easy))
+            script.append(created_action)
         elif action[ACTION_KEYWORD] == Actions.upgrade:
             action_class: UpgradeTowerEntry = UpgradeTowerEntry.from_dict(action)
             script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action_class.id],
@@ -52,9 +59,9 @@ def create_script(ahk: AHK, script_dict: Dict) -> Tuple[List[IAction], Dict[int,
 def main():
     ahk = AHK()
     total_dict = load_script_dict()
-    metadata = total_dict["metadata"]
+    metadata = GameMetadata.from_dict(total_dict["metadata"])
     script_dict = total_dict["script"]
-    script, tower_map = create_script(ahk=ahk, script_dict=script_dict)
+    script, tower_map = create_script(ahk=ahk, script_dict=script_dict, metadata=metadata)
     time.sleep(2)
 
     for action in script:

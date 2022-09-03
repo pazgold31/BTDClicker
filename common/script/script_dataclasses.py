@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 
-from common.enums import UpgradeTier
+from common.enums import UpgradeTier, Difficulty
 
 ACTION_KEYWORD = "action"
 
@@ -12,6 +12,13 @@ class Actions:
     sell = "sell"
     change_targeting = "change_targeting"
     change_special_targeting = "change_special_targeting"
+
+
+@dataclass_json
+@dataclass
+class GameMetadata:
+    difficulty: Difficulty
+    hero_type: str
 
 
 @dataclass_json
