@@ -14,6 +14,7 @@ from clicker.actions.IAction import IAction
 from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
 from common.enums import Difficulty, UpgradeTier
+from common.keyboard import is_language_valid
 from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
 from common.tower import Tower, Hero
@@ -58,6 +59,8 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
 
 
 def main():
+    if not is_language_valid():
+        raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
     ahk = AHK()
     total_dict = load_script_dict()
     metadata = GameMetadata.parse_obj(total_dict["metadata"])
