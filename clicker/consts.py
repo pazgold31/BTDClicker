@@ -1,0 +1,1 @@
+CLICK_DELAY = 0.5

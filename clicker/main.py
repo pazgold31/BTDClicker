@@ -32,10 +32,10 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
             action_class: CreateTowerEntry = CreateTowerEntry.parse_obj(action)
             if "Hero" == action_class.name:
                 tower = Hero(name=metadata.hero_type, x=action_class.x, y=action_class.y)
-                created_action = PlaceHeroAction(ahk=ahk, hero=tower, difficulty=Difficulty.easy)
+                created_action = PlaceHeroAction(ahk=ahk, hero=tower, difficulty=metadata.difficulty)
             else:
                 tower = Tower(name=action_class.name, x=action_class.x, y=action_class.y)
-                created_action = PlaceTowerAction(ahk=ahk, tower=tower, difficulty=Difficulty.easy)
+                created_action = PlaceTowerAction(ahk=ahk, tower=tower, difficulty=metadata.difficulty)
 
             tower_map[action_class.id] = tower
             script.append(created_action)
@@ -43,7 +43,7 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
             action_class: UpgradeTowerEntry = UpgradeTowerEntry.parse_obj(action)
             script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action_class.id],
                                              tier=UpgradeTier(action_class.tier),
-                                             difficulty=Difficulty.easy))
+                                             difficulty=metadata.difficulty))
         elif action[ACTION_KEYWORD] == Actions.sell:
             action_class: SellTowerEntry = SellTowerEntry.parse_obj(action)
             script.append(SellTowerAction(ahk=ahk, tower=tower_map[action_class.id]))

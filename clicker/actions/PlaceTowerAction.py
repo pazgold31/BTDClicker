@@ -22,7 +22,7 @@ class PlaceTowerAction(IAction):
 
     def can_act(self) -> bool:
         try:
-            tower_price = TOWER_COSTS[self._tower.name].base_cost.get_mapping()[self._difficulty.value]
+            tower_price = TOWER_COSTS[self._tower.name].base_cost.get_mapping()[self._difficulty]
             return safe_get_amount_of_money() >= tower_price
         except Exception:
             # TODO: add max tries

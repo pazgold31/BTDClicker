@@ -1,5 +1,7 @@
 import itertools
 import json
+import os
+import subprocess
 from typing import List, Dict, Any
 
 import PySimpleGUI as sg
@@ -108,6 +110,9 @@ class GuiHandlers:
         except IndexError:
             pass
 
+    def handle_keyboard_mouse(self, event: Dict[str, Any], values: List[Any]):
+        os.system("start ms-settings:easeofaccess-mouse")
+
     def handle_save_tower(self, event: Dict[str, Any], values: List[Any]):
         if not values[GuiKeys.NewTowerTypeInput] or not values[GuiKeys.XPositionInput] \
                 or not values[GuiKeys.YPositionInput]:
@@ -179,6 +184,8 @@ class GuiHandlers:
             json.dump(Script(metadata=self._metadata, script=self._script), of, default=pydantic_encoder)
 
 
+# TODO: open the mouse keys menu using:
+# ms-settings:easeofaccess-mouse
 def main():
     window = sg.Window(title="BTD Scripter", layout=get_layout())
     Hotkeys(ahk=AHK(), x_pos=window[GuiKeys.XPositionInput], y_pos=window[GuiKeys.YPositionInput])
@@ -187,6 +194,10 @@ def main():
 
     while True:
         event, values = window.read()
+
+        if event == GuiKeys.KeyboardMouseButton:
+            gui_handler.handle_keyboard_mouse(event=event, values=values)
+            continue
 
         if event == GuiKeys.DifficultyListBox:
             gui_handler.handle_change_difficulty(event=event, values=values)

@@ -3,6 +3,7 @@ import time
 from ahk import AHK
 
 from clicker.actions.IAction import IAction
+from clicker.consts import CLICK_DELAY
 from clicker.money_extracter import safe_get_amount_of_money
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import Difficulty, UpgradeTier, TierLevel
@@ -21,11 +22,11 @@ class UpgradeTowerAction(IAction):
 
         self._ahk.mouse_position = (self._tower.x, self._tower.y)
         self._ahk.click()
-        time.sleep(0.2)
+        time.sleep(CLICK_DELAY)
         self._ahk.key_press(UPGRADE_TIER_MAPPING[self._tier])
-        time.sleep(0.1)
+        time.sleep(CLICK_DELAY)
         self._ahk.send(Keymap.pause)  # close the window
-        time.sleep(0.1)
+        time.sleep(CLICK_DELAY)
 
         self._tower.tier_map[self._tier] += 1
 

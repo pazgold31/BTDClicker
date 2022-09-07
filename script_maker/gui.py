@@ -15,6 +15,7 @@ class GuiKeys:
     YPositionInput = "-ypos-"
     NewTowerTypeInput = "-new_tower_type_input-"
     SaveTowerButton = '-save_tower_button-'
+    KeyboardMouseButton = '-keyboard_mouse_button-'
     ExistingTowerName = "-existing_tower_name-"
     TopUpgradeButton = "-top_upgrade_button-"
     MiddleUpgradeButton = "-middle_upgrade_button-"
@@ -56,7 +57,8 @@ def get_layout() -> List[List[Any]]:
         ],
         [sg.Text("Type:"),
          sg.In(size=(40, 1), disabled=True, key=GuiKeys.NewTowerTypeInput)],
-        [sg.Button("Save", enable_events=True, key=GuiKeys.SaveTowerButton)],
+        [sg.Button("Save", enable_events=True, key=GuiKeys.SaveTowerButton),
+         sg.Button("Keyboard mouse", enable_events=True, key=GuiKeys.KeyboardMouseButton)],
         [sg.HSeparator()],
         [sg.Text("Existing tower upgrades")],
         [sg.Text("Type:"),
