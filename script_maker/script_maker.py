@@ -175,6 +175,53 @@ class GuiHandlers:
                                 self._additional_tower_information)
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
+    def handle_delete_from_script(self, event: Dict[str, Any], values: List[Any]):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to remove!")
+            return
+
+        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        self._script.pop(selected_entry_index)
+        update_towers_from_list(self._window[GuiKeys.ExistingTowersListBox], self._towers_list,
+                                self._additional_tower_information)
+        update_script_box(self._window[GuiKeys.ScriptBox], self._script)
+
+    def handle_move_down_on_script(self, event: Dict[str, Any], values: List[Any]):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to move!")
+            return
+
+        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+
+        if selected_entry_index == 0:
+            sg.popup("Item already first!")
+            return
+
+        self._script[selected_entry_index], self._script[selected_entry_index + 1] = \
+            self._script[selected_entry_index + 1], self._script[selected_entry_index]
+
+        update_towers_from_list(self._window[GuiKeys.ExistingTowersListBox], self._towers_list,
+                                self._additional_tower_information)
+        update_script_box(self._window[GuiKeys.ScriptBox], self._script)
+
+    def handle_move_up_on_script(self, event: Dict[str, Any], values: List[Any]):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to move!")
+            return
+
+        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+
+        if selected_entry_index == len(self._script) + 1:
+            sg.popup("Item already last!")
+            return
+
+        self._script[selected_entry_index], self._script[selected_entry_index - 1] = \
+            self._script[selected_entry_index - 1], self._script[selected_entry_index]
+
+        update_towers_from_list(self._window[GuiKeys.ExistingTowersListBox], self._towers_list,
+                                self._additional_tower_information)
+        update_script_box(self._window[GuiKeys.ScriptBox], self._script)
+
     def handle_export_button(self, event: Dict[str, Any], values: List[Any]):
         if not self._metadata.hero_type:
             sg.popup("You must select a hero!")
@@ -223,6 +270,15 @@ def main():
                      GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton):
             gui_handler.handle_tower_modification(event=event, values=values)
             continue
+
+        if event == GuiKeys.DeleteFromScriptButton:
+            gui_handler.handle_delete_from_script(event=event, values=values)
+
+        if event == GuiKeys.MoveDownInScriptButton:
+            gui_handler.handle_move_down_on_script(event=event, values=values)
+
+        if event == GuiKeys.MoveUpInScriptButton:
+            gui_handler.handle_move_up_on_script(event=event, values=values)
 
         if event == GuiKeys.ExportButton:
             gui_handler.handle_export_button(event=event, values=values)

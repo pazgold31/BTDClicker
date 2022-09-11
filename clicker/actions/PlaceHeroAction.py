@@ -4,7 +4,7 @@ from clicker.actions.IAction import IAction
 from common.enums import Difficulty
 from common.cost.cost_parsing import HERO_COSTS
 from common.keymap import Keymap
-from clicker.money_extracter import safe_get_amount_of_money
+from clicker.money_extracter import get_amount_of_money
 from common.tower import BaseTower
 
 
@@ -23,7 +23,7 @@ class PlaceHeroAction(IAction):
     def can_act(self) -> bool:
         try:
             tower_price = HERO_COSTS[self._hero.name].base_cost.get_mapping()[self._difficulty]
-            return safe_get_amount_of_money() >= tower_price
+            return get_amount_of_money() >= tower_price
         except Exception:
             # TODO: add max tries
             pass

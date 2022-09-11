@@ -4,7 +4,7 @@ from ahk import AHK
 
 from clicker.actions.IAction import IAction
 from clicker.consts import CLICK_DELAY
-from clicker.money_extracter import safe_get_amount_of_money
+from clicker.money_extracter import get_amount_of_money
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import Difficulty, UpgradeTier, TierLevel
 from common.keymap import Keymap, UPGRADE_TIER_MAPPING
@@ -35,7 +35,7 @@ class UpgradeTowerAction(IAction):
         try:
             upgrade_price = TOWER_COSTS[self._tower.name].upgrades.get_mapping()[self._tier].get_mapping()[TierLevel(
                 self._tower.tier_map[self._tier] + 1)].cost.get_mapping()[self._difficulty]
-            money = safe_get_amount_of_money()
+            money = get_amount_of_money()
             if money >= upgrade_price:
                 print(f"Got {money}. Need: {upgrade_price}")
             return money >= upgrade_price

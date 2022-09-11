@@ -25,6 +25,9 @@ class GuiKeys:
     SpecialTargetingButton = "-s_targeting_button-"
     ExportButton = "-export_button-"
     ScriptBox = "-script_box-"
+    DeleteFromScriptButton = "-delete-from-script"
+    MoveDownInScriptButton = "-move-down-in-script"
+    MoveUpInScriptButton = "-move-up-in-script"
 
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
@@ -77,14 +80,19 @@ def get_layout() -> List[List[Any]]:
         [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton)]
     ]
 
-    script_layout = [[sg.Text("Script:")],
-                     [sg.Listbox(values=[], select_mode="extended", key=GuiKeys.ScriptBox, size=(150, 12),
-                                 enable_events=True)]]
+    bottom_left_col = [[sg.Text("Script:")],
+                       [sg.Listbox(values=[], select_mode="extended", key=GuiKeys.ScriptBox, size=(150, 12),
+                                   enable_events=True)]]
+    bottom_right_col = [[sg.Button("Delete", size=(15, 1), enable_events=True, key=GuiKeys.DeleteFromScriptButton)],
+                        [sg.Button("Move Up", size=(15, 1), enable_events=True, key=GuiKeys.MoveUpInScriptButton)],
+                        [sg.Button("Move Down", size=(15, 1), enable_events=True, key=GuiKeys.MoveDownInScriptButton)]]
+
+    bottom_layout = [[sg.Column(bottom_left_col), sg.VSeparator(), sg.Column(bottom_right_col)]]
 
     return [[sg.Column(left_col),
              sg.VSeparator(),
              sg.Column(right_col)],
-            script_layout]
+            bottom_layout]
 
 
 def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None) -> List[str]:
