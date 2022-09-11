@@ -27,3 +27,6 @@ class PlaceHeroAction(IAction):
         except Exception:
             # TODO: add max tries
             pass
+
+    def get_action_message(self) -> str:
+        return f"Place {self._hero.name} at {self._hero.x}:{self._hero.y}"

@@ -25,3 +25,6 @@ class ChangeSpecialTargetingAction(IAction):
 
     def can_act(self) -> bool:
         return True
+
+    def get_action_message(self) -> str:
+        return f"Place {self._tower.name} at {self._tower.x}:{self._tower.y}"

@@ -27,3 +27,6 @@ class PlaceTowerAction(IAction):
         except Exception:
             # TODO: add max tries
             pass
+
+    def get_action_message(self) -> str:
+        return f"Place {self._tower.name} at {self._tower.x}:{self._tower.y}"

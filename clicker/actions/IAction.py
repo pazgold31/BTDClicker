@@ -4,3 +4,6 @@ class IAction:
 
     def can_act(self) -> bool:
         raise NotImplementedError
+
+    def get_action_message(self) -> str:
+        raise NotImplementedError

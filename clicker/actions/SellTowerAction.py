@@ -23,3 +23,6 @@ class SellTowerAction(IAction):
 
     def can_act(self) -> bool:
         return True
+
+    def get_action_message(self) -> str:
+        return f"Sell {self._tower.name}"

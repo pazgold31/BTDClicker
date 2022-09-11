@@ -13,7 +13,7 @@ from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
 from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
-from common.enums import Difficulty, UpgradeTier
+from common.enums import UpgradeTier
 from common.keyboard import is_language_valid
 from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
@@ -68,6 +68,7 @@ def main():
     time.sleep(2)
 
     for action in script:
+        print(f"Next: {action.get_action_message()}")
         while True:
             if action.can_act():
                 action.act()

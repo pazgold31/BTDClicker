@@ -42,3 +42,6 @@ class UpgradeTowerAction(IAction):
         except Exception as e:
             # TODO: add max tries
             pass
+
+    def get_action_message(self) -> str:
+        return f"Upgrade {self._tower.name} tier {self._tier.name}"
