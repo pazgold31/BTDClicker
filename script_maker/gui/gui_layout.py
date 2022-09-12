@@ -2,33 +2,9 @@ from typing import List, Any
 
 import PySimpleGUI as sg
 
-from common.cost.cost_parsing import TOWER_COSTS, HERO_COSTS
 from common.enums import Difficulty
-
-
-class GuiKeys:
-    DifficultyListBox = "-difficulty-"
-    HeroListBox = "-hero-"
-    TowerTypesListBox = "-chosen_tower_type-"
-    ExistingTowersListBox = "-existing_towers-"
-    XPositionInput = "-xpos-"
-    YPositionInput = "-ypos-"
-    NewTowerTypeInput = "-new_tower_type_input-"
-    SaveTowerButton = '-save_tower_button-'
-    KeyboardMouseButton = '-keyboard_mouse_button-'
-    ExistingTowerName = "-existing_tower_name-"
-    TopUpgradeButton = "-top_upgrade_button-"
-    MiddleUpgradeButton = "-middle_upgrade_button-"
-    BottomUpgradeButton = "-bottom_upgrade_button-"
-    SellButton = "-sell_button-"
-    TargetingButton = "-targeting_button-"
-    SpecialTargetingButton = "-s_targeting_button-"
-    ExportButton = "-export_button-"
-    ScriptBox = "-script_box-"
-    DeleteFromScriptButton = "-delete-from-script"
-    MoveDownInScriptButton = "-move-down-in-script"
-    MoveUpInScriptButton = "-move-up-in-script"
-
+from script_maker.gui.gui import get_hero_options, get_tower_options
+from script_maker.gui.gui_keys import GuiKeys
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "chimps": Difficulty.chimps}
@@ -40,7 +16,8 @@ def get_layout() -> List[List[Any]]:
                   layout=[[sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
                                     key=GuiKeys.DifficultyListBox, enable_events=True)]]),
          sg.Frame("Hero",
-                  layout=[[sg.Combo(get_hero_options(), key=GuiKeys.HeroListBox, enable_events=True)],
+                  layout=[[sg.Combo(get_hero_options(), default_value=get_hero_options()[0],
+                                    key=GuiKeys.HeroListBox, enable_events=True)],
                           [sg.Text("(you still need to manually choose the hero before starting the game)")]])],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
         [sg.Listbox(values=get_tower_options(),
@@ -93,14 +70,3 @@ def get_layout() -> List[List[Any]]:
              sg.VSeparator(),
              sg.Column(right_col)],
             bottom_layout]
-
-
-def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None) -> List[str]:
-    hero_str = "Hero" if not chosen_hero else \
-        f"Hero | {chosen_hero}: {HERO_COSTS[chosen_hero].base_cost.get_mapping()[difficulty]}"
-    return [hero_str] + \
-           [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
-
-
-def get_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
-    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in HERO_COSTS.items()]
