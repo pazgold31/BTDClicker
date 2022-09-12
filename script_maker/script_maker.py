@@ -76,7 +76,7 @@ class GuiHandlers:
         self._metadata = GameMetadata(difficulty=Difficulty.easy, hero_type="")
         self._id_generator = itertools.count()
 
-    def handle_change_difficulty(self, event: Dict[str, Any], values: List[Any]):
+    def handle_change_difficulty(self, event: EventType, values: ValuesType):
         difficulty_value = values[GuiKeys.DifficultyListBox]
         self._metadata.difficulty = DIFFICULTY_MAP[difficulty_value]
         self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._metadata.difficulty,
@@ -85,13 +85,13 @@ class GuiHandlers:
         hero_options = get_hero_options(self._metadata.difficulty)
         self._window[GuiKeys.HeroListBox].update(values=hero_options, value=hero_options[selected_hero_index])
 
-    def handle_change_hero(self, event: Dict[str, Any], values: List[Any]):
+    def handle_change_hero(self, event: EventType, values: ValuesType):
         self._metadata.hero_type = values[GuiKeys.HeroListBox].split(":")[0]
         self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._metadata.difficulty), )
         self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(self._metadata.difficulty,
                                                                          chosen_hero=self._metadata.hero_type), )
 
-    def handle_select_tower_type(self, event: Dict[str, Any], values: List[Any]):
+    def handle_select_tower_type(self, event: EventType, values: ValuesType):
         try:
             tower_name = values[GuiKeys.TowerTypesListBox][0].split(":")[0]
             selected_tower_text = "Hero" if "Hero" in tower_name else tower_name
@@ -99,7 +99,7 @@ class GuiHandlers:
         except IndexError:
             pass
 
-    def handle_select_existing_tower(self, event: Dict[str, Any], values: List[Any]):
+    def handle_select_existing_tower(self, event: EventType, values: ValuesType):
         try:
             selected_tower_value = values[GuiKeys.ExistingTowersListBox][0].split("|")[0]
             self._window[GuiKeys.ExistingTowerName].update(selected_tower_value, )
@@ -110,10 +110,10 @@ class GuiHandlers:
         except IndexError:
             pass
 
-    def handle_keyboard_mouse(self, event: Dict[str, Any], values: List[Any]):
+    def handle_keyboard_mouse(self, event: EventType, values: ValuesType):
         os.system("start ms-settings:easeofaccess-mouse")
 
-    def handle_save_tower(self, event: Dict[str, Any], values: List[Any]):
+    def handle_save_tower(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.NewTowerTypeInput] or not values[GuiKeys.XPositionInput] \
                 or not values[GuiKeys.YPositionInput]:
             sg.popup("You didn't fill all of the data!")
@@ -141,7 +141,7 @@ class GuiHandlers:
         self._towers_list[tower_id].tier_map[tier] += 1
         return UpgradeTowerEntry(id=tower_id, tier=tier)
 
-    def handle_tower_modification(self, event: Dict[str, Any], values: List[Any]):
+    def handle_tower_modification(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ExistingTowerName]:
             sg.popup("You must chose a tower first!")
             return
@@ -175,7 +175,7 @@ class GuiHandlers:
                                 self._additional_tower_information)
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
-    def handle_delete_from_script(self, event: Dict[str, Any], values: List[Any]):
+    def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
             sg.popup("You must select an entry to remove!")
             return
@@ -186,7 +186,7 @@ class GuiHandlers:
                                 self._additional_tower_information)
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
-    def handle_move_down_on_script(self, event: Dict[str, Any], values: List[Any]):
+    def handle_move_down_on_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
             sg.popup("You must select an entry to move!")
             return
@@ -204,7 +204,7 @@ class GuiHandlers:
                                 self._additional_tower_information)
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
-    def handle_move_up_on_script(self, event: Dict[str, Any], values: List[Any]):
+    def handle_move_up_on_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
             sg.popup("You must select an entry to move!")
             return
@@ -222,7 +222,7 @@ class GuiHandlers:
                                 self._additional_tower_information)
         update_script_box(self._window[GuiKeys.ScriptBox], self._script)
 
-    def handle_export_button(self, event: Dict[str, Any], values: List[Any]):
+    def handle_export_button(self, event: EventType, values: ValuesType):
         if not self._metadata.hero_type:
             sg.popup("You must select a hero!")
             return

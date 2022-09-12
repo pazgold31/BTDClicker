@@ -14,15 +14,18 @@ from script_maker.gui.gui_updater import GuiUpdater
 
 class GuiClass:
     def __init__(self, ):
-        self._window = sg.Window(title="BTD Scripter", layout=get_layout())
+        self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
 
         self._towers_list: Dict[int, Tower] = {}
         self._additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
         self._script: List[IScriptEntry] = []
+        self._id_generator = itertools.count()
+
         event, values = self._window.read(0)
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
-                                      hero_type=GuiParsers.parse_hero(values[GuiKeys.HeroListBox]))
-        self._id_generator = itertools.count()
+                                      hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroListBox]))
+
+        self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
 
     def run(self):
         callback_map = self.get_callback_map()
@@ -40,11 +43,24 @@ class GuiClass:
     def handle_change_difficulty(self, event: EventType, values: ValuesType):
         difficulty_str = values[GuiKeys.DifficultyListBox]
         self._metadata.difficulty = DIFFICULTY_MAP[difficulty_str]
-        GuiUpdater.update_difficulty(window=self._window, values=values, metadata=self._metadata)
+        self._gui_updater.update_difficulty(values=values)
+
+    def handle_change_hero(self, event: EventType, values: ValuesType):
+        self._metadata.hero_type = GuiParsers.parse_selected_hero(values[GuiKeys.HeroListBox])
+        self._gui_updater.update_hero(metadata=self._metadata)
+
+    def handle_select_tower_type(self, event: EventType, values: ValuesType):
+        try:
+            tower_name = GuiParsers.parse_selected_tower(values[GuiKeys.TowerTypesListBox][0])
+            self._gui_updater.update_selected_tower(selected_tower_text=tower_name, values=values)
+        except IndexError:
+            pass
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
-            GuiKeys.DifficultyListBox: self.handle_change_difficulty
+            GuiKeys.DifficultyListBox: self.handle_change_difficulty,
+            GuiKeys.HeroListBox: self.handle_change_hero,
+            GuiKeys.TowerTypesListBox: self.handle_select_tower_type
         }
 
 
