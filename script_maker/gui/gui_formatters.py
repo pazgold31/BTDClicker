@@ -1,5 +1,5 @@
 from common.enums import UpgradeTier
-from script_maker.ScriptClasses.towers_container import TowersContainer
+from script_maker.script.towers_container import TowersContainer
 
 
 class GuiFormatters:

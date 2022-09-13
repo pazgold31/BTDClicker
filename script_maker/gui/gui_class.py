@@ -3,8 +3,7 @@ from typing import Dict
 import PySimpleGUI as sg
 from ahk import AHK
 
-from script_maker.ScriptClasses.script_container import ScriptContainer
-from script_maker.ScriptClasses.towers_container import TowersContainer
+from script_maker.script.activity_container import ActivityContainer
 from common.script.script_dataclasses import GameMetadata, CreateTowerEntry
 from script_maker.gui.gui_controls_utils import are_values_set
 from script_maker.gui.gui_keys import GuiKeys
@@ -20,8 +19,7 @@ class GuiClass:
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
         Hotkeys(ahk=AHK(), x_pos=self._window[GuiKeys.XPositionInput], y_pos=self._window[GuiKeys.YPositionInput])
 
-        self._script_container = ScriptContainer()
-        self._towers_container = TowersContainer()
+        self._activity_container = ActivityContainer()
 
         event, values = self._window.read(0)
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
@@ -75,21 +73,16 @@ class GuiClass:
             sg.popup("You didn't fill all of the data!")
             return
 
-        if "Hero" == values[GuiKeys.NewTowerTypeInput] and \
-                any(i for i in self._script_container if isinstance(i, CreateTowerEntry) and i.name == "Hero"):
+        if "Hero" == values[GuiKeys.NewTowerTypeInput] and not self._activity_container.is_hero_placeable():
             sg.popup("Your Hero is already placed!")
             return
 
-        tower_id = self._towers_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
-                                                        x=int(values[GuiKeys.XPositionInput]),
-                                                        y=int(values[GuiKeys.YPositionInput]))
+        self._activity_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
+                                               x=int(values[GuiKeys.XPositionInput]),
+                                               y=int(values[GuiKeys.YPositionInput]))
 
-        self._gui_updater.update_existing_towers(towers_container=self._towers_container)
-        self._script_container.append(CreateTowerEntry(name=self._towers_container[tower_id].name,
-                                                       id=tower_id,
-                                                       x=self._towers_container[tower_id].x,
-                                                       y=self._towers_container[tower_id].y))
-        self._gui_updater.update_script_box(self._script_container)
+        self._gui_updater.update_existing_towers(towers_container=self._activity_container.towers_container)
+        self._gui_updater.update_script_box(script_container=self._activity_container.script_container)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
