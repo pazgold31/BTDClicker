@@ -102,7 +102,6 @@ class GuiHandlers:
     def handle_select_existing_tower(self, event: EventType, values: ValuesType):
         try:
             selected_tower_value = values[GuiKeys.ExistingTowersListBox][0].split("|")[0]
-            self._window[GuiKeys.ExistingTowerName].update(selected_tower_value, )
             is_hero = "Hero" in selected_tower_value
             self._window[GuiKeys.TopUpgradeButton].update(disabled=is_hero)
             self._window[GuiKeys.MiddleUpgradeButton].update(disabled=is_hero)
@@ -142,10 +141,6 @@ class GuiHandlers:
         return UpgradeTowerEntry(id=tower_id, tier=tier)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
-        if not values[GuiKeys.ExistingTowerName]:
-            sg.popup("You must chose a tower first!")
-            return
-
         selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
         if event == GuiKeys.TopUpgradeButton:
             action = self._handle_tower_upgrade(tower_id=selected_tower_id, tier=UpgradeTier.top)

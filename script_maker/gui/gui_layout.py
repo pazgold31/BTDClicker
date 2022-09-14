@@ -51,9 +51,6 @@ def get_layout() -> List[List[Any]]:
         [sg.Button("Save", enable_events=True, key=GuiKeys.SaveTowerButton),
          sg.Button("Keyboard mouse", enable_events=True, key=GuiKeys.KeyboardMouseButton)],
         [sg.HSeparator()],
-        [sg.Text("Existing tower upgrades")],
-        [sg.Text("Type:"),
-         sg.In(size=(40, 1), disabled=True, key=GuiKeys.ExistingTowerName)],
         [
             sg.Button("Upgrade Top", size=(15, 1), enable_events=True, key=GuiKeys.TopUpgradeButton),
             sg.Button("Upgrade Middle", size=(15, 1), enable_events=True, key=GuiKeys.MiddleUpgradeButton),

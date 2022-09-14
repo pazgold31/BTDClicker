@@ -7,8 +7,7 @@ from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier
 from common.tower import Tower
 from script_maker.script.activity_container import ActivityContainer
-from common.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, IScriptEntry, \
-    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
+from common.script.script_dataclasses import GameMetadata
 from script_maker.gui.gui_controls_utils import are_values_set
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP

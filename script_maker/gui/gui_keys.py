@@ -8,7 +8,6 @@ class GuiKeys:
     NewTowerTypeInput = "-new_tower_type_input-"
     SaveTowerButton = '-save_tower_button-'
     KeyboardMouseButton = '-keyboard_mouse_button-'
-    ExistingTowerName = "-existing_tower_name-"
     TopUpgradeButton = "-top_upgrade_button-"
     MiddleUpgradeButton = "-middle_upgrade_button-"
     BottomUpgradeButton = "-bottom_upgrade_button-"

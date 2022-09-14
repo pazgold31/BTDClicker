@@ -35,7 +35,6 @@ class GuiUpdater:
         self._window[GuiKeys.NewTowerTypeInput].update(selected_tower_text, )
 
     def update_selected_existing_tower(self, selected_tower_text: str, is_hero: bool):
-        self._window[GuiKeys.ExistingTowerName].update(selected_tower_text, )
         self._window[GuiKeys.TopUpgradeButton].update(disabled=is_hero)
         self._window[GuiKeys.MiddleUpgradeButton].update(disabled=is_hero)
         self._window[GuiKeys.BottomUpgradeButton].update(disabled=is_hero)
