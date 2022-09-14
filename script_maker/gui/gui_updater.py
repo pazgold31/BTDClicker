@@ -59,3 +59,7 @@ class GuiUpdater:
                 output.append(f"Change special targeting: ({action.id})")
 
         self._window[GuiKeys.ScriptBox].update(output, )  # TODO: keep selection
+
+    def update_existing_towers_and_script(self, towers_container: TowersContainer, script_container: ScriptContainer):
+        self.update_existing_towers(towers_container=towers_container)
+        self.update_script_box(script_container=script_container)
