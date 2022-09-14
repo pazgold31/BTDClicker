@@ -94,7 +94,8 @@ class GuiClass:
                                                x=int(values[GuiKeys.XPositionInput]),
                                                y=int(values[GuiKeys.YPositionInput]))
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(values=values,
+                                                            towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
@@ -125,7 +126,8 @@ class GuiClass:
         else:
             raise RuntimeError
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(values=values,
+                                                            towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:

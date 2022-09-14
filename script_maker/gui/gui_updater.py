@@ -40,11 +40,17 @@ class GuiUpdater:
         self._window[GuiKeys.MiddleUpgradeButton].update(disabled=is_hero)
         self._window[GuiKeys.BottomUpgradeButton].update(disabled=is_hero)
 
-    def update_existing_towers(self, towers_container: TowersContainer):
+    def update_existing_towers(self, values: ValuesType, towers_container: TowersContainer):
         list_box = self._window[GuiKeys.ExistingTowersListBox]
-        list_box.update(GuiFormatters.format_existing_towers(towers_container), list_box.get_indexes())
+        try:
+            selected_index = self._window[GuiKeys.ExistingTowersListBox].Values.index(
+                values[GuiKeys.ExistingTowersListBox][0])
+        except IndexError:
+            selected_index = None
 
-    def update_script_box(self, script_container: ScriptContainer):
+        list_box.update(values=GuiFormatters.format_existing_towers(towers_container), set_to_index=selected_index)
+
+    def update_script_box(self, values: ValuesType, script_container: ScriptContainer):
         output = []
         for action in script_container:
             if isinstance(action, CreateTowerEntry):
@@ -58,8 +64,14 @@ class GuiUpdater:
             elif isinstance(action, ChangeSpecialTargetingEntry):
                 output.append(f"Change special targeting: ({action.id})")
 
-        self._window[GuiKeys.ScriptBox].update(output, )  # TODO: keep selection
+        try:
+            selected_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        except IndexError:
+            selected_index = None
 
-    def update_existing_towers_and_script(self, towers_container: TowersContainer, script_container: ScriptContainer):
-        self.update_existing_towers(towers_container=towers_container)
-        self.update_script_box(script_container=script_container)
+        self._window[GuiKeys.ScriptBox].update(values=output, set_to_index=selected_index)  # TODO: fix selection
+
+    def update_existing_towers_and_script(self, values: ValuesType, towers_container: TowersContainer,
+                                          script_container: ScriptContainer):
+        self.update_existing_towers(values=values, towers_container=towers_container)
+        self.update_script_box(values=values, script_container=script_container)
