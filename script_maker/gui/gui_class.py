@@ -93,7 +93,7 @@ class GuiClass:
             sg.popup("You must chose a tower first!")
             return
 
-        selected_tower_id = GuiParsers.parse_selected_tower_id(values[GuiKeys.ExistingTowersListBox])
+        selected_tower_id = GuiParsers.parse_selected_tower_id(values[GuiKeys.ExistingTowersListBox][0])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
         if event in upgrade_tiers_map:
@@ -130,7 +130,8 @@ class GuiClass:
 
         self._gui_updater.update_existing_towers_and_script(values=values,
                                                             towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+                                                            script_container=self._activity_container.script_container,
+                                                            selected_script_index=selected_entry_index)
 
     def handle_move_up_on_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
@@ -146,7 +147,8 @@ class GuiClass:
 
         self._gui_updater.update_existing_towers_and_script(values=values,
                                                             towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+                                                            script_container=self._activity_container.script_container,
+                                                            selected_script_index=selected_entry_index - 1)
 
     def handle_move_down_on_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
@@ -162,7 +164,8 @@ class GuiClass:
 
         self._gui_updater.update_existing_towers_and_script(values=values,
                                                             towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+                                                            script_container=self._activity_container.script_container,
+                                                            selected_script_index=selected_entry_index + 1)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {

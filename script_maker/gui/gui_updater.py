@@ -49,7 +49,7 @@ class GuiUpdater:
 
         list_box.update(values=GuiFormatters.format_existing_towers(towers_container), set_to_index=selected_index)
 
-    def update_script_box(self, values: ValuesType, script_container: ScriptContainer):
+    def update_script_box(self, values: ValuesType, script_container: ScriptContainer, selected_index: int = None):
         output = []
         for action in script_container:
             if isinstance(action, CreateTowerEntry):
@@ -64,13 +64,14 @@ class GuiUpdater:
                 output.append(f"Change special targeting: ({action.id})")
 
         try:
-            selected_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+            selected_index = selected_index if selected_index is not None else self._window[
+                GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
         except IndexError:
             selected_index = None
 
-        self._window[GuiKeys.ScriptBox].update(values=output, set_to_index=selected_index)  # TODO: fix selection
+        self._window[GuiKeys.ScriptBox].update(values=output, set_to_index=selected_index)
 
     def update_existing_towers_and_script(self, values: ValuesType, towers_container: TowersContainer,
-                                          script_container: ScriptContainer):
+                                          script_container: ScriptContainer, selected_script_index: int = None):
         self.update_existing_towers(values=values, towers_container=towers_container)
-        self.update_script_box(values=values, script_container=script_container)
+        self.update_script_box(values=values, script_container=script_container, selected_index=selected_script_index)
