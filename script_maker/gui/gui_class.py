@@ -1,11 +1,13 @@
+import json
 import os
 from typing import Dict
 import PySimpleGUI as sg
 from ahk import AHK
+from pydantic.json import pydantic_encoder
 
 from common.enums import UpgradeTier
 from script_maker.script.activity_container import ActivityContainer
-from common.script.script_dataclasses import GameMetadata
+from common.script.script_dataclasses import GameMetadata, Script
 from script_maker.gui.gui_controls_utils import are_values_set
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
@@ -178,6 +180,15 @@ class GuiClass:
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script
         }
+
+    def handle_export_button(self, event: EventType, values: ValuesType):
+        if not self._metadata.hero_type:  # TODO: support not giving a hero if it is not used
+            sg.popup("You must select a hero!")
+            return
+
+        with open("../exported.json", "w") as of:  # TODO: move to actual path
+            json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
+                      default=pydantic_encoder)
 
 
 def main():
