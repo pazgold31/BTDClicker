@@ -139,7 +139,7 @@ class GuiClass:
 
         selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
         try:
-            self._activity_container.move_script_entry_down(entry_index=selected_entry_index)
+            self._activity_container.move_script_entry_up(entry_index=selected_entry_index)
         except ValueError:
             sg.popup("Item already first!")
             return
