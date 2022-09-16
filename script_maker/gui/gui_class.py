@@ -181,7 +181,8 @@ class GuiClass:
                     GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton)},
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
-            GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script
+            GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
+            GuiKeys.ExportButton: self.handle_export_button
         }
 
     def handle_export_button(self, event: EventType, values: ValuesType):
@@ -192,12 +193,3 @@ class GuiClass:
         with open("../exported.json", "w") as of:  # TODO: move to actual path
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
                       default=pydantic_encoder)
-
-
-def main():
-    gui_class = GuiClass()
-    gui_class.run()
-
-
-if __name__ == '__main__':
-    main()
