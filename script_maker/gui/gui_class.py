@@ -104,23 +104,27 @@ class GuiClass:
         selected_tower_id = GuiParsers.parse_selected_tower_id(values[GuiKeys.ExistingTowersListBox][0])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
+        selected_script_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+
         if event in upgrade_tiers_map:
             try:
-                self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=upgrade_tiers_map[event])
+                self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=upgrade_tiers_map[event],
+                                                       index=selected_script_entry_index + 1)
             except ValueError:
                 sg.popup("Tower is already at max level!")
                 return
 
         elif event == GuiKeys.SellButton:
             try:
-                self._activity_container.sell_tower(tower_id=selected_tower_id)
+                self._activity_container.sell_tower(tower_id=selected_tower_id, index=selected_script_entry_index + 1)
             except ValueError:
                 sg.popup("The tower is already sold!")
                 return
         elif event == GuiKeys.TargetingButton:
-            self._activity_container.change_targeting(tower_id=selected_tower_id)
+            self._activity_container.change_targeting(tower_id=selected_tower_id, index=selected_script_entry_index + 1)
         elif event == GuiKeys.SpecialTargetingButton:
-            self._activity_container.change_special_targeting(tower_id=selected_tower_id)
+            self._activity_container.change_special_targeting(tower_id=selected_tower_id,
+                                                              index=selected_script_entry_index + 1)
         else:
             raise RuntimeError
 
