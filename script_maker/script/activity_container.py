@@ -31,7 +31,8 @@ class ActivityContainer:
 
     def is_hero_placeable(self) -> bool:
         # TODO: support sold hero
-        return any(i for i in self._script_container if isinstance(i, CreateTowerEntry) and i.name == "Hero")
+        is_hero_placed = any(i for i in self._script_container if isinstance(i, CreateTowerEntry) and i.name == "Hero")
+        return not is_hero_placed
 
     def add_new_tower(self, name: str, x: int, y: int):
         tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y)
