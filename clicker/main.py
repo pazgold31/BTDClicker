@@ -17,7 +17,8 @@ from common.enums import UpgradeTier
 from common.keyboard import is_language_valid
 from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
-from common.tower import Tower, Hero
+from common.script.script_parsing import import_script, parse_towers_from_script
+from common.tower import Tower, Hero, BaseTower
 
 
 def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:
@@ -25,35 +26,29 @@ def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:
         return json.load(of)
 
 
-def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, Tower]]:
-    script = []
-    tower_map: Dict[int, Tower] = {}
-    for action in script_dict:
-        if action[ACTION_KEYWORD] == Actions.create:
-            action_class: CreateTowerEntry = CreateTowerEntry.parse_obj(action)
-            if "Hero" == action_class.name:
-                tower = Hero(name=metadata.hero_type, x=action_class.x, y=action_class.y)
-                created_action = PlaceHeroAction(ahk=ahk, hero=tower, difficulty=metadata.difficulty)
+def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, BaseTower]]:
+    script_entries = import_script(script_dict=script_dict)
+    tower_map: Dict[int, BaseTower] = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
+    script: List[IAction] = []
+    for script_entry in script_entries:
+        if isinstance(script_entry, CreateTowerEntry):
+            if "Hero" == script_entry.name:
+                script.append(PlaceHeroAction(ahk=ahk, hero=tower_map[script_entry.id],
+                                              difficulty=metadata.difficulty))
             else:
-                tower = Tower(name=action_class.name, x=action_class.x, y=action_class.y)
-                created_action = PlaceTowerAction(ahk=ahk, tower=tower, difficulty=metadata.difficulty)
+                script.append(PlaceTowerAction(ahk=ahk, tower=tower_map[script_entry.id],
+                                               difficulty=metadata.difficulty))
 
-            tower_map[action_class.id] = tower
-            script.append(created_action)
-        elif action[ACTION_KEYWORD] == Actions.upgrade:
-            action_class: UpgradeTowerEntry = UpgradeTowerEntry.parse_obj(action)
-            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[action_class.id],
-                                             tier=UpgradeTier(action_class.tier),
+        elif isinstance(script_entry, UpgradeTowerEntry):
+            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[script_entry.id],
+                                             tier=UpgradeTier(script_entry.tier),
                                              difficulty=metadata.difficulty))
-        elif action[ACTION_KEYWORD] == Actions.sell:
-            action_class: SellTowerEntry = SellTowerEntry.parse_obj(action)
-            script.append(SellTowerAction(ahk=ahk, tower=tower_map[action_class.id]))
-        elif action[ACTION_KEYWORD] == Actions.change_targeting:
-            action_class: ChangeTargetingEntry = ChangeTargetingEntry.parse_obj(action)
-            script.append(ChangeTargetingAction(ahk=ahk, tower=tower_map[action_class.id]))
-        elif action[ACTION_KEYWORD] == Actions.change_special_targeting:
-            action_class: ChangeSpecialTargetingEntry = ChangeSpecialTargetingEntry.parse_obj(action)
-            script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=tower_map[action_class.id]))
+        elif isinstance(script_entry, SellTowerEntry):
+            script.append(SellTowerAction(ahk=ahk, tower=tower_map[script_entry.id]))
+        elif isinstance(script_entry, ChangeTargetingEntry):
+            script.append(ChangeTargetingAction(ahk=ahk, tower=tower_map[script_entry.id]))
+        elif isinstance(script_entry, ChangeSpecialTargetingEntry):
+            script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=tower_map[script_entry.id]))
 
     return script, tower_map
 
