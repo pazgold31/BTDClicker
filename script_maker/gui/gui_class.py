@@ -6,6 +6,8 @@ from ahk import AHK
 from pydantic.json import pydantic_encoder
 
 from common.enums import UpgradeTier
+from common.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
+from common.tower import BaseTower
 from script_maker.script.activity_container import ActivityContainer
 from common.script.script_dataclasses import GameMetadata, Script
 from script_maker.gui.gui_controls_utils import are_values_set
@@ -76,13 +78,19 @@ class GuiClass:
             sg.popup("You didn't fill all of the data!")
             return
 
-        if "Hero" == values[GuiKeys.NewTowerTypeInput] and not self._activity_container.is_hero_placeable():
-            sg.popup("Your Hero is already placed!")
-            return
+        if "Hero" == values[GuiKeys.NewTowerTypeInput]:
+            if not self._activity_container.is_hero_placeable():
+                sg.popup("Your Hero is already placed!")
+                return
 
-        self._activity_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
-                                               x=int(values[GuiKeys.XPositionInput]),
-                                               y=int(values[GuiKeys.YPositionInput]))
+            self._activity_container.add_hero(name=values[GuiKeys.NewTowerTypeInput],
+                                              x=int(values[GuiKeys.XPositionInput]),
+                                              y=int(values[GuiKeys.YPositionInput]))
+
+        else:
+            self._activity_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
+                                                   x=int(values[GuiKeys.XPositionInput]),
+                                                   y=int(values[GuiKeys.YPositionInput]))
 
         self._gui_updater.update_existing_towers_and_script(values=values,
                                                             towers_container=self._activity_container.towers_container,
@@ -167,6 +175,28 @@ class GuiClass:
                                                             script_container=self._activity_container.script_container,
                                                             selected_script_index=selected_entry_index + 1)
 
+    def handle_export_button(self, event: EventType, values: ValuesType):
+        if not self._metadata.hero_type:  # TODO: support not giving a hero if it is not used
+            sg.popup("You must select a hero!")
+            return
+
+        with open("../exported.json", "w") as of:  # TODO: move to actual path
+            json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
+                      default=pydantic_encoder)
+
+    def handle_import_button(self, event: EventType, values: ValuesType):
+        with open("../exported.json", "r") as of:  # TODO: move to actual path
+            json_dict = json.load(of)
+        self._metadata = parse_metadata(json_dict=json_dict)
+        self._activity_container.script_container = import_script(script_dict=json_dict["script"])
+        self._activity_container.towers_container = parse_towers_from_script(
+            script_entries=self._activity_container.script_container,
+            metadata=self._metadata)
+
+        self._gui_updater.update_existing_towers_and_script(values=values,
+                                                            towers_container=self._activity_container.towers_container,
+                                                            script_container=self._activity_container.script_container)
+
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
@@ -182,14 +212,6 @@ class GuiClass:
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
-            GuiKeys.ExportButton: self.handle_export_button
+            GuiKeys.ExportButton: self.handle_export_button,
+            GuiKeys.ImportButton: self.handle_import_button
         }
-
-    def handle_export_button(self, event: EventType, values: ValuesType):
-        if not self._metadata.hero_type:  # TODO: support not giving a hero if it is not used
-            sg.popup("You must select a hero!")
-            return
-
-        with open("../exported.json", "w") as of:  # TODO: move to actual path
-            json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
-                      default=pydantic_encoder)

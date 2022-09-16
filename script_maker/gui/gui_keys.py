@@ -15,6 +15,7 @@ class GuiKeys:
     TargetingButton = "-targeting_button-"
     SpecialTargetingButton = "-s_targeting_button-"
     ExportButton = "-export_button-"
+    ImportButton = "-import_button-"
     ScriptBox = "-script_box-"
     DeleteFromScriptButton = "-delete-from-script"
     MoveDownInScriptButton = "-move-down-in-script"

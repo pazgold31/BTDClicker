@@ -62,7 +62,8 @@ def get_layout() -> List[List[Any]]:
             sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
         ],
         [sg.HSeparator()],
-        [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton)]
+        [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton),
+         sg.Button("Import", size=(15, 1), enable_events=True, key=GuiKeys.ImportButton)]
     ]
 
     bottom_left_col = [[sg.Text("Script:")],

@@ -1,7 +1,7 @@
 import itertools
 from typing import Dict, Generator, Tuple
 
-from common.tower import Tower
+from common.tower import Tower, Hero
 from script_maker.additional_tower_info import AdditionalTowerInfo
 
 
@@ -12,9 +12,19 @@ class TowersContainer(Dict[int, Tower]):
         self._id_generator = itertools.count()
         self._additional_tower_information: Dict[int, AdditionalTowerInfo] = {}
 
+    def set_towers(self, value: Dict[int, Tower]):
+        super(TowersContainer, self).__init__(value)
+        self._additional_tower_information = {i: AdditionalTowerInfo() for i in self.keys()}
+
     def add_new_tower(self, name: str, x: int, y: int) -> int:
         tower_id = next(self._id_generator)
         self[tower_id] = Tower(name=name, x=x, y=y)
+        self._additional_tower_information[tower_id] = AdditionalTowerInfo()
+        return tower_id
+
+    def add_hero(self, name: str, x: int, y: int) -> int:
+        tower_id = next(self._id_generator)
+        self[tower_id] = Hero(name=name, x=x, y=y)
         self._additional_tower_information[tower_id] = AdditionalTowerInfo()
         return tower_id
 

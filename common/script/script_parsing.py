@@ -34,3 +34,7 @@ def parse_towers_from_script(script_entries: List[IScriptEntry], metadata: GameM
 
             tower_map[script_entry.id] = tower
     return tower_map
+
+
+def parse_metadata(json_dict: Dict) -> GameMetadata:
+    return GameMetadata.parse_obj(json_dict["metadata"])

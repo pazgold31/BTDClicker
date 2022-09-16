@@ -17,7 +17,7 @@ from common.enums import UpgradeTier
 from common.keyboard import is_language_valid
 from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
-from common.script.script_parsing import import_script, parse_towers_from_script
+from common.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.tower import Tower, Hero, BaseTower
 
 
@@ -58,7 +58,7 @@ def main():
         raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
     ahk = AHK()
     total_dict = load_script_dict()
-    metadata = GameMetadata.parse_obj(total_dict["metadata"])
+    metadata = parse_metadata(json_dict=total_dict)
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
     time.sleep(2)
 

@@ -1,7 +1,9 @@
+from typing import List, Dict
+
 from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier
 from common.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry
+    ChangeSpecialTargetingEntry, IScriptEntry
 from common.tower import Tower
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
@@ -25,9 +27,17 @@ class ActivityContainer:
     def script_container(self) -> ScriptContainer:
         return self._script_container
 
+    @script_container.setter
+    def script_container(self, value: List[IScriptEntry]):
+        self._script_container = value
+
     @property
     def towers_container(self) -> TowersContainer:
         return self._towers_container
+
+    @towers_container.setter
+    def towers_container(self, value: Dict[int, Tower]):
+        self._towers_container.set_towers(value=value)
 
     def is_hero_placeable(self) -> bool:
         # TODO: support sold hero
@@ -36,6 +46,11 @@ class ActivityContainer:
 
     def add_new_tower(self, name: str, x: int, y: int):
         tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y)
+
+        self._script_container.append(CreateTowerEntry(name=name, id=tower_id, x=x, y=y))
+
+    def add_hero(self, name: str, x: int, y: int):
+        tower_id = self._towers_container.add_hero(name=name, x=x, y=y)
 
         self._script_container.append(CreateTowerEntry(name=name, id=tower_id, x=x, y=y))
 
