@@ -5,7 +5,7 @@ class Difficulty(IntEnum):
     easy = 1,
     medium = 2,
     hard = 3,
-    chimps = 4
+    impopable = 4
 
 
 class TierLevel(IntEnum):

@@ -9,14 +9,14 @@ class Cost(BaseModel):
     easy: int
     medium: int
     hard: int
-    chimps: int
+    impopable: int
 
     class Config:
         use_enum_values = True
 
     def get_mapping(self) -> Dict[Difficulty, int]:
         return {Difficulty.easy: self.easy, Difficulty.medium: self.medium,
-                Difficulty.hard: self.hard, Difficulty.chimps: self.chimps}
+                Difficulty.hard: self.hard, Difficulty.impopable: self.impopable}
 
 
 class Upgrade(BaseModel):

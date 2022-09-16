@@ -27,7 +27,7 @@ def parse_single_upgrade(data: str) -> Upgrade:
         easy=int(match.group(2).replace(",", "")),
         medium=int(match.group(3).replace(",", "")),
         hard=int(match.group(4).replace(",", "")),
-        chimps=int(match.group(5).replace(",", ""))))
+        impopable=int(match.group(5).replace(",", ""))))
 
 
 def parse_tower_base(data: str) -> Tuple[str, Cost]:
@@ -36,7 +36,7 @@ def parse_tower_base(data: str) -> Tuple[str, Cost]:
         easy=int(match.group(2).replace(",", "")),
         medium=int(match.group(3).replace(",", "")),
         hard=int(match.group(4).replace(",", "")),
-        chimps=int(match.group(5).replace(",", "")))
+        impopable=int(match.group(5).replace(",", "")))
 
 
 def parse_upgrades_tier(data: List[str]) -> UpgradeTierCost:
@@ -132,7 +132,7 @@ def parse_hero_costs() -> List[HeroCost]:
         heroes.append(HeroCost(name=hero_name, base_cost=Cost(easy=int(re_search.group(1).replace(",", "")),
                                                               medium=int(re_search.group(2).replace(",", "")),
                                                               hard=int(re_search.group(3).replace(",", "")),
-                                                              chimps=int(re_search.group(4).replace(",", "")))))
+                                                              impopable=int(re_search.group(4).replace(",", "")))))
 
     return heroes
 

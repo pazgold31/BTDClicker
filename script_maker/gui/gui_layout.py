@@ -7,7 +7,7 @@ from common.enums import Difficulty
 from script_maker.gui.gui_keys import GuiKeys
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
-                  "hard": Difficulty.hard, "chimps": Difficulty.chimps}
+                  "hard": Difficulty.hard, "impopable": Difficulty.impopable}
 
 
 def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None) -> List[str]:
