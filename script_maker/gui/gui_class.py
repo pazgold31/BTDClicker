@@ -28,7 +28,7 @@ class GuiClass:
 
         event, values = self._window.read(0)
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
-                                      hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroListBox]))
+                                      hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
 
@@ -51,8 +51,8 @@ class GuiClass:
         self._gui_updater.update_difficulty(values=values)
 
     def handle_change_hero(self, event: EventType, values: ValuesType):
-        self._metadata.hero_type = GuiParsers.parse_selected_hero(values[GuiKeys.HeroListBox])
-        self._gui_updater.update_hero(metadata=self._metadata)
+        self._metadata.hero_type = GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo])
+        self._gui_updater.update_hero()
 
     def handle_select_tower_type(self, event: EventType, values: ValuesType):
         try:
@@ -187,7 +187,13 @@ class GuiClass:
     def handle_import_button(self, event: EventType, values: ValuesType):
         with open("../exported.json", "r") as of:  # TODO: move to actual path
             json_dict = json.load(of)
-        self._metadata = parse_metadata(json_dict=json_dict)
+
+        loaded_metadata = parse_metadata(json_dict=json_dict)
+        self._metadata.difficulty = loaded_metadata.difficulty
+        self._gui_updater.update_selected_difficulty()
+        self._metadata.hero_type = loaded_metadata.hero_type
+        self._gui_updater.update_selected_hero()
+
         self._activity_container.script_container = import_script(script_dict=json_dict["script"])
         self._activity_container.towers_container = parse_towers_from_script(
             script_entries=self._activity_container.script_container,
@@ -200,7 +206,7 @@ class GuiClass:
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
-            GuiKeys.HeroListBox: self.handle_change_hero,
+            GuiKeys.HeroCombo: self.handle_change_hero,
             GuiKeys.TowerTypesListBox: self.handle_select_tower_type,
             GuiKeys.ExistingTowersListBox: self.handle_select_existing_tower,
             GuiKeys.KeyboardMouseButton: self.handle_keyboard_mouse,

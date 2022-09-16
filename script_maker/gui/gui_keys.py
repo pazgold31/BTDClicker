@@ -1,6 +1,6 @@
 class GuiKeys:
     DifficultyListBox = "-difficulty-"
-    HeroListBox = "-hero-"
+    HeroCombo = "-hero-"
     TowerTypesListBox = "-chosen_tower_type-"
     ExistingTowersListBox = "-existing_towers-"
     XPositionInput = "-xpos-"

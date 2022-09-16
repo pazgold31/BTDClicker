@@ -28,7 +28,7 @@ def get_layout() -> List[List[Any]]:
                                     key=GuiKeys.DifficultyListBox, enable_events=True)]]),
          sg.Frame("Hero",
                   layout=[[sg.Combo(get_hero_options(), default_value=get_hero_options()[0],
-                                    key=GuiKeys.HeroListBox, enable_events=True)],
+                                    key=GuiKeys.HeroCombo, enable_events=True)],
                           [sg.Text("(you still need to manually choose the hero before starting the game)")]])],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
         [sg.Listbox(values=get_tower_options(),

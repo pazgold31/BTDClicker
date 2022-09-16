@@ -1,13 +1,15 @@
 import PySimpleGUI as sg
 
+from common.cost.cost_parsing import HERO_COSTS
 from common.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry
+from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.script.script_container import ScriptContainer
 from script_maker.gui.gui_controls_utils import get_value_index_for_list_box
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_types import ValuesType
 from script_maker.gui.gui_keys import GuiKeys
-from script_maker.gui.gui_layout import get_tower_options, get_hero_options
+from script_maker.gui.gui_layout import get_tower_options, get_hero_options, DIFFICULTY_MAP
 from script_maker.script.towers_container import TowersContainer
 
 
@@ -19,13 +21,22 @@ class GuiUpdater:
     def update_difficulty(self, values: ValuesType):
         self._window[GuiKeys.TowerTypesListBox].update(
             get_tower_options(difficulty=self._metadata.difficulty, chosen_hero=self._metadata.hero_type), )
-        selected_hero_index = self._window[GuiKeys.HeroListBox].Values.index(values[GuiKeys.HeroListBox])
+        selected_hero_index = self._window[GuiKeys.HeroCombo].Values.index(values[GuiKeys.HeroCombo])
         hero_options = get_hero_options(difficulty=self._metadata.difficulty)
-        self._window[GuiKeys.HeroListBox].update(values=hero_options, value=hero_options[selected_hero_index])
+        self._window[GuiKeys.HeroCombo].update(values=hero_options, value=hero_options[selected_hero_index])
 
-    def update_hero(self, metadata: GameMetadata):
-        self._window[GuiKeys.TowerTypesListBox].update(get_tower_options(difficulty=metadata.difficulty,
-                                                                         chosen_hero=metadata.hero_type), )
+    def update_selected_difficulty(self):
+        self._window[GuiKeys.DifficultyListBox].update(
+            value={v: k for k, v in DIFFICULTY_MAP.items()}[self._metadata.difficulty])
+
+    def update_hero(self):
+        self._window[GuiKeys.TowerTypesListBox].update(values=get_tower_options(difficulty=self._metadata.difficulty,
+                                                                                chosen_hero=self._metadata.hero_type))
+
+    def update_selected_hero(self):
+        hero_cost = HERO_COSTS[self._metadata.hero_type].base_cost.get_mapping()[self._metadata.difficulty]
+        hero_value = f"{self._metadata.hero_type}: {hero_cost}$"
+        self._window[GuiKeys.HeroCombo].update(value=hero_value)
 
     def update_selected_tower_type(self, values: ValuesType, selected_tower_text: str):
         selected_tower_index = get_value_index_for_list_box(window=self._window, values=values,
