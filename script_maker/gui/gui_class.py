@@ -3,9 +3,7 @@ from typing import Dict
 import PySimpleGUI as sg
 from ahk import AHK
 
-from common.cost.cost_parsing import TOWER_COSTS
 from common.enums import UpgradeTier
-from common.tower import Tower
 from script_maker.script.activity_container import ActivityContainer
 from common.script.script_dataclasses import GameMetadata
 from script_maker.gui.gui_controls_utils import are_values_set
@@ -15,15 +13,6 @@ from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.hotkeys import Hotkeys
-
-
-def is_tier_upgradeable(tower: Tower, tier: UpgradeTier) -> bool:
-    current_upgrade = tower.tier_map[tier]
-    try:
-        new_cost = TOWER_COSTS[tower.name].upgrades.get_mapping()[tier].get_mapping()[current_upgrade + 1]
-        return new_cost
-    except KeyError:
-        return False
 
 
 class GuiClass:
@@ -102,7 +91,7 @@ class GuiClass:
             sg.popup("You must chose a tower first!")
             return
 
-        selected_tower_id = int(values[GuiKeys.ExistingTowersListBox][0].split(":")[0])
+        selected_tower_id = GuiParsers.parse_selected_tower_id(values[GuiKeys.ExistingTowersListBox])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
         if event in upgrade_tiers_map:
@@ -129,6 +118,50 @@ class GuiClass:
                                                             towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container)
 
+    def handle_delete_from_script(self, event: EventType, values: ValuesType):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to remove!")
+            return
+
+        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        self._activity_container.delete_entry(selected_entry_index)
+
+        self._gui_updater.update_existing_towers_and_script(values=values,
+                                                            towers_container=self._activity_container.towers_container,
+                                                            script_container=self._activity_container.script_container)
+
+    def handle_move_up_on_script(self, event: EventType, values: ValuesType):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to move!")
+            return
+
+        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        try:
+            self._activity_container.move_script_entry_down(entry_index=selected_entry_index)
+        except ValueError:
+            sg.popup("Item already first!")
+            return
+
+        self._gui_updater.update_existing_towers_and_script(values=values,
+                                                            towers_container=self._activity_container.towers_container,
+                                                            script_container=self._activity_container.script_container)
+
+    def handle_move_down_on_script(self, event: EventType, values: ValuesType):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to move!")
+            return
+
+        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        try:
+            self._activity_container.move_script_entry_down(entry_index=selected_entry_index)
+        except ValueError:
+            sg.popup("Item already last!")
+            return
+
+        self._gui_updater.update_existing_towers_and_script(values=values,
+                                                            towers_container=self._activity_container.towers_container,
+                                                            script_container=self._activity_container.script_container)
+
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
@@ -140,7 +173,10 @@ class GuiClass:
             **{
                 i: self.handle_tower_modification for i in (
                     GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
-                    GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton)}
+                    GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton)},
+            GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
+            GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
+            GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script
         }
 
 

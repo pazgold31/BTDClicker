@@ -61,3 +61,23 @@ class ActivityContainer:
     def change_special_targeting(self, tower_id: int):
         self._towers_container.get_additional_tower_information()[tower_id].s_targeting += 1
         self._script_container.append(ChangeSpecialTargetingEntry(id=tower_id))
+
+    def delete_entry(self, entry_index: int):
+        try:
+            self._script_container.pop(entry_index)
+        except IndexError:
+            raise ValueError("Invalid entry index")
+
+    def move_script_entry_up(self, entry_index: int):
+        if entry_index == 0:
+            raise ValueError("Entry is already at the top")
+
+        self._script_container[entry_index], self._script_container[entry_index - 1] = \
+            self._script_container[entry_index - 1], self._script_container[entry_index]
+
+    def move_script_entry_down(self, entry_index: int):
+        try:
+            self._script_container[entry_index], self._script_container[entry_index + 1] = \
+                self._script_container[entry_index + 1], self._script_container[entry_index]
+        except IndexError:
+            raise ValueError("Entry is already at the bottom")
