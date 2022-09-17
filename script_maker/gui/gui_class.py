@@ -130,6 +130,8 @@ class GuiClass:
         elif event == GuiKeys.SpecialTargetingButton:
             self._activity_container.change_special_targeting(tower_id=selected_tower_id,
                                                               index=selected_script_entry_index + 1)
+        elif event == GuiKeys.DeleteTowerButton:
+            self._activity_container.delete_tower(tower_id=selected_tower_id)
         else:
             raise RuntimeError
 
@@ -224,7 +226,8 @@ class GuiClass:
             **{
                 i: self.handle_tower_modification for i in (
                     GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
-                    GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton)},
+                    GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton,
+                    GuiKeys.DeleteTowerButton)},
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,

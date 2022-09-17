@@ -62,6 +62,8 @@ def get_layout() -> List[List[Any]]:
             sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
         ],
         [sg.HSeparator()],
+        [sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)],
+        [sg.HSeparator()],
         [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton),
          sg.Button("Import", size=(15, 1), enable_events=True, key=GuiKeys.ImportButton)]
     ]
@@ -69,6 +71,7 @@ def get_layout() -> List[List[Any]]:
     bottom_left_col = [[sg.Text("Script:")],
                        [sg.Listbox(values=[], select_mode="extended", key=GuiKeys.ScriptBox, size=(150, 12),
                                    enable_events=True)]]
+
     bottom_right_col = [[sg.Button("Delete", size=(15, 1), enable_events=True, key=GuiKeys.DeleteFromScriptButton)],
                         [sg.Button("Move Up", size=(15, 1), enable_events=True, key=GuiKeys.MoveUpInScriptButton)],
                         [sg.Button("Move Down", size=(15, 1), enable_events=True, key=GuiKeys.MoveDownInScriptButton)]]

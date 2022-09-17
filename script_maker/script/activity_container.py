@@ -1,3 +1,4 @@
+import copy
 from typing import List, Dict
 
 from common.cost.cost_parsing import TOWER_COSTS
@@ -83,6 +84,12 @@ class ActivityContainer:
     def change_special_targeting(self, tower_id: int, index: int = None):
         self._towers_container.get_additional_tower_information()[tower_id].s_targeting += 1
         self._add_entry(ChangeSpecialTargetingEntry(id=tower_id), index=index)
+
+    def delete_tower(self, tower_id: int):
+        self._towers_container.pop(tower_id)
+        for entry in copy.copy(self._script_container):
+            if hasattr(entry, "id") and getattr(entry, "id") == tower_id:
+                self._script_container.remove(entry)
 
     def delete_entry(self, entry_index: int):
         try:
