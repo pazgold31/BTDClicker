@@ -1,11 +1,11 @@
 import copy
 from typing import List, Dict
 
-from common.cost.cost_parsing import TOWER_COSTS
-from common.enums import UpgradeTier
+from common.cost.game_costs import TOWER_COSTS
+from common.game_classes.enums import UpgradeTier
 from common.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry
-from common.tower import Tower
+from common.game_classes.tower import Tower
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
 

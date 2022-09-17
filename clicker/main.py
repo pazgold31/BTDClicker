@@ -12,12 +12,12 @@ from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
 from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
-from common.enums import UpgradeTier
+from common.game_classes.enums import UpgradeTier
 from common.keyboard import is_language_valid
 from common.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
 from common.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.tower import BaseTower
+from common.game_classes.tower import BaseTower
 
 
 def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:

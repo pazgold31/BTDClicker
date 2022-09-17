@@ -5,10 +5,10 @@ from ahk import AHK
 from clicker.actions.IAction import IAction
 from clicker.consts import CLICK_DELAY
 from clicker.money_extracter import get_amount_of_money
-from common.cost.cost_parsing import TOWER_COSTS
-from common.enums import Difficulty, UpgradeTier, TierLevel
-from common.keymap import Keymap, UPGRADE_TIER_MAPPING
-from common.tower import Tower
+from common.cost.game_costs import TOWER_COSTS
+from common.game_classes.enums import Difficulty, UpgradeTier, TierLevel
+from clicker.consts.keymap import Keymap, UPGRADE_TIER_MAPPING
+from common.game_classes.tower import Tower
 
 
 class UpgradeTowerAction(IAction):

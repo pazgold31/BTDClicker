@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict
 
-from common.enums import UpgradeTier
+from common.game_classes.enums import UpgradeTier
 
 
 @dataclass

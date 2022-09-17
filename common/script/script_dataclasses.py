@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from common.enums import UpgradeTier, Difficulty
+from common.game_classes.enums import UpgradeTier, Difficulty
 
 ACTION_KEYWORD = "action"
 

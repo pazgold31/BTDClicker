@@ -3,8 +3,8 @@ from typing import List, Any
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.cost.cost_parsing import HERO_COSTS, TOWER_COSTS
-from common.enums import Difficulty
+from common.cost.game_costs import HERO_COSTS, TOWER_COSTS
+from common.game_classes.enums import Difficulty
 from script_maker.gui.gui_keys import GuiKeys
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,

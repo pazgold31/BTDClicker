@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from common.script.script_dataclasses import ACTION_KEYWORD, Actions, CreateTowerEntry, UpgradeTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata
-from common.tower import Tower, Hero, BaseTower
+from common.game_classes.tower import Tower, Hero, BaseTower
 
 
 def import_script(script_dict: Dict) -> List[IScriptEntry]:

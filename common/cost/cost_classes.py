@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel
 
-from common.enums import Difficulty, TierLevel, UpgradeTier
+from common.game_classes.enums import Difficulty, TierLevel, UpgradeTier
 
 
 class Cost(BaseModel):

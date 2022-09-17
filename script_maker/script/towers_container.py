@@ -1,7 +1,7 @@
 import itertools
 from typing import Dict, Generator, Tuple
 
-from common.tower import Tower, Hero
+from common.game_classes.tower import Tower, Hero
 from script_maker.additional_tower_info import AdditionalTowerInfo
 
 

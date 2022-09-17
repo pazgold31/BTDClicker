@@ -1,5 +1,5 @@
-from common.enums import UpgradeTier
-from common.tower import Hero
+from common.game_classes.enums import UpgradeTier
+from common.game_classes.tower import Hero
 from script_maker.script.towers_container import TowersContainer
 
 

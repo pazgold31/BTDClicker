@@ -176,5 +176,3 @@ def get_tower_costs() -> Dict[str, TowerCost]:
     return convert_to_map(costs_data)
 
 
-HERO_COSTS: Dict[str, HeroCost] = get_hero_costs()
-TOWER_COSTS: Dict[str, TowerCost] = get_tower_costs()

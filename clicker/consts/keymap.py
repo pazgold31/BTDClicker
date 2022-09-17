@@ -1,4 +1,4 @@
-from common.enums import UpgradeTier
+from common.game_classes.enums import UpgradeTier
 
 
 class Keymap:

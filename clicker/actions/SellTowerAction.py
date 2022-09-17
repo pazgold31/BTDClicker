@@ -4,8 +4,8 @@ from ahk import AHK
 
 from clicker.actions.IAction import IAction
 from clicker.consts import CLICK_DELAY
-from common.keymap import Keymap
-from common.tower import Tower
+from clicker.consts.keymap import Keymap
+from common.game_classes.tower import Tower
 
 
 class SellTowerAction(IAction):

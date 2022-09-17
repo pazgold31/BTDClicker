@@ -2,10 +2,10 @@ from ahk import AHK
 
 from clicker.actions.IAction import IAction
 from clicker.money_extracter import get_amount_of_money
-from common.cost.cost_parsing import TOWER_COSTS
-from common.enums import Difficulty
-from common.keymap import TOWER_KEY_MAP
-from common.tower import Tower
+from common.cost.game_costs import TOWER_COSTS
+from common.game_classes.enums import Difficulty
+from clicker.consts.keymap import TOWER_KEY_MAP
+from common.game_classes.tower import Tower
 
 
 class PlaceTowerAction(IAction):

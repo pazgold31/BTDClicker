@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 from ahk import AHK
 from pydantic.json import pydantic_encoder
 
-from common.enums import UpgradeTier
+from common.game_classes.enums import UpgradeTier
 from common.script.script_dataclasses import GameMetadata, Script
 from common.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
