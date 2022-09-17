@@ -14,4 +14,3 @@ class Hotkeys:
         x, y = self._ahk.mouse_position
         self._x_pos.update(x)
         self._y_pos.update(y)
-

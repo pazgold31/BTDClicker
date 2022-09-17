@@ -4,11 +4,11 @@ import PySimpleGUI as sg
 from common.cost.cost_parsing import HERO_COSTS
 from common.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry
-from script_maker.script.script_container import ScriptContainer
 from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_tower_options, get_hero_options, DIFFICULTY_MAP
+from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
 
 

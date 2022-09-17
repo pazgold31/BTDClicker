@@ -3,9 +3,8 @@ import time
 
 import numpy as np
 import pyautogui
-
-from PIL import Image
 import pytesseract
+from PIL import Image
 
 
 def get_screenshot() -> Image:
