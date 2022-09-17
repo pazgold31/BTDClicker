@@ -3,9 +3,8 @@ import PySimpleGUI as sg
 from common.cost.cost_parsing import HERO_COSTS
 from common.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry
-from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.script.script_container import ScriptContainer
-from script_maker.gui.gui_controls_utils import get_value_index_for_list_box
+from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_types import ValuesType
 from script_maker.gui.gui_keys import GuiKeys
@@ -21,7 +20,7 @@ class GuiUpdater:
     def update_difficulty(self, values: ValuesType):
         self._window[GuiKeys.TowerTypesListBox].update(
             get_tower_options(difficulty=self._metadata.difficulty, chosen_hero=self._metadata.hero_type), )
-        selected_hero_index = self._window[GuiKeys.HeroCombo].Values.index(values[GuiKeys.HeroCombo])
+        selected_hero_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.HeroCombo)
         hero_options = get_hero_options(difficulty=self._metadata.difficulty)
         self._window[GuiKeys.HeroCombo].update(values=hero_options, value=hero_options[selected_hero_index])
 
@@ -39,8 +38,8 @@ class GuiUpdater:
         self._window[GuiKeys.HeroCombo].update(value=hero_value)
 
     def update_selected_tower_type(self, values: ValuesType, selected_tower_text: str):
-        selected_tower_index = get_value_index_for_list_box(window=self._window, values=values,
-                                                            key=GuiKeys.TowerTypesListBox)
+        selected_tower_index = get_selected_index_for_list_box(window=self._window,
+                                                               key=GuiKeys.TowerTypesListBox)
         tower_options = get_tower_options(difficulty=self._metadata.difficulty)
         self._window[GuiKeys.TowerTypesListBox].update(None, tower_options[selected_tower_index])
         self._window[GuiKeys.NewTowerTypeInput].update(selected_tower_text, )
@@ -53,8 +52,7 @@ class GuiUpdater:
     def update_existing_towers(self, values: ValuesType, towers_container: TowersContainer):
         list_box = self._window[GuiKeys.ExistingTowersListBox]
         try:
-            selected_index = self._window[GuiKeys.ExistingTowersListBox].Values.index(
-                values[GuiKeys.ExistingTowersListBox][0])
+            selected_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ExistingTowersListBox)
         except IndexError:
             selected_index = None
 
@@ -75,12 +73,14 @@ class GuiUpdater:
                 output.append(f"Change special targeting: ({action.id})")
 
         try:
-            selected_index = selected_index if selected_index is not None else self._window[
-                GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+            selected_index = selected_index if selected_index is not None else get_selected_index_for_list_box(
+                window=self._window, key=GuiKeys.ScriptBox)
         except IndexError:
             selected_index = None
 
         self._window[GuiKeys.ScriptBox].update(values=output, set_to_index=selected_index)
+        if selected_index is not None:
+            self._window[GuiKeys.ScriptBox].Widget.see(selected_index)
 
     def update_existing_towers_and_script(self, values: ValuesType, towers_container: TowersContainer,
                                           script_container: ScriptContainer, selected_script_index: int = None):

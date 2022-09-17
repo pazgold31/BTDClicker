@@ -10,7 +10,7 @@ from common.script.script_parsing import import_script, parse_towers_from_script
 from common.tower import BaseTower
 from script_maker.script.activity_container import ActivityContainer
 from common.script.script_dataclasses import GameMetadata, Script
-from script_maker.gui.gui_controls_utils import are_values_set
+from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_parsers import GuiParsers
@@ -78,6 +78,8 @@ class GuiClass:
             sg.popup("You didn't fill all of the data!")
             return
 
+        selected_script_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+
         if "Hero" == values[GuiKeys.NewTowerTypeInput]:
             if not self._activity_container.is_hero_placeable():
                 sg.popup("Your Hero is already placed!")
@@ -85,16 +87,19 @@ class GuiClass:
 
             self._activity_container.add_hero(name=values[GuiKeys.NewTowerTypeInput],
                                               x=int(values[GuiKeys.XPositionInput]),
-                                              y=int(values[GuiKeys.YPositionInput]))
+                                              y=int(values[GuiKeys.YPositionInput]),
+                                              index=selected_script_entry_index + 1)
 
         else:
             self._activity_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
                                                    x=int(values[GuiKeys.XPositionInput]),
-                                                   y=int(values[GuiKeys.YPositionInput]))
+                                                   y=int(values[GuiKeys.YPositionInput]),
+                                                   index=selected_script_entry_index + 1)
 
         self._gui_updater.update_existing_towers_and_script(values=values,
                                                             towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+                                                            script_container=self._activity_container.script_container,
+                                                            selected_script_index=selected_script_entry_index + 1)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ExistingTowersListBox]:
@@ -104,7 +109,7 @@ class GuiClass:
         selected_tower_id = GuiParsers.parse_selected_tower_id(values[GuiKeys.ExistingTowersListBox][0])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
-        selected_script_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        selected_script_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
 
         if event in upgrade_tiers_map:
             try:
@@ -130,14 +135,15 @@ class GuiClass:
 
         self._gui_updater.update_existing_towers_and_script(values=values,
                                                             towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+                                                            script_container=self._activity_container.script_container,
+                                                            selected_script_index=selected_script_entry_index + 1)
 
     def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
             sg.popup("You must select an entry to remove!")
             return
 
-        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         self._activity_container.delete_entry(selected_entry_index)
 
         self._gui_updater.update_existing_towers_and_script(values=values,
@@ -150,7 +156,7 @@ class GuiClass:
             sg.popup("You must select an entry to move!")
             return
 
-        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         try:
             self._activity_container.move_script_entry_up(entry_index=selected_entry_index)
         except ValueError:
@@ -167,7 +173,7 @@ class GuiClass:
             sg.popup("You must select an entry to move!")
             return
 
-        selected_entry_index = self._window[GuiKeys.ScriptBox].Values.index(values[GuiKeys.ScriptBox][0])
+        selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         try:
             self._activity_container.move_script_entry_down(entry_index=selected_entry_index)
         except ValueError:

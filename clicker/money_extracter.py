@@ -1,4 +1,5 @@
 import re
+import time
 
 import numpy as np
 import pyautogui
@@ -26,7 +27,21 @@ def get_text_from_image(image: Image) -> str:
     return image_text
 
 
-def get_amount_of_money() -> int:
+def _get_amount_of_money() -> int:
     image_text = get_text_from_image(image=preprocess_image(get_screenshot()))
     re_text = re.search(r"([\d,]+)", image_text).group(1)
     return int(re_text.replace(",", ""))
+
+
+def get_amount_of_money(amount_of_reads=3) -> int:
+    results = []
+    for i in range(amount_of_reads):
+        results.append(_get_amount_of_money())
+        time.sleep(0.2)
+
+    for i in range(amount_of_reads - 1):
+        if abs(results[i] - results[i + 1]) > 800:
+            print("Error with money")
+            raise RuntimeError("Failed to get money")
+
+    return results[-1]

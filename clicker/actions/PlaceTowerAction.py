@@ -23,7 +23,12 @@ class PlaceTowerAction(IAction):
     def can_act(self) -> bool:
         try:
             tower_price = TOWER_COSTS[self._tower.name].base_cost.get_mapping()[self._difficulty]
-            return get_amount_of_money() >= tower_price
+            money = get_amount_of_money()
+            if money >= tower_price:
+                print(f"Got {money}. Need: {tower_price}")
+                return True
+
+            return False
         except Exception:
             # TODO: add max tries
             pass

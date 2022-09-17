@@ -14,7 +14,9 @@ class TowersContainer(Dict[int, Tower]):
 
     def set_towers(self, value: Dict[int, Tower]):
         super(TowersContainer, self).__init__(value)
-        self._additional_tower_information = {i: AdditionalTowerInfo() for i in self.keys()}
+        self._additional_tower_information = {i: AdditionalTowerInfo() for i in
+                                              self.keys()}  # TODO: load the additional info
+        self._id_generator = itertools.count(max(self.keys()) + 1)
 
     def add_new_tower(self, name: str, x: int, y: int) -> int:
         tower_id = next(self._id_generator)

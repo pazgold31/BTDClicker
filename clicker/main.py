@@ -69,7 +69,9 @@ def main():
                 action.act()
                 break
 
-            time.sleep(0.5)
+            time.sleep(0.2)
+
+        time.sleep(0.5)
 
 
 if __name__ == '__main__':
