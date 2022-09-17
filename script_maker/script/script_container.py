@@ -1,6 +1,6 @@
 from typing import List
 
-from common.script.script_dataclasses import IScriptEntry
+from common.game_classes.script.script_dataclasses import IScriptEntry
 
 
 class ScriptContainer(List[IScriptEntry]):

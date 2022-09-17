@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from common.cost.game_costs import TOWER_COSTS
 from common.game_classes.enums import UpgradeTier
-from common.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
+from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry
 from common.game_classes.tower import Tower
 from script_maker.script.script_container import ScriptContainer

@@ -61,4 +61,4 @@ class ChangeSpecialTargetingEntry(IScriptEntry):
 
 class Script(BaseModel):
     metadata: GameMetadata
-    script: List[BaseModel]
+    script: List[IScriptEntry]

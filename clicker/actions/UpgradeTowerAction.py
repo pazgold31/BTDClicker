@@ -3,7 +3,7 @@ import time
 from ahk import AHK
 
 from clicker.actions.IAction import IAction
-from clicker.consts import CLICK_DELAY
+from clicker.consts.timing_consts import CLICK_DELAY
 from clicker.money_extracter import get_amount_of_money
 from common.cost.game_costs import TOWER_COSTS
 from common.game_classes.enums import Difficulty, UpgradeTier, TierLevel
