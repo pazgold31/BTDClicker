@@ -135,10 +135,11 @@ class GuiClass:
         else:
             raise RuntimeError
 
-        self._gui_updater.update_existing_towers_and_script(values=values,
-                                                            towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
-                                                            selected_script_index=selected_script_entry_index + 1)
+        self._gui_updater.update_existing_towers_and_script(
+            values=values,
+            towers_container=self._activity_container.towers_container,
+            script_container=self._activity_container.script_container,
+            selected_script_index=not selected_script_entry_index or selected_script_entry_index + 1)
 
     def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
