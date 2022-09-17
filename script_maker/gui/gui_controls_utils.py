@@ -1,5 +1,6 @@
 from typing import List
 
+# noinspection PyPep8Naming
 import PySimpleGUI as sg
 
 from script_maker.gui.gui_types import ValuesType

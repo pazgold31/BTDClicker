@@ -21,6 +21,7 @@ class PlaceTowerAction(IAction):
         self._ahk.click()
 
     def can_act(self) -> bool:
+        # noinspection PyBroadException
         try:
             tower_price = TOWER_COSTS[self._tower.name].base_cost.get_mapping()[self._difficulty]
             money = get_amount_of_money()

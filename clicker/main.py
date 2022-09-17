@@ -1,10 +1,9 @@
 import json
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Tuple
 
 from ahk import AHK
-from pydantic import parse_raw_as
 
 from actions.PlaceTowerAction import PlaceTowerAction
 from actions.UpgradeTowerAction import UpgradeTowerAction
@@ -15,10 +14,10 @@ from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
 from common.enums import UpgradeTier
 from common.keyboard import is_language_valid
-from common.script.script_dataclasses import CreateTowerEntry, ACTION_KEYWORD, Actions, UpgradeTowerEntry, \
+from common.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
 from common.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.tower import Tower, Hero, BaseTower
+from common.tower import BaseTower
 
 
 def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:

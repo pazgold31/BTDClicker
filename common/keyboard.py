@@ -17,10 +17,10 @@ def get_keyboard_language():
     handle = user32.GetForegroundWindow()
 
     # Get the thread id from that window handle
-    threadid = user32.GetWindowThreadProcessId(handle, 0)
+    thread_id = user32.GetWindowThreadProcessId(handle, 0)
 
-    # Get the keyboard layout id from the threadid
-    layout_id = user32.GetKeyboardLayout(threadid)
+    # Get the keyboard layout id from the thread id
+    layout_id = user32.GetKeyboardLayout(thread_id)
 
     # Extract the keyboard language id from the keyboard layout id
     return layout_id & (2 ** 16 - 1)

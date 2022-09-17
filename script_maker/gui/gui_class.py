@@ -1,13 +1,13 @@
 import json
 import os
 from typing import Dict
+# noinspection PyPep8Naming
 import PySimpleGUI as sg
 from ahk import AHK
 from pydantic.json import pydantic_encoder
 
 from common.enums import UpgradeTier
 from common.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.tower import BaseTower
 from script_maker.script.activity_container import ActivityContainer
 from common.script.script_dataclasses import GameMetadata, Script
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
@@ -19,6 +19,7 @@ from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.hotkeys import Hotkeys
 
 
+# noinspection PyUnusedLocal
 class GuiClass:
     def __init__(self, ):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
@@ -48,7 +49,7 @@ class GuiClass:
     def handle_change_difficulty(self, event: EventType, values: ValuesType):
         difficulty_str = values[GuiKeys.DifficultyListBox]
         self._metadata.difficulty = DIFFICULTY_MAP[difficulty_str]
-        self._gui_updater.update_difficulty(values=values)
+        self._gui_updater.update_difficulty()
 
     def handle_change_hero(self, event: EventType, values: ValuesType):
         self._metadata.hero_type = GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo])
@@ -57,19 +58,19 @@ class GuiClass:
     def handle_select_tower_type(self, event: EventType, values: ValuesType):
         try:
             tower_name = GuiParsers.parse_selected_tower(values[GuiKeys.TowerTypesListBox][0])
-            self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name, values=values)
+            self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
         except IndexError:
             pass
 
     def handle_select_existing_tower(self, event: EventType, values: ValuesType):
         try:
             selected_tower_value = GuiParsers.parse_existing_tower(values[GuiKeys.ExistingTowersListBox][0])
-            self._gui_updater.update_selected_existing_tower(selected_tower_text=selected_tower_value,
-                                                             is_hero="Hero" in selected_tower_value)
+            self._gui_updater.update_selected_existing_tower(is_hero="Hero" in selected_tower_value)
 
         except IndexError:
             pass
 
+    # noinspection PyMethodMayBeStatic
     def handle_keyboard_mouse(self, event: EventType, values: ValuesType):
         os.system("start ms-settings:easeofaccess-mouse")
 
@@ -96,8 +97,7 @@ class GuiClass:
                                                    y=int(values[GuiKeys.YPositionInput]),
                                                    index=selected_script_entry_index + 1)
 
-        self._gui_updater.update_existing_towers_and_script(values=values,
-                                                            towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container,
                                                             selected_script_index=selected_script_entry_index + 1)
 
@@ -136,7 +136,6 @@ class GuiClass:
             raise RuntimeError
 
         self._gui_updater.update_existing_towers_and_script(
-            values=values,
             towers_container=self._activity_container.towers_container,
             script_container=self._activity_container.script_container,
             selected_script_index=not selected_script_entry_index or selected_script_entry_index + 1)
@@ -149,8 +148,7 @@ class GuiClass:
         selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         self._activity_container.delete_entry(selected_entry_index)
 
-        self._gui_updater.update_existing_towers_and_script(values=values,
-                                                            towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container,
                                                             selected_script_index=selected_entry_index)
 
@@ -166,8 +164,7 @@ class GuiClass:
             sg.popup("Item already first!")
             return
 
-        self._gui_updater.update_existing_towers_and_script(values=values,
-                                                            towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container,
                                                             selected_script_index=selected_entry_index - 1)
 
@@ -183,8 +180,7 @@ class GuiClass:
             sg.popup("Item already last!")
             return
 
-        self._gui_updater.update_existing_towers_and_script(values=values,
-                                                            towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container,
                                                             selected_script_index=selected_entry_index + 1)
 
@@ -212,8 +208,7 @@ class GuiClass:
             script_entries=self._activity_container.script_container,
             metadata=self._metadata)
 
-        self._gui_updater.update_existing_towers_and_script(values=values,
-                                                            towers_container=self._activity_container.towers_container,
+        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:

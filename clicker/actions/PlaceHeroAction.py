@@ -21,6 +21,7 @@ class PlaceHeroAction(IAction):
         self._ahk.click()
 
     def can_act(self) -> bool:
+        # noinspection PyBroadException
         try:
             tower_price = HERO_COSTS[self._hero.name].base_cost.get_mapping()[self._difficulty]
             return get_amount_of_money() >= tower_price

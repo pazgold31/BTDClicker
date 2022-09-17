@@ -32,14 +32,17 @@ class UpgradeTowerAction(IAction):
 
     def can_act(self) -> bool:
 
+        # noinspection PyBroadException
         try:
-            upgrade_price = TOWER_COSTS[self._tower.name].upgrades.get_mapping()[self._tier].get_mapping()[TierLevel(
-                self._tower.tier_map[self._tier] + 1)].cost.get_mapping()[self._difficulty]
+            tiers_cost = TOWER_COSTS[self._tower.name].upgrades.get_mapping()[self._tier]
+            current_tier_costs = tiers_cost.get_mapping()[TierLevel(self._tower.tier_map[self._tier] + 1)]
+            upgrade_price = current_tier_costs.cost.get_mapping()[self._difficulty]
+
             money = get_amount_of_money()
             if money >= upgrade_price:
                 print(f"Got {money}. Need: {upgrade_price}")
             return money >= upgrade_price
-        except Exception as e:
+        except Exception:
             # TODO: add max tries
             pass
 

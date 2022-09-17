@@ -35,7 +35,7 @@ class UpgradeTierCost(BaseModel):
     class Config:
         use_enum_values = True
 
-    def get_mapping(self) -> Dict[TierLevel, Cost]:
+    def get_mapping(self) -> Dict[TierLevel, Upgrade]:
         return {TierLevel.first: self.first, TierLevel.second: self.second,
                 TierLevel.third: self.third, TierLevel.fourth: self.fourth,
                 TierLevel.fifth: self.fifth, TierLevel.paragon: self.paragon}

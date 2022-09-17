@@ -115,6 +115,7 @@ def parse_hero_costs() -> List[HeroCost]:
         if skins_headline:
             break
 
+        # noinspection PyUnresolvedReferences
         table_body = table.find('tbody')
         rows = table_body.find_all('tr')
         link_element = rows[0].find("a")

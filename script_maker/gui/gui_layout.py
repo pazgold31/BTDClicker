@@ -1,5 +1,6 @@
 from typing import List, Any
 
+# noinspection PyPep8Naming
 import PySimpleGUI as sg
 
 from common.cost.cost_parsing import HERO_COSTS, TOWER_COSTS
