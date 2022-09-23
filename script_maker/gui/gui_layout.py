@@ -24,7 +24,9 @@ def get_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
 
 
 def get_layout() -> List[List[Any]]:
-    menu = [[GuiMenu.File.MenuName, [GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]]]
+    menu = [[GuiMenu.File.MenuName, [GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]],
+            [GuiMenu.ViewedTowers.MenuName, [GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
+                                             GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support]]]
 
     left_col = [
         [sg.Frame("Difficulty",

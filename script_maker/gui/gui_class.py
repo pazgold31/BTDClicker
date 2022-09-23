@@ -225,6 +225,9 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container)
 
+    def handle_viewed_towers(self, event: EventType, values: ValuesType):
+        pass
+
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
@@ -242,5 +245,9 @@ class GuiClass:
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
             GuiMenu.File.Save: self.handle_save_button,
-            GuiMenu.File.Import: self.handle_import_button
+            GuiMenu.File.Import: self.handle_import_button,
+            **{
+                i: self.handle_viewed_towers for i in (
+                    GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military, GuiMenu.ViewedTowers.Magic,
+                    GuiMenu.ViewedTowers.Support)}
         }
