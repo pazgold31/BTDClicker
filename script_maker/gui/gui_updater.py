@@ -1,7 +1,7 @@
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.cost.game_costs import HERO_COSTS
+from common.towers_info.game_info import HEROES_INFO
 from common.game_classes.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box
@@ -33,7 +33,7 @@ class GuiUpdater:
                                                                                 chosen_hero=self._metadata.hero_type))
 
     def update_selected_hero(self):
-        hero_cost = HERO_COSTS[self._metadata.hero_type].base_cost.get_mapping()[self._metadata.difficulty]
+        hero_cost = HEROES_INFO[self._metadata.hero_type].base_cost.get_mapping()[self._metadata.difficulty]
         hero_value = f"{self._metadata.hero_type}: {hero_cost}$"
         self._window[GuiKeys.HeroCombo].update(value=hero_value)
 

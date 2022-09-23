@@ -2,7 +2,7 @@ from ahk import AHK
 
 from clicker.actions.IAction import IAction
 from clicker.money_extracter import get_amount_of_money
-from common.cost.game_costs import HERO_COSTS
+from common.towers_info.game_info import HEROES_INFO
 from common.game_classes.enums import Difficulty
 from clicker.consts.keymap import Keymap
 from common.game_classes.tower import BaseTower
@@ -23,7 +23,7 @@ class PlaceHeroAction(IAction):
     def can_act(self) -> bool:
         # noinspection PyBroadException
         try:
-            tower_price = HERO_COSTS[self._hero.name].base_cost.get_mapping()[self._difficulty]
+            tower_price = HEROES_INFO[self._hero.name].base_cost.get_mapping()[self._difficulty]
             return get_amount_of_money() >= tower_price
         except Exception:
             # TODO: add max tries

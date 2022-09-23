@@ -5,7 +5,7 @@ from ahk import AHK
 from clicker.actions.IAction import IAction
 from clicker.consts.timing_consts import CLICK_DELAY
 from clicker.money_extracter import get_amount_of_money
-from common.cost.game_costs import TOWER_COSTS
+from common.towers_info.game_info import TOWERS_INFO
 from common.game_classes.enums import Difficulty, UpgradeTier, TierLevel
 from clicker.consts.keymap import Keymap, UPGRADE_TIER_MAPPING
 from common.game_classes.tower import Tower
@@ -34,7 +34,7 @@ class UpgradeTowerAction(IAction):
 
         # noinspection PyBroadException
         try:
-            tiers_cost = TOWER_COSTS[self._tower.name].upgrades.get_mapping()[self._tier]
+            tiers_cost = TOWERS_INFO[self._tower.name].upgrades.get_mapping()[self._tier]
             current_tier_costs = tiers_cost.get_mapping()[TierLevel(self._tower.tier_map[self._tier] + 1)]
             upgrade_price = current_tier_costs.cost.get_mapping()[self._difficulty]
 

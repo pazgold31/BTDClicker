@@ -54,12 +54,12 @@ class UpgradesCost(BaseModel):
                 UpgradeTier.bottom: self.bottom}
 
 
-class TowerCost(BaseModel):
+class TowerInfo(BaseModel):
     name: str
     base_cost: Cost
     upgrades: UpgradesCost
 
 
-class HeroCost(BaseModel):
+class HeroInfo(BaseModel):
     name: str
     base_cost: Cost
