@@ -11,6 +11,7 @@ from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import GameMetadata, Script
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.hotkeys import Hotkeys
+from common.user_files import get_files_dir
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
@@ -27,6 +28,7 @@ class GuiClass:
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
         Hotkeys(ahk=AHK(), x_pos=self._window[GuiKeys.XPositionInput], y_pos=self._window[GuiKeys.YPositionInput])
 
+        self._selected_file_path: str = None
         self._activity_container = ActivityContainer()
 
         event, values = self._window.read(0)
@@ -82,7 +84,7 @@ class GuiClass:
             return
 
         selected_script_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-
+        entry_index_to_select = None if not selected_script_entry_index else selected_script_entry_index + 1
         if "Hero" == values[GuiKeys.NewTowerTypeInput]:
             if not self._activity_container.is_hero_placeable():
                 sg.popup("Your Hero is already placed!")
@@ -91,17 +93,17 @@ class GuiClass:
             self._activity_container.add_hero(name=values[GuiKeys.NewTowerTypeInput],
                                               x=int(values[GuiKeys.XPositionInput]),
                                               y=int(values[GuiKeys.YPositionInput]),
-                                              index=selected_script_entry_index + 1)
+                                              index=entry_index_to_select)
 
         else:
             self._activity_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
                                                    x=int(values[GuiKeys.XPositionInput]),
                                                    y=int(values[GuiKeys.YPositionInput]),
-                                                   index=selected_script_entry_index + 1)
+                                                   index=entry_index_to_select)
 
         self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
                                                             script_container=self._activity_container.script_container,
-                                                            selected_script_index=selected_script_entry_index + 1)
+                                                            selected_script_index=entry_index_to_select)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ExistingTowersListBox]:
@@ -112,26 +114,27 @@ class GuiClass:
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
         selected_script_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        entry_index_to_select = None if not selected_script_entry_index else selected_script_entry_index + 1
 
         if event in upgrade_tiers_map:
             try:
                 self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=upgrade_tiers_map[event],
-                                                       index=selected_script_entry_index + 1)
+                                                       index=entry_index_to_select)
             except ValueError:
                 sg.popup("Tower is already at max level!")
                 return
 
         elif event == GuiKeys.SellButton:
             try:
-                self._activity_container.sell_tower(tower_id=selected_tower_id, index=selected_script_entry_index + 1)
+                self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
             except ValueError:
                 sg.popup("The tower is already sold!")
                 return
         elif event == GuiKeys.TargetingButton:
-            self._activity_container.change_targeting(tower_id=selected_tower_id, index=selected_script_entry_index + 1)
+            self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
         elif event == GuiKeys.SpecialTargetingButton:
             self._activity_container.change_special_targeting(tower_id=selected_tower_id,
-                                                              index=selected_script_entry_index + 1)
+                                                              index=entry_index_to_select)
         elif event == GuiKeys.DeleteTowerButton:
             self._activity_container.delete_tower(tower_id=selected_tower_id)
         else:
@@ -140,7 +143,7 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(
             towers_container=self._activity_container.towers_container,
             script_container=self._activity_container.script_container,
-            selected_script_index=not selected_script_entry_index or selected_script_entry_index + 1)
+            selected_script_index=entry_index_to_select)
 
     def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
@@ -186,17 +189,26 @@ class GuiClass:
                                                             script_container=self._activity_container.script_container,
                                                             selected_script_index=selected_entry_index + 1)
 
-    def handle_export_button(self, event: EventType, values: ValuesType):
+    def handle_save_button(self, event: EventType, values: ValuesType):
         if not self._metadata.hero_type:  # TODO: support not giving a hero if it is not used
             sg.popup("You must select a hero!")
             return
 
-        with open("../exported.json", "w") as of:  # TODO: move to actual path
+        if not self._selected_file_path:
+            file_path = sg.popup_get_file("Please select file to import", default_path=get_files_dir(),
+                                          file_types=(("Json files", "json"),))
+            self._selected_file_path = file_path
+
+        with open(self._selected_file_path, "w") as of:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
                       default=pydantic_encoder)
 
     def handle_import_button(self, event: EventType, values: ValuesType):
-        with open("../exported.json", "r") as of:  # TODO: move to actual path
+
+        self._selected_file_path = sg.popup_get_file("Please select file to import", default_path=get_files_dir(),
+                                                     file_types=(("Json files", "json"),))
+
+        with open(self._selected_file_path, "r") as of:
             json_dict = json.load(of)
 
         loaded_metadata = parse_metadata(json_dict=json_dict)
@@ -229,6 +241,6 @@ class GuiClass:
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
-            GuiMenu.File.Save: self.handle_export_button,
+            GuiMenu.File.Save: self.handle_save_button,
             GuiMenu.File.Import: self.handle_import_button
         }
