@@ -2,7 +2,7 @@ import itertools
 from typing import Dict, Generator, Tuple
 
 from common.game_classes.tower import Tower, Hero
-from script_maker.additional_tower_info import AdditionalTowerInfo
+from script_maker.script.additional_tower_info import AdditionalTowerInfo
 
 
 class TowersContainer(Dict[int, Tower]):

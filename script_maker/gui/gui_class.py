@@ -16,7 +16,7 @@ from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
-from script_maker.hotkeys import Hotkeys
+from common.hotkeys import Hotkeys
 from script_maker.script.activity_container import ActivityContainer
 
 
