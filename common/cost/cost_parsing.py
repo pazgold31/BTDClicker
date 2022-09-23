@@ -94,7 +94,7 @@ def crawl_towers_costs() -> List[TowerCost]:
     tables = soup.find_all("table", class_="article-table")
     towers = []
     for table in tables[:4]:  # First 4 tables (primary, military, magic and support)
-        towers.append(parse_towers_table(table_body=table.find('tbody')))
+        towers += parse_towers_table(table_body=table.find('tbody'))
 
     return towers
 
@@ -187,6 +187,6 @@ def get_tower_costs() -> Dict[str, TowerCost]:
     try:
         return load_cached_costs(path=path, output_type=TowerCost)
     except FileNotFoundError:
-        costs_data = crawl_hero_costs()
+        costs_data = crawl_towers_costs()
         save_cached_costs(path=path, costs_data=costs_data)
         return convert_to_map(costs_data)
