@@ -12,6 +12,7 @@ from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
 from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
+from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
@@ -59,7 +60,7 @@ def main():
     total_dict = load_script_dict()
     metadata = parse_metadata(json_dict=total_dict)
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
-    time.sleep(2)
+    time.sleep(CLICKER_START_DELAY)
 
     for action in script:
         print(f"Next: {action.get_action_message()}")
@@ -68,9 +69,9 @@ def main():
                 action.act()
                 break
 
-            time.sleep(0.2)
+            time.sleep(ACTION_CHECKING_DELAY)
 
-        time.sleep(0.5)
+        time.sleep(ACTIONS_DELAY)
 
 
 if __name__ == '__main__':
