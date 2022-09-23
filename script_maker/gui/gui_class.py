@@ -10,13 +10,14 @@ from pydantic.json import pydantic_encoder
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import GameMetadata, Script
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
+from common.hotkeys import Hotkeys
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
+from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
-from common.hotkeys import Hotkeys
 from script_maker.script.activity_container import ActivityContainer
 
 
@@ -228,6 +229,6 @@ class GuiClass:
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
-            GuiKeys.ExportButton: self.handle_export_button,
-            GuiKeys.ImportButton: self.handle_import_button
+            GuiMenu.File.Save: self.handle_export_button,
+            GuiMenu.File.Import: self.handle_import_button
         }

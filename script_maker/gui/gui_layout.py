@@ -6,6 +6,7 @@ import PySimpleGUI as sg
 from common.cost.game_costs import HERO_COSTS, TOWER_COSTS
 from common.game_classes.enums import Difficulty
 from script_maker.gui.gui_keys import GuiKeys
+from script_maker.gui.gui_menu import GuiMenu
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "impopable": Difficulty.impopable}
@@ -23,6 +24,8 @@ def get_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
 
 
 def get_layout() -> List[List[Any]]:
+    menu = [[GuiMenu.File.MenuName, [GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]]]
+
     left_col = [
         [sg.Frame("Difficulty",
                   layout=[[sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
@@ -63,10 +66,7 @@ def get_layout() -> List[List[Any]]:
             sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
         ],
         [sg.HSeparator()],
-        [sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)],
-        [sg.HSeparator()],
-        [sg.Button("Export", size=(15, 1), enable_events=True, key=GuiKeys.ExportButton),
-         sg.Button("Import", size=(15, 1), enable_events=True, key=GuiKeys.ImportButton)]
+        [sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)]
     ]
 
     bottom_left_col = [[sg.Text("Script:")],
@@ -79,7 +79,8 @@ def get_layout() -> List[List[Any]]:
 
     bottom_layout = [[sg.Column(bottom_left_col), sg.VSeparator(), sg.Column(bottom_right_col)]]
 
-    return [[sg.Column(left_col),
+    return [[sg.Menu(menu, tearoff=False, pad=(200, 1), key=GuiKeys.MenuKey)],
+            [sg.Column(left_col),
              sg.VSeparator(),
              sg.Column(right_col)],
             bottom_layout]

@@ -1,4 +1,5 @@
 class GuiKeys:
+    MenuKey = "-Menu-"
     DifficultyListBox = "-difficulty-"
     HeroCombo = "-hero-"
     TowerTypesListBox = "-chosen_tower_type-"
@@ -14,8 +15,6 @@ class GuiKeys:
     SellButton = "-sell_button-"
     TargetingButton = "-targeting_button-"
     SpecialTargetingButton = "-s_targeting_button-"
-    ExportButton = "-export_button-"
-    ImportButton = "-import_button-"
     ScriptBox = "-script_box-"
     DeleteFromScriptButton = "-delete-from-script"
     DeleteTowerButton = "-delete-tower-button"
