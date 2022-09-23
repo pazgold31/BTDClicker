@@ -1,7 +1,8 @@
 import json
 import re
 from datetime import timedelta, datetime
-from typing import List, Tuple, Dict, Union
+from pathlib import Path
+from typing import List, Tuple, Dict, TypeVar
 from urllib.parse import urljoin
 
 import bs4
@@ -152,42 +153,40 @@ def crawl_hero_costs() -> List[HeroCost]:
     return heroes
 
 
-print(crawl_hero_costs())
+CostType = TypeVar('CostType', HeroCost, TowerCost)
 
 
-def convert_to_map(lst: List[Union[HeroCost, TowerCost]]) -> Dict[str, Union[HeroCost, TowerCost]]:
+def convert_to_map(lst: List[CostType]) -> Dict[str, CostType]:
     return {i.name: i for i in lst}
+
+
+def load_cached_costs(path: Path, output_type: CostType,
+                      update_time: timedelta = COSTS_UPDATE_TIME) -> Dict[str, CostType]:
+    if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < update_time:
+        with path.open("r") as of:
+            return convert_to_map(parse_raw_as(List[output_type], of.read()))
+
+
+def save_cached_costs(path: Path, costs_data):
+    with path.open("w") as of:
+        json.dump(costs_data, of, default=pydantic_encoder)
 
 
 def get_hero_costs() -> Dict[str, HeroCost]:
     path = get_files_dir() / "hero_costs.json"
     try:
-        if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < COSTS_UPDATE_TIME:
-            with path.open("r") as of:
-                return convert_to_map(parse_raw_as(List[HeroCost], of.read()))
+        return load_cached_costs(path=path, output_type=HeroCost)
     except FileNotFoundError:
-        pass
-
-    costs_data = crawl_hero_costs()
-
-    with path.open("w") as of:
-        json.dump(costs_data, of, default=pydantic_encoder)
-
-    return convert_to_map(costs_data)
+        costs_data = crawl_hero_costs()
+        save_cached_costs(path=path, costs_data=costs_data)
+        return convert_to_map(costs_data)
 
 
 def get_tower_costs() -> Dict[str, TowerCost]:
     path = get_files_dir() / "tower_costs.json"
     try:
-        if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < COSTS_UPDATE_TIME:
-            with path.open("r") as of:
-                return convert_to_map(parse_raw_as(List[TowerCost], of.read()))
+        return load_cached_costs(path=path, output_type=TowerCost)
     except FileNotFoundError:
-        pass
-
-    costs_data = crawl_towers_costs()
-
-    with path.open("w") as of:
-        json.dump(costs_data, of, default=pydantic_encoder)
-
-    return convert_to_map(costs_data)
+        costs_data = crawl_hero_costs()
+        save_cached_costs(path=path, costs_data=costs_data)
+        return convert_to_map(costs_data)

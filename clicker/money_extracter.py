@@ -20,8 +20,6 @@ def preprocess_image(image: Image) -> Image:
 
 
 def get_text_from_image(image: Image) -> str:
-    # TODO: fix the command thing to work for everyone.
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     image_text = pytesseract.image_to_string(image, config='--psm 7 -c tessedit_char_whitelist=0123456789')
     return image_text
 
