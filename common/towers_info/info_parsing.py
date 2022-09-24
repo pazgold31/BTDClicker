@@ -12,22 +12,23 @@ from fake_useragent import UserAgent
 from pydantic import parse_raw_as
 from pydantic.json import pydantic_encoder
 
-from common.cost.cost_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerCost, HeroCost
+from common.game_classes.enums import TowerType
+from common.towers_info.info_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerInfo, HeroInfo
 from common.user_files import get_files_dir
 
 BASE_WIKI_URL = r"https://bloons.fandom.com"
 TOWERS_PRICES_URL = urljoin(BASE_WIKI_URL, r"wiki/Tower_Price_Lists")
 HERO_PRICES_URL = urljoin(BASE_WIKI_URL, r"wiki/Heroes")
 
-TOWER_COSTS_REGEX = re.compile(r"([\w .-]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**\nI\$([,\d]+)\**")
-HERO_COSTS_REGEX = re.compile(
+TOWER_INFO_REGEX = re.compile(r"([\w .-]+)\nE\$([,\d]+)\**\nM\$([,\d]+)\**\nH\$([,\d]+)\**\nI\$([,\d]+)\**")
+HERO_INFO_REGEX = re.compile(
     r"Default:\$([\d,]+) \(Easy\)\$([\d,]+) \(Medium\)\$([\d,]+) \(Hard\)\$([\d,]+) \(Impoppable\)")
 
-COSTS_UPDATE_TIME = timedelta(days=7)
+INFO_UPDATE_TIME = timedelta(days=7)
 
 
 def parse_single_upgrade(data: str) -> Upgrade:
-    match = TOWER_COSTS_REGEX.search(data)
+    match = TOWER_INFO_REGEX.search(data)
     return Upgrade(name=match.group(1), cost=Cost(
         easy=int(match.group(2).replace(",", "")),
         medium=int(match.group(3).replace(",", "")),
@@ -37,9 +38,9 @@ def parse_single_upgrade(data: str) -> Upgrade:
 
 def parse_tower_base_cost(data: str) -> Tuple[str, Cost]:
     """
-    :return: a tuple of the towers name and base cost.
+    :return: a tuple of the towers name and base towers_info.
     """
-    match = TOWER_COSTS_REGEX.search(data)
+    match = TOWER_INFO_REGEX.search(data)
     return match.group(1), Cost(
         easy=int(match.group(2).replace(",", "")),
         medium=int(match.group(3).replace(",", "")),
@@ -62,12 +63,13 @@ def parse_upgrades(data: List[List[str]]) -> UpgradesCost:
                         bottom=parse_upgrades_tier(data[2]))
 
 
-def parse_towers_chunk(data: List[List[str]]) -> List[TowerCost]:
-    output: List[TowerCost] = []
+def parse_towers_chunk(data: List[List[str]], towers_type: TowerType) -> List[TowerInfo]:
+    output: List[TowerInfo] = []
     for i in range(0, len(data), 3):
         tower_lines = [data[i], data[i + 1], data[i + 2]]
         tower_name, tower_cost = parse_tower_base_cost(tower_lines[0][0])
-        output.append(TowerCost(name=tower_name, base_cost=tower_cost, upgrades=parse_upgrades(tower_lines)))
+        output.append(TowerInfo(name=tower_name, type=towers_type, base_cost=tower_cost,
+                                upgrades=parse_upgrades(tower_lines)))
 
     return output
 
@@ -78,7 +80,7 @@ def get_page_soup(url: str) -> BeautifulSoup:
     return BeautifulSoup(page.content, "html.parser")
 
 
-def parse_towers_table(table_body: bs4.Tag) -> List[TowerCost]:
+def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> List[TowerInfo]:
     rows = table_body.find_all('tr')
     towers_data = []
     for row in rows:
@@ -86,15 +88,30 @@ def parse_towers_table(table_body: bs4.Tag) -> List[TowerCost]:
         cols = [ele.text.strip() for ele in cols]
         towers_data.append([ele for ele in cols if ele])  # Get rid of empty values
 
-    return parse_towers_chunk(data=towers_data[1:])  # remove the tower name item
+    return parse_towers_chunk(data=towers_data[1:], towers_type=towers_type)  # remove the tower name item
 
 
-def crawl_towers_costs() -> List[TowerCost]:
+def get_towers_type_name(table: bs4.Tag):
+    for headline in table.find_previous("h3"):
+        return headline.text
+
+    raise RuntimeError("Failed to find headline")
+
+
+def get_tower_type(tower_type_name: str) -> TowerType:
+    return {"Primary Monkeys": TowerType.Primary,
+            "Military Monkeys": TowerType.Military,
+            "Magic Monkeys": TowerType.Magic,
+            "Support Monkeys": TowerType.Support}[tower_type_name]
+
+
+def crawl_towers_info() -> List[TowerInfo]:
     soup = get_page_soup(TOWERS_PRICES_URL)
     tables = soup.find_all("table", class_="article-table")
     towers = []
     for table in tables[:4]:  # First 4 tables (primary, military, magic and support)
-        towers += parse_towers_table(table_body=table.find('tbody'))
+        towers += parse_towers_table(table_body=table.find('tbody'),
+                                     towers_type=get_tower_type(get_towers_type_name(table=table)))
 
     return towers
 
@@ -115,7 +132,7 @@ def get_hero_skins_title(table: bs4.Tag):
     raise RuntimeError("Failed to find skins title")
 
 
-def parse_hero_costs(table_body: bs4.Tag):
+def parse_hero_info(table_body: bs4.Tag):
     rows = table_body.find_all('tr')
     link_element = rows[0].find("a")
     hero_name = link_element.text
@@ -128,14 +145,14 @@ def parse_hero_costs(table_body: bs4.Tag):
         hero_soup = get_page_soup(new_url)
         prices_box_text = hero_soup.find_all("div", class_="pi-data-value")[2].text
 
-    re_search = HERO_COSTS_REGEX.search(prices_box_text)
-    return HeroCost(name=hero_name, base_cost=Cost(easy=int(re_search.group(1).replace(",", "")),
+    re_search = HERO_INFO_REGEX.search(prices_box_text)
+    return HeroInfo(name=hero_name, base_cost=Cost(easy=int(re_search.group(1).replace(",", "")),
                                                    medium=int(re_search.group(2).replace(",", "")),
                                                    hard=int(re_search.group(3).replace(",", "")),
                                                    impopable=int(re_search.group(4).replace(",", ""))))
 
 
-def crawl_hero_costs() -> List[HeroCost]:
+def crawl_hero_info() -> List[HeroInfo]:
     soup = get_page_soup(HERO_PRICES_URL)
 
     heroes = []
@@ -148,45 +165,45 @@ def crawl_hero_costs() -> List[HeroCost]:
             pass
 
         table_body = table.find_next('tbody')
-        heroes.append(parse_hero_costs(table_body=table_body))
+        heroes.append(parse_hero_info(table_body=table_body))
 
     return heroes
 
 
-CostType = TypeVar('CostType', HeroCost, TowerCost)
+InfoType = TypeVar('InfoType', HeroInfo, TowerInfo)
 
 
-def convert_to_map(lst: List[CostType]) -> Dict[str, CostType]:
+def convert_to_map(lst: List[InfoType]) -> Dict[str, InfoType]:
     return {i.name: i for i in lst}
 
 
-def load_cached_costs(path: Path, output_type: CostType,
-                      update_time: timedelta = COSTS_UPDATE_TIME) -> Dict[str, CostType]:
+def load_cached_info(path: Path, output_type: InfoType,
+                     update_time: timedelta = INFO_UPDATE_TIME) -> Dict[str, InfoType]:
     if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < update_time:
         with path.open("r") as of:
             return convert_to_map(parse_raw_as(List[output_type], of.read()))
 
 
-def save_cached_costs(path: Path, costs_data):
+def save_info_to_cache(path: Path, info_data: List[InfoType]):
     with path.open("w") as of:
-        json.dump(costs_data, of, default=pydantic_encoder)
+        json.dump(info_data, of, default=pydantic_encoder)
 
 
-def get_hero_costs() -> Dict[str, HeroCost]:
-    path = get_files_dir() / "hero_costs.json"
+def get_heroes_info() -> Dict[str, HeroInfo]:
+    path = get_files_dir() / "heroes_info.json"
     try:
-        return load_cached_costs(path=path, output_type=HeroCost)
+        return load_cached_info(path=path, output_type=HeroInfo)
     except FileNotFoundError:
-        costs_data = crawl_hero_costs()
-        save_cached_costs(path=path, costs_data=costs_data)
-        return convert_to_map(costs_data)
+        info_data = crawl_hero_info()
+        save_info_to_cache(path=path, info_data=info_data)
+        return convert_to_map(info_data)
 
 
-def get_tower_costs() -> Dict[str, TowerCost]:
-    path = get_files_dir() / "tower_costs.json"
+def get_towers_info() -> Dict[str, TowerInfo]:
+    path = get_files_dir() / "towers_info.json"
     try:
-        return load_cached_costs(path=path, output_type=TowerCost)
+        return load_cached_info(path=path, output_type=TowerInfo)
     except FileNotFoundError:
-        costs_data = crawl_towers_costs()
-        save_cached_costs(path=path, costs_data=costs_data)
-        return convert_to_map(costs_data)
+        info_data = crawl_towers_info()
+        save_info_to_cache(path=path, info_data=info_data)
+        return convert_to_map(info_data)

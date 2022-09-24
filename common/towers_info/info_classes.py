@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel
 
-from common.game_classes.enums import Difficulty, TierLevel, UpgradeTier
+from common.game_classes.enums import Difficulty, TierLevel, UpgradeTier, TowerType
 
 
 class Cost(BaseModel):
@@ -54,12 +54,16 @@ class UpgradesCost(BaseModel):
                 UpgradeTier.bottom: self.bottom}
 
 
-class TowerCost(BaseModel):
+class TowerInfo(BaseModel):
     name: str
+    type: TowerType
     base_cost: Cost
     upgrades: UpgradesCost
 
+    class Config:
+        use_enum_values = True
 
-class HeroCost(BaseModel):
+
+class HeroInfo(BaseModel):
     name: str
     base_cost: Cost

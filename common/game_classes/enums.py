@@ -21,3 +21,10 @@ class UpgradeTier(IntEnum):
     top = 1,
     middle = 2,
     bottom = 3
+
+
+class TowerType(IntEnum):
+    Primary = 0
+    Military = 1
+    Magic = 2
+    Support = 3

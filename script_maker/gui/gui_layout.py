@@ -3,28 +3,19 @@ from typing import List, Any
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.cost.game_costs import HERO_COSTS, TOWER_COSTS
 from common.game_classes.enums import Difficulty
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_menu import GuiMenu
+from script_maker.gui.gui_options import get_tower_options, get_hero_options
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "impopable": Difficulty.impopable}
 
 
-def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None) -> List[str]:
-    hero_str = "Hero" if not chosen_hero else \
-        f"Hero | {chosen_hero}: {HERO_COSTS[chosen_hero].base_cost.get_mapping()[difficulty]}"
-    return [hero_str] + \
-           [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWER_COSTS.items()]
-
-
-def get_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
-    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in HERO_COSTS.items()]
-
-
 def get_layout() -> List[List[Any]]:
-    menu = [[GuiMenu.File.MenuName, [GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]]]
+    menu = [[GuiMenu.File.MenuName, [GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]],
+            [GuiMenu.ViewedTowers.MenuName, [GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
+                                             GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support]]]
 
     left_col = [
         [sg.Frame("Difficulty",
