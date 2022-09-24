@@ -37,8 +37,19 @@ class GuiClass:
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
 
+    def _add_hotkey_binds(self):
+        self._window.bind("<Control-o>", GuiMenu.File.Import)
+        self._window.bind("<Control-s>", GuiMenu.File.Save)
+        self._window.bind("<Control-Shift-S>", GuiMenu.File.SaveAs)
+
+        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.Primary)
+        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Military)
+        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Magic)
+        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Support)
+
     def run(self):
         callback_map = self.get_callback_map()
+        self._add_hotkey_binds()
         while True:
             event, values = self._window.read()
 
