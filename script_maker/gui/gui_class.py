@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 from ahk import AHK
 from pydantic.json import pydantic_encoder
 
-from common.game_classes.enums import UpgradeTier
+from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.script_dataclasses import GameMetadata, Script
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.hotkeys import Hotkeys
@@ -226,7 +226,14 @@ class GuiClass:
                                                             script_container=self._activity_container.script_container)
 
     def handle_viewed_towers(self, event: EventType, values: ValuesType):
-        pass
+        if GuiMenu.ViewedTowers.Primary == event:
+            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Primary)
+        elif GuiMenu.ViewedTowers.Military == event:
+            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Military)
+        elif GuiMenu.ViewedTowers.Magic == event:
+            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Magic)
+        elif GuiMenu.ViewedTowers.Support == event:
+            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Support)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {

@@ -91,11 +91,18 @@ def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> List[Towe
     return parse_towers_chunk(data=towers_data[1:], towers_type=towers_type)  # remove the tower name item
 
 
-def get_towers_type(table: bs4.Tag):
+def get_towers_type_name(table: bs4.Tag):
     for headline in table.find_previous("h3"):
         return headline.text
 
     raise RuntimeError("Failed to find headline")
+
+
+def get_tower_type(tower_type_name: str) -> TowerType:
+    return {"Primary Monkeys": TowerType.Primary,
+            "Military Monkeys": TowerType.Military,
+            "Magic Monkeys": TowerType.Magic,
+            "Support Monkeys": TowerType.Support}[tower_type_name]
 
 
 def crawl_towers_info() -> List[TowerInfo]:
@@ -104,7 +111,7 @@ def crawl_towers_info() -> List[TowerInfo]:
     towers = []
     for table in tables[:4]:  # First 4 tables (primary, military, magic and support)
         towers += parse_towers_table(table_body=table.find('tbody'),
-                                     towers_type=TowerType(get_towers_type(table=table)))
+                                     towers_type=get_tower_type(get_towers_type_name(table=table)))
 
     return towers
 

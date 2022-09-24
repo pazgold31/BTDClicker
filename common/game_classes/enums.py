@@ -1,4 +1,4 @@
-from enum import IntEnum, Enum
+from enum import IntEnum
 
 
 class Difficulty(IntEnum):
@@ -23,8 +23,8 @@ class UpgradeTier(IntEnum):
     bottom = 3
 
 
-class TowerType(Enum):
-    Primary = "Primary Monkeys"
-    Military = "Military Monkeys"
-    Magic = "Magic Monkeys"
-    Support = "Support Monkeys"
+class TowerType(IntEnum):
+    Primary = 0
+    Military = 1
+    Magic = 2
+    Support = 3

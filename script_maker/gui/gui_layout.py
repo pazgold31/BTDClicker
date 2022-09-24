@@ -3,24 +3,13 @@ from typing import List, Any
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.towers_info.game_info import HEROES_INFO, TOWERS_INFO
 from common.game_classes.enums import Difficulty
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_menu import GuiMenu
+from script_maker.gui.gui_options import get_tower_options, get_hero_options
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "impopable": Difficulty.impopable}
-
-
-def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None) -> List[str]:
-    hero_str = "Hero" if not chosen_hero else \
-        f"Hero | {chosen_hero}: {HEROES_INFO[chosen_hero].base_cost.get_mapping()[difficulty]}"
-    return [hero_str] + \
-           [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in TOWERS_INFO.items()]
-
-
-def get_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
-    return [f"{name}: {cost.base_cost.get_mapping()[difficulty]}$" for name, cost in HEROES_INFO.items()]
 
 
 def get_layout() -> List[List[Any]]:
