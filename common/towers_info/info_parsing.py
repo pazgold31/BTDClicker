@@ -12,6 +12,7 @@ from fake_useragent import UserAgent
 from pydantic import parse_raw_as
 from pydantic.json import pydantic_encoder
 
+from common.game_classes.enums import TowerType
 from common.towers_info.info_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerInfo, HeroInfo
 from common.user_files import get_files_dir
 
@@ -62,12 +63,13 @@ def parse_upgrades(data: List[List[str]]) -> UpgradesCost:
                         bottom=parse_upgrades_tier(data[2]))
 
 
-def parse_towers_chunk(data: List[List[str]]) -> List[TowerInfo]:
+def parse_towers_chunk(data: List[List[str]], towers_type: TowerType) -> List[TowerInfo]:
     output: List[TowerInfo] = []
     for i in range(0, len(data), 3):
         tower_lines = [data[i], data[i + 1], data[i + 2]]
         tower_name, tower_cost = parse_tower_base_cost(tower_lines[0][0])
-        output.append(TowerInfo(name=tower_name, base_cost=tower_cost, upgrades=parse_upgrades(tower_lines)))
+        output.append(TowerInfo(name=tower_name, type=towers_type, base_cost=tower_cost,
+                                upgrades=parse_upgrades(tower_lines)))
 
     return output
 
@@ -78,7 +80,7 @@ def get_page_soup(url: str) -> BeautifulSoup:
     return BeautifulSoup(page.content, "html.parser")
 
 
-def parse_towers_table(table_body: bs4.Tag) -> List[TowerInfo]:
+def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> List[TowerInfo]:
     rows = table_body.find_all('tr')
     towers_data = []
     for row in rows:
@@ -86,7 +88,14 @@ def parse_towers_table(table_body: bs4.Tag) -> List[TowerInfo]:
         cols = [ele.text.strip() for ele in cols]
         towers_data.append([ele for ele in cols if ele])  # Get rid of empty values
 
-    return parse_towers_chunk(data=towers_data[1:])  # remove the tower name item
+    return parse_towers_chunk(data=towers_data[1:], towers_type=towers_type)  # remove the tower name item
+
+
+def get_towers_type(table: bs4.Tag):
+    for headline in table.find_previous("h3"):
+        return headline.text
+
+    raise RuntimeError("Failed to find headline")
 
 
 def crawl_towers_info() -> List[TowerInfo]:
@@ -94,7 +103,8 @@ def crawl_towers_info() -> List[TowerInfo]:
     tables = soup.find_all("table", class_="article-table")
     towers = []
     for table in tables[:4]:  # First 4 tables (primary, military, magic and support)
-        towers += parse_towers_table(table_body=table.find('tbody'))
+        towers += parse_towers_table(table_body=table.find('tbody'),
+                                     towers_type=TowerType(get_towers_type(table=table)))
 
     return towers
 
