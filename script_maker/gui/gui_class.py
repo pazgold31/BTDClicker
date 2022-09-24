@@ -44,10 +44,11 @@ class GuiClass:
         self._window.bind("<Control-s>", GuiMenu.File.Save)
         self._window.bind("<Control-Shift-S>", GuiMenu.File.SaveAs)
 
-        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.Primary)
-        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Military)
-        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Magic)
-        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Support)
+        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.All)
+        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Primary)
+        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Military)
+        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Magic)
+        self._window.bind("<Control_L>5", GuiMenu.ViewedTowers.Support)
 
     def run(self):
         callback_map = self.get_callback_map()
@@ -263,6 +264,6 @@ class GuiClass:
             GuiMenu.File.Import: self.handle_import_button,
             **{
                 i: self.handle_viewed_towers for i in (
-                    GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military, GuiMenu.ViewedTowers.Magic,
-                    GuiMenu.ViewedTowers.Support)}
+                    GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
+                    GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support)}
         }
