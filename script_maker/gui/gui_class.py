@@ -112,8 +112,7 @@ class GuiClass:
                                                    y=int(values[GuiKeys.YPositionInput]),
                                                    index=entry_index_to_select)
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
@@ -151,10 +150,8 @@ class GuiClass:
         else:
             raise RuntimeError
 
-        self._gui_updater.update_existing_towers_and_script(
-            towers_container=self._activity_container.towers_container,
-            script_container=self._activity_container.script_container,
-            selected_script_index=entry_index_to_select)
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
 
     def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
@@ -164,8 +161,7 @@ class GuiClass:
         selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         self._activity_container.delete_entry(selected_entry_index)
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=selected_entry_index)
 
     def handle_move_up_on_script(self, event: EventType, values: ValuesType):
@@ -180,8 +176,7 @@ class GuiClass:
             sg.popup("Item already first!")
             return
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=selected_entry_index - 1)
 
     def handle_move_down_on_script(self, event: EventType, values: ValuesType):
@@ -196,8 +191,7 @@ class GuiClass:
             sg.popup("Item already last!")
             return
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=selected_entry_index + 1)
 
     def handle_save_button(self, event: EventType, values: ValuesType):
@@ -233,8 +227,7 @@ class GuiClass:
             script_entries=self._activity_container.script_container,
             metadata=self._metadata)
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 
     def handle_viewed_towers(self, event: EventType, values: ValuesType):
         if GuiMenu.ViewedTowers.Primary == event:

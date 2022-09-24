@@ -1,4 +1,5 @@
 # noinspection PyPep8Naming
+import tkinter
 from typing import Callable
 
 import PySimpleGUI as sg
@@ -12,7 +13,7 @@ from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
 from script_maker.gui.gui_options import get_tower_options, get_hero_options
-from script_maker.script.script_container import ScriptContainer
+from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.towers_container import TowersContainer
 
 
@@ -66,11 +67,15 @@ class GuiUpdater:
         except IndexError:
             selected_index = None
 
-        list_box.update(values=GuiFormatters.format_existing_towers(towers_container), set_to_index=selected_index)
+        list_box_items = GuiFormatters.format_existing_towers(towers_container)
+        list_box.update(values=list_box_items, set_to_index=selected_index)
+        for i in range(len(list_box_items)):
+            listbox_widget: tkinter.Listbox = list_box.widget
+            listbox_widget.itemconfig(i, bg=towers_container.get_tower_color(tower_id=i))
 
-    def update_script_box(self, script_container: ScriptContainer, selected_index: int = None):
+    def update_script_box(self, activity_container: ActivityContainer, selected_index: int = None):
         output = []
-        for action in script_container:
+        for action in activity_container.script_container:
             if isinstance(action, CreateTowerEntry):
                 output.append(f"Create: {action.name}({action.id}) | X: {action.x} Y: {action.y}")
             elif isinstance(action, UpgradeTowerEntry):
@@ -88,11 +93,17 @@ class GuiUpdater:
         except IndexError:
             selected_index = None
 
-        self._window[GuiKeys.ScriptBox].update(values=output, set_to_index=selected_index)
+        list_box = self._window[GuiKeys.ScriptBox]
+        list_box.update(values=output, set_to_index=selected_index)
+        for i, script_entry in enumerate(activity_container.script_container):
+            listbox_widget: tkinter.Listbox = list_box.widget
+            listbox_widget.itemconfig(i,
+                                      bg=activity_container.towers_container.get_tower_color(tower_id=script_entry.id))
+
         if selected_index is not None:
             self._window[GuiKeys.ScriptBox].Widget.see(selected_index)
 
-    def update_existing_towers_and_script(self, towers_container: TowersContainer,
-                                          script_container: ScriptContainer, selected_script_index: int = None):
-        self.update_existing_towers(towers_container=towers_container)
-        self.update_script_box(script_container=script_container, selected_index=selected_script_index)
+    def update_existing_towers_and_script(self, activity_container: ActivityContainer,
+                                          selected_script_index: int = None):
+        self.update_existing_towers(towers_container=activity_container.towers_container)
+        self.update_script_box(activity_container=activity_container, selected_index=selected_script_index)
