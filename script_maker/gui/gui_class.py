@@ -37,6 +37,8 @@ class GuiClass:
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
 
+        self.handle_viewed_towers(event=event, values=values)
+
     def _add_hotkey_binds(self):
         self._window.bind("<Control-o>", GuiMenu.File.Import)
         self._window.bind("<Control-s>", GuiMenu.File.Save)
@@ -238,6 +240,8 @@ class GuiClass:
             self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Magic)
         elif GuiMenu.ViewedTowers.Support == event:
             self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Support)
+        else:
+            self._gui_updater.update_tower_types(towers_filter=lambda x: True)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {

@@ -4,7 +4,6 @@ EXISTING_TOWERS_COLORS = [
     "#800000",  # maroon
     "#A52A2A",  # brown
     "#B22222",  # firebrick
-    "#DC143C",  # crimson
     "#FF0000",  # red
     "#FF6347",  # tomato
     "#FF7F50",  # coral
@@ -79,7 +78,6 @@ EXISTING_TOWERS_COLORS = [
     "#9400D3",  # dark violet
     "#9932CC",  # dark orchid
     "#BA55D3",  # medium orchid
-    "#800080",  # purple
     "#D8BFD8",  # thistle
     "#DDA0DD",  # plum
     "#EE82EE",  # violet
@@ -99,7 +97,6 @@ EXISTING_TOWERS_COLORS = [
     "#FAFAD2",  # light golden rod yellow
     "#FFFFE0",  # light yellow
     "#8B4513",  # saddle brown
-    "#A0522D",  # sienna
     "#D2691E",  # chocolate
     "#CD853F",  # peru
     "#F4A460",  # sandy brown
@@ -131,3 +128,6 @@ EXISTING_TOWERS_COLORS = [
     "#DCDCDC",  # gainsboro
 ]
 random.shuffle(EXISTING_TOWERS_COLORS)
+
+ALTERNATING_DARK_COLOR = "#A9A9A9"
+ALTERNATING_LIGHT_COLOR = "#D3D3D3"

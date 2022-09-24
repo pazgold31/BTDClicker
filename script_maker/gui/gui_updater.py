@@ -1,5 +1,4 @@
 # noinspection PyPep8Naming
-import tkinter
 from typing import Callable
 
 import PySimpleGUI as sg
@@ -8,7 +7,8 @@ from common.game_classes.script.script_dataclasses import GameMetadata, CreateTo
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.towers_info.game_info import HEROES_INFO
 from common.towers_info.info_classes import TowerInfo
-from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box
+from script_maker.gui.gui_colors import ALTERNATING_LIGHT_COLOR, ALTERNATING_DARK_COLOR
+from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box, change_cell_color
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
@@ -30,10 +30,14 @@ class GuiUpdater:
         self._window[GuiKeys.HeroCombo].update(values=hero_options, value=hero_options[selected_hero_index])
 
     def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool]):
-        self._window[GuiKeys.TowerTypesListBox].update(
-            values=get_tower_options(difficulty=self._metadata.difficulty,
-                                     chosen_hero=self._metadata.hero_type,
-                                     towers_filter=towers_filter))
+        tower_options = get_tower_options(difficulty=self._metadata.difficulty,
+                                          chosen_hero=self._metadata.hero_type,
+                                          towers_filter=towers_filter)
+        list_box = self._window[GuiKeys.TowerTypesListBox]
+        list_box.update(values=tower_options)
+        for i in range(len(tower_options)):
+            color = ALTERNATING_LIGHT_COLOR if not i % 2 else ALTERNATING_DARK_COLOR
+            change_cell_color(listbox_widget=list_box.widget, index=i, color=color)
 
     def update_selected_difficulty(self):
         self._window[GuiKeys.DifficultyListBox].update(
@@ -51,8 +55,7 @@ class GuiUpdater:
     def update_selected_tower_type(self, selected_tower_text: str):
         selected_tower_index = get_selected_index_for_list_box(window=self._window,
                                                                key=GuiKeys.TowerTypesListBox)
-        tower_options = get_tower_options(difficulty=self._metadata.difficulty)
-        self._window[GuiKeys.TowerTypesListBox].update(None, tower_options[selected_tower_index])
+        self._window[GuiKeys.TowerTypesListBox].update(None, set_to_index=selected_tower_index)
         self._window[GuiKeys.NewTowerTypeInput].update(selected_tower_text, )
 
     def update_selected_existing_tower(self, is_hero: bool):
@@ -70,8 +73,8 @@ class GuiUpdater:
         list_box_items = GuiFormatters.format_existing_towers(towers_container)
         list_box.update(values=list_box_items, set_to_index=selected_index)
         for i in range(len(list_box_items)):
-            listbox_widget: tkinter.Listbox = list_box.widget
-            listbox_widget.itemconfig(i, bg=towers_container.get_tower_color(tower_id=i))
+            change_cell_color(listbox_widget=list_box.widget, index=i,
+                              color=towers_container.get_tower_color(tower_id=i))
 
     def update_script_box(self, activity_container: ActivityContainer, selected_index: int = None):
         output = []
@@ -96,9 +99,8 @@ class GuiUpdater:
         list_box = self._window[GuiKeys.ScriptBox]
         list_box.update(values=output, set_to_index=selected_index)
         for i, script_entry in enumerate(activity_container.script_container):
-            listbox_widget: tkinter.Listbox = list_box.widget
-            listbox_widget.itemconfig(i,
-                                      bg=activity_container.towers_container.get_tower_color(tower_id=script_entry.id))
+            change_cell_color(listbox_widget=list_box.widget, index=i,
+                              color=activity_container.towers_container.get_tower_color(tower_id=script_entry.id))
 
         if selected_index is not None:
             self._window[GuiKeys.ScriptBox].Widget.see(selected_index)
