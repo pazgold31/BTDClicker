@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 from common.game_classes.enums import Difficulty
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_menu import GuiMenu
-from script_maker.gui.gui_options import get_tower_options, get_hero_options
+from script_maker.gui.gui_options import get_hero_options
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "impopable": Difficulty.impopable}
@@ -14,19 +14,20 @@ DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
 
 def get_layout() -> List[List[Any]]:
     menu = [[GuiMenu.File.MenuName, [GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]],
-            [GuiMenu.ViewedTowers.MenuName, [GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
-                                             GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support]]]
+            [GuiMenu.ViewedTowers.MenuName,
+             [GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
+              GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support]]]
 
     left_col = [
         [sg.Frame("Difficulty",
-                  layout=[[sg.Combo(list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
+                  layout=[[sg.Combo(values=list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
                                     key=GuiKeys.DifficultyListBox, enable_events=True)]]),
          sg.Frame("Hero",
-                  layout=[[sg.Combo(get_hero_options(), default_value=get_hero_options()[0],
+                  layout=[[sg.Combo(values=get_hero_options(), default_value=get_hero_options()[0],
                                     key=GuiKeys.HeroCombo, enable_events=True)],
                           [sg.Text("(you still need to manually choose the hero before starting the game)")]])],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
-        [sg.Listbox(values=get_tower_options(),
+        [sg.Listbox(values=[],
                     select_mode="extended", key=GuiKeys.TowerTypesListBox, size=(30, 25), enable_events=True),
          sg.Listbox(values=[],
                     select_mode="extended", key=GuiKeys.ExistingTowersListBox, size=(75, 25), enable_events=True),

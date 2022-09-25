@@ -5,8 +5,9 @@ from common.towers_info.game_info import HEROES_INFO, TOWERS_INFO
 from common.towers_info.info_classes import TowerInfo
 
 
-def get_tower_options(difficulty: Difficulty = Difficulty.easy, chosen_hero: str = None,
-                      towers_filter: Callable[[TowerInfo], bool] = lambda x: True) -> List[str]:
+def get_tower_options(towers_filter: Callable[[TowerInfo], bool],
+                      difficulty: Difficulty = Difficulty.easy,
+                      chosen_hero: str = None) -> List[str]:
     hero_str = "Hero" if not chosen_hero else \
         f"Hero | {chosen_hero}: {HEROES_INFO[chosen_hero].base_cost.get_mapping()[difficulty]}"
     return [hero_str] + \

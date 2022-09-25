@@ -37,15 +37,18 @@ class GuiClass:
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
 
+        self.handle_viewed_towers(event=event, values=values)
+
     def _add_hotkey_binds(self):
         self._window.bind("<Control-o>", GuiMenu.File.Import)
         self._window.bind("<Control-s>", GuiMenu.File.Save)
         self._window.bind("<Control-Shift-S>", GuiMenu.File.SaveAs)
 
-        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.Primary)
-        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Military)
-        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Magic)
-        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Support)
+        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.All)
+        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Primary)
+        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Military)
+        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Magic)
+        self._window.bind("<Control_L>5", GuiMenu.ViewedTowers.Support)
 
     def run(self):
         callback_map = self.get_callback_map()
@@ -112,8 +115,7 @@ class GuiClass:
                                                    y=int(values[GuiKeys.YPositionInput]),
                                                    index=entry_index_to_select)
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
@@ -151,10 +153,8 @@ class GuiClass:
         else:
             raise RuntimeError
 
-        self._gui_updater.update_existing_towers_and_script(
-            towers_container=self._activity_container.towers_container,
-            script_container=self._activity_container.script_container,
-            selected_script_index=entry_index_to_select)
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
 
     def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
@@ -164,8 +164,7 @@ class GuiClass:
         selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         self._activity_container.delete_entry(selected_entry_index)
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=selected_entry_index)
 
     def handle_move_up_on_script(self, event: EventType, values: ValuesType):
@@ -180,8 +179,7 @@ class GuiClass:
             sg.popup("Item already first!")
             return
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=selected_entry_index - 1)
 
     def handle_move_down_on_script(self, event: EventType, values: ValuesType):
@@ -196,8 +194,7 @@ class GuiClass:
             sg.popup("Item already last!")
             return
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container,
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=selected_entry_index + 1)
 
     def handle_save_button(self, event: EventType, values: ValuesType):
@@ -233,8 +230,7 @@ class GuiClass:
             script_entries=self._activity_container.script_container,
             metadata=self._metadata)
 
-        self._gui_updater.update_existing_towers_and_script(towers_container=self._activity_container.towers_container,
-                                                            script_container=self._activity_container.script_container)
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 
     def handle_viewed_towers(self, event: EventType, values: ValuesType):
         if GuiMenu.ViewedTowers.Primary == event:
@@ -245,6 +241,8 @@ class GuiClass:
             self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Magic)
         elif GuiMenu.ViewedTowers.Support == event:
             self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Support)
+        else:
+            self._gui_updater.update_tower_types(towers_filter=lambda x: True)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
@@ -266,6 +264,6 @@ class GuiClass:
             GuiMenu.File.Import: self.handle_import_button,
             **{
                 i: self.handle_viewed_towers for i in (
-                    GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military, GuiMenu.ViewedTowers.Magic,
-                    GuiMenu.ViewedTowers.Support)}
+                    GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
+                    GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support)}
         }

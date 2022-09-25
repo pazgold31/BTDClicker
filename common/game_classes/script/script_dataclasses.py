@@ -27,35 +27,34 @@ class IScriptEntry(BaseModel):
     action: str
 
 
-class CreateTowerEntry(IScriptEntry):
-    name: str
+class ITowerModifyingScriptEntry(IScriptEntry):
     id: int
+
+
+class CreateTowerEntry(ITowerModifyingScriptEntry):
+    action: str = Actions.create
+    name: str
     x: int
     y: int
-    action: str = Actions.create
 
 
-class UpgradeTowerEntry(IScriptEntry):
-    id: int
-    tier: UpgradeTier
+class UpgradeTowerEntry(ITowerModifyingScriptEntry):
     action: str = Actions.upgrade
+    tier: UpgradeTier
 
     class Config:
         use_enum_values = True
 
 
-class SellTowerEntry(IScriptEntry):
-    id: int
+class SellTowerEntry(ITowerModifyingScriptEntry):
     action: str = Actions.sell
 
 
-class ChangeTargetingEntry(IScriptEntry):
-    id: int
+class ChangeTargetingEntry(ITowerModifyingScriptEntry):
     action: str = Actions.change_targeting
 
 
-class ChangeSpecialTargetingEntry(IScriptEntry):
-    id: int
+class ChangeSpecialTargetingEntry(ITowerModifyingScriptEntry):
     action: str = Actions.change_special_targeting
 
 
