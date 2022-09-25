@@ -18,6 +18,7 @@ from common.game_classes.script.script_dataclasses import CreateTowerEntry, Upgr
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.game_classes.tower import BaseTower
+from common.hotkeys import Hotkeys
 from common.keyboard import is_language_valid
 
 
@@ -53,10 +54,29 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
     return script, tower_map
 
 
+class ClickerState:
+    def __init__(self):
+        self._stopped = False
+
+    def stop(self):
+        print("Stop")
+        self._stopped = True
+
+    def run(self):
+        print("Running")
+        self._stopped = False
+
+    def is_stopped(self):
+        return self._stopped
+
+
 def main():
     if not is_language_valid():
         raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
     ahk = AHK()
+    clicker_state = ClickerState()
+    Hotkeys.add_hotkey("ctrl + shift + s", clicker_state.stop)
+    Hotkeys.add_hotkey("ctrl + shift + c", clicker_state.run)
     total_dict = load_script_dict()
     metadata = parse_metadata(json_dict=total_dict)
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
@@ -65,7 +85,7 @@ def main():
     for action in script:
         print(f"Next: {action.get_action_message()}")
         while True:
-            if action.can_act():
+            if not clicker_state.is_stopped() and action.can_act():
                 action.act()
                 break
 

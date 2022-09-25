@@ -10,7 +10,6 @@ from pydantic.json import pydantic_encoder
 from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.script_dataclasses import GameMetadata, Script
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.hotkeys import Hotkeys
 from common.user_files import get_files_dir
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
 from script_maker.gui.gui_keys import GuiKeys
@@ -20,13 +19,13 @@ from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
+from script_maker.script.script_hotkeys import ScriptHotkeys
 
 
-# noinspection PyUnusedLocal
 class GuiClass:
     def __init__(self, ):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
-        Hotkeys(ahk=AHK(), x_pos=self._window[GuiKeys.XPositionInput], y_pos=self._window[GuiKeys.YPositionInput])
+        ScriptHotkeys(ahk=AHK(), x_pos=self._window[GuiKeys.XPositionInput], y_pos=self._window[GuiKeys.YPositionInput])
 
         self._selected_file_path: str = None
         self._activity_container = ActivityContainer()
