@@ -7,8 +7,8 @@ from common.game_classes.script.script_dataclasses import GameMetadata, CreateTo
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.towers_info.game_info import HEROES_INFO
 from common.towers_info.info_classes import TowerInfo
-from script_maker.gui.gui_colors import ALTERNATING_LIGHT_COLOR, ALTERNATING_DARK_COLOR
-from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box, change_cell_color
+from script_maker.gui.gui_controls_utils import get_selected_index_for_list_box, change_cell_color, \
+    add_alternating_colors
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
@@ -35,9 +35,7 @@ class GuiUpdater:
                                           towers_filter=towers_filter)
         list_box = self._window[GuiKeys.TowerTypesListBox]
         list_box.update(values=tower_options)
-        for i in range(len(tower_options)):
-            color = ALTERNATING_LIGHT_COLOR if not i % 2 else ALTERNATING_DARK_COLOR
-            change_cell_color(listbox_widget=list_box.widget, index=i, color=color)
+        add_alternating_colors(listbox_widget=list_box.widget)
 
     def update_selected_difficulty(self):
         self._window[GuiKeys.DifficultyListBox].update(
