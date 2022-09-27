@@ -10,7 +10,8 @@ from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.script_dataclasses import GameMetadata, Script
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.user_files import get_files_dir
-from script_maker.gui.gui_controls_utils import are_values_set, get_selected_index_for_list_box
+from script_maker.gui.gui_controls_utils import are_values_set, get_selected_indexes_for_list_box, \
+    get_last_selected_index_for_list_box
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
@@ -78,8 +79,8 @@ class GuiClass:
         try:
             tower_name = GuiParsers.parse_selected_tower(values[GuiKeys.TowerTypesListBox][0])
             self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
-        except IndexError:
-            pass
+        except ValueError:
+            sg.popup("You must only select 1 tower type")
 
     def handle_select_existing_tower(self, event: EventType, values: ValuesType):
         try:
@@ -98,7 +99,7 @@ class GuiClass:
             sg.popup("You didn't fill all of the data!")
             return
 
-        selected_script_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        selected_script_entry_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         entry_index_to_select = None if not selected_script_entry_index else selected_script_entry_index + 1
         if "Hero" == values[GuiKeys.NewTowerTypeInput]:
             if not self._activity_container.is_hero_placeable():
@@ -120,14 +121,15 @@ class GuiClass:
                                                             selected_script_index=entry_index_to_select)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
-        if not values[GuiKeys.ExistingTowersListBox]:
-            sg.popup("You must chose a tower first!")
+        selected_towers_list = values[GuiKeys.ExistingTowersListBox]
+        if len(selected_towers_list) != 1:
+            sg.popup("You must chose exactly one tower!")
             return
 
-        selected_tower_id = GuiParsers.parse_selected_tower_id(values[GuiKeys.ExistingTowersListBox][0])
+        selected_tower_id = GuiParsers.parse_selected_tower_id(selected_towers_list[0])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
-        selected_script_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        selected_script_entry_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         entry_index_to_select = None if not selected_script_entry_index else selected_script_entry_index + 1
 
         if event in upgrade_tiers_map:
@@ -166,41 +168,47 @@ class GuiClass:
             sg.popup("You must select an entry to remove!")
             return
 
-        selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        self._activity_container.delete_entry(selected_entry_index)
+        selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        for selected_entry_index in selected_indexes:
+            self._activity_container.delete_entry(selected_entry_index)
 
+        index_to_select = selected_indexes[0] if len(selected_indexes) == 1 else None
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=selected_entry_index)
+                                                            selected_script_index=index_to_select)
 
     def handle_move_up_on_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
             sg.popup("You must select an entry to move!")
             return
 
-        selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        try:
-            self._activity_container.move_script_entry_up(entry_index=selected_entry_index)
-        except ValueError:
-            sg.popup("Item already first!")
-            return
+        selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        for selected_entry_index in selected_indexes:
+            # Order of iteration is important to ensure all items can move up.
+            try:
+                self._activity_container.move_script_entry_up(entry_index=selected_entry_index)
+            except ValueError:
+                sg.popup("Item already first!")
+                return
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=selected_entry_index - 1)
+                                                            selected_script_index=[i - 1 for i in selected_indexes])
 
     def handle_move_down_on_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
             sg.popup("You must select an entry to move!")
             return
 
-        selected_entry_index = get_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        try:
-            self._activity_container.move_script_entry_down(entry_index=selected_entry_index)
-        except ValueError:
-            sg.popup("Item already last!")
-            return
+        selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        for selected_entry_index in selected_indexes[::-1]:
+            # Going in reverse to ensure that the last entry is valid to move
+            try:
+                self._activity_container.move_script_entry_down(entry_index=selected_entry_index)
+            except ValueError:
+                sg.popup("Item already last!")
+                return
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=selected_entry_index + 1)
+                                                            selected_script_index=[i + 1 for i in selected_indexes])
 
     def handle_save_button(self, event: EventType, values: ValuesType):
         if not self._metadata.hero_type:  # TODO: support not giving a hero if it is not used

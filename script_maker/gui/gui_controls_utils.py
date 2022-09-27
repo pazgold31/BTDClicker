@@ -20,6 +20,15 @@ def get_selected_index_for_list_box(window: sg.Window, key: str) -> int:
     return None if len(indexes) == 0 else indexes[0]
 
 
+def get_selected_indexes_for_list_box(window: sg.Window, key: str) -> List[int]:
+    return window[key].get_indexes()
+
+
+def get_last_selected_index_for_list_box(window: sg.Window, key: str) -> int:
+    indexes = window[key].get_indexes()
+    return None if len(indexes) == 0 else indexes[-1]
+
+
 def change_cell_color(listbox_widget: tkinter.Listbox, index: int, color: str):
     listbox_widget.itemconfig(index, bg=color)
 
