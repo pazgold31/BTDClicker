@@ -1,17 +1,16 @@
 from PySimpleGUI import Input
-from ahk import AHK
+import pyautogui
 
 from common.hotkeys import Hotkeys
 
 
 class ScriptHotkeys:
-    def __init__(self, ahk: AHK, x_pos: Input, y_pos: Input):
-        self._ahk = ahk
+    def __init__(self, x_pos: Input, y_pos: Input):
         self._x_pos = x_pos
         self._y_pos = y_pos
 
     def _record_tower(self):
-        x, y = self._ahk.mouse_position
+        x, y = pyautogui.position()
         self._x_pos.update(x)
         self._y_pos.update(y)
 

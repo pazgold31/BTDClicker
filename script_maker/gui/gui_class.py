@@ -4,7 +4,6 @@ from typing import Dict
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
-from ahk import AHK
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import UpgradeTier, TowerType
@@ -16,6 +15,7 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
+from script_maker.gui.gui_popups import popup_get_position
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
@@ -25,8 +25,7 @@ from script_maker.script.script_hotkeys import ScriptHotkeys
 class GuiClass:
     def __init__(self, ):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
-        self._ahk = AHK()
-        self._script_global_hotkeys = ScriptHotkeys(ahk=self._ahk, x_pos=self._window[GuiKeys.XPositionInput],
+        self._script_global_hotkeys = ScriptHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
                                                     y_pos=self._window[GuiKeys.YPositionInput])
         self._script_global_hotkeys.record_towers_position()
 
@@ -121,37 +120,9 @@ class GuiClass:
                                                             selected_script_index=entry_index_to_select)
 
     def _handle_modify_tower(self, selected_tower_id: int):
-        x_pos_key = "-ModifyTowerXpos-"
-        y_pos_key = "-ModifyTowerYpos-"
-        save_button_key = "-ModifyTowerSaveButton-"
-        layout = [[sg.Text(f"Modifying tower with id: {selected_tower_id}")],
-                  [sg.Text("Click Ctrl + Shift + R to capture mouse position.")],
-                  [
-                      sg.Text("X"),
-                      sg.In(size=(5, 1), enable_events=True, key=x_pos_key),
-                      sg.Text("Y"),
-                      sg.In(size=(5, 1), enable_events=True, key=y_pos_key)
-                  ],
-                  [sg.Button("Save", enable_events=True, key=save_button_key)]]
-
-        window = sg.Window("Second Window", layout, modal=True)
         self._script_global_hotkeys.stop_recording_towers_position()
-        with ScriptHotkeys(ahk=self._ahk, x_pos=window[x_pos_key], y_pos=window[y_pos_key]):
-            while True:
-                event, values = window.read()
-                if event == save_button_key:
-                    if not values[x_pos_key] or not values[y_pos_key]:
-                        sg.popup("You must specify position")
-                        continue
-
-                    self._activity_container.change_position(tower_id=selected_tower_id, x=values[x_pos_key],
-                                                             y=values[y_pos_key])
-                    break
-
-                if event == "Exit" or event == sg.WIN_CLOSED:
-                    break
-
-        window.close()
+        x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+        self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
         self._script_global_hotkeys.record_towers_position()
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
