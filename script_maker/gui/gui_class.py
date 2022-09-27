@@ -23,8 +23,9 @@ from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.script_hotkeys import ScriptHotkeys
 
 
+# noinspection PyUnusedLocal
 class GuiClass:
-    def __init__(self, ):
+    def __init__(self):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
         self._script_global_hotkeys = ScriptHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
                                                     y_pos=self._window[GuiKeys.YPositionInput])
@@ -255,7 +256,7 @@ class GuiClass:
         elif GuiMenu.ViewedTowers.Support == event:
             self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Support)
         else:
-            self._gui_updater.update_tower_types(towers_filter=lambda x: True)
+            self._gui_updater.update_tower_types(towers_filter=lambda _: True)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {

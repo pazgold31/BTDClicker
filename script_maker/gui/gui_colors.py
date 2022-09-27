@@ -104,7 +104,7 @@ EXISTING_TOWERS_COLORS = [
     "#FAF0E6",  # linen
     "#FDF5E6",  # old lace
     "#FFEFD5",  # papaya whip
-    "#FFF5EE",  # sea shell
+    "#FFF5EE",  # seashell
     "#708090",  # slate gray
     "#778899",  # light slate gray
     "#B0C4DE",  # light steel blue

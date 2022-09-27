@@ -1,6 +1,7 @@
 # noinspection PyPep8Naming
 from typing import Callable, Union, List
 
+# noinspection PyPep8Naming
 import PySimpleGUI as sg
 
 from common.game_classes.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, \
@@ -24,7 +25,7 @@ class GuiUpdater:
 
     def update_difficulty(self):
         self._window[GuiKeys.TowerTypesListBox].update(
-            get_tower_options(towers_filter=lambda x: True, difficulty=self._metadata.difficulty,
+            get_tower_options(towers_filter=lambda _: True, difficulty=self._metadata.difficulty,
                               chosen_hero=self._metadata.hero_type), )
         selected_hero_index = get_first_selected_index_for_list_box(window=self._window, key=GuiKeys.HeroCombo)
         hero_options = get_hero_options(difficulty=self._metadata.difficulty)
@@ -44,7 +45,8 @@ class GuiUpdater:
 
     def update_hero(self):
         self._window[GuiKeys.TowerTypesListBox].update(values=get_tower_options(difficulty=self._metadata.difficulty,
-                                                                                chosen_hero=self._metadata.hero_type))
+                                                                                chosen_hero=self._metadata.hero_type,
+                                                                                towers_filter=lambda _: True), )
 
     def update_selected_hero(self):
         hero_cost = HEROES_INFO[self._metadata.hero_type].base_cost.get_mapping()[self._metadata.difficulty]
