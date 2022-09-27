@@ -1,13 +1,13 @@
 import json
 import os
-from typing import Dict
+from typing import Dict, List
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import UpgradeTier, TowerType
-from common.game_classes.script.script_dataclasses import GameMetadata, Script
+from common.game_classes.script.script_dataclasses import GameMetadata, Script, IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.user_files import get_files_dir
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_indexes_for_list_box, \
@@ -42,6 +42,8 @@ class GuiClass:
 
         self.handle_viewed_towers(event=event, values=values)
 
+        self._clip_boarded_script_entries: List[IScriptEntry] = []
+
     def _add_hotkey_binds(self):
         self._window.bind("<Control-o>", GuiMenu.File.Import)
         self._window.bind("<Control-s>", GuiMenu.File.Save)
@@ -52,6 +54,9 @@ class GuiClass:
         self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Military)
         self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Magic)
         self._window.bind("<Control_L>5", GuiMenu.ViewedTowers.Support)
+
+        self._window[GuiKeys.ScriptBox].bind("<Control_L>c", GuiKeys.CopyToClipboard)
+        self._window[GuiKeys.ScriptBox].bind("<Control_L>v", GuiKeys.PasteClipboard)
 
     def run(self):
         callback_map = self.get_callback_map()
@@ -131,7 +136,7 @@ class GuiClass:
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
         selected_script_entry_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        entry_index_to_select = None if not selected_script_entry_index else selected_script_entry_index + 1
+        entry_index_to_select = None if selected_script_entry_index is None else selected_script_entry_index + 1
 
         if event in upgrade_tiers_map:
             try:
@@ -170,8 +175,13 @@ class GuiClass:
             return
 
         selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        for selected_entry_index in selected_indexes:
-            self._activity_container.delete_entry(selected_entry_index)
+        for selected_entry_index in selected_indexes[::-1]:
+            # Going in reverse to allow deletion of towers.
+            try:
+                self._activity_container.delete_entry(selected_entry_index)
+            except ValueError:
+                sg.popup("Invalid deletion attempted.")
+                continue
 
         index_to_select = selected_indexes[0] if len(selected_indexes) == 1 else None
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
@@ -258,6 +268,24 @@ class GuiClass:
         else:
             self._gui_updater.update_tower_types(towers_filter=lambda _: True)
 
+    def handle_copy_on_script(self, event: EventType, values: ValuesType):
+        self._clip_boarded_script_entries = [self._activity_container.script_container[i] for i in
+                                             get_selected_indexes_for_list_box(window=self._window,
+                                                                               key=GuiKeys.ScriptBox)]
+
+    def handle_paste_on_script(self, event: EventType, values: ValuesType):
+        if not self._clip_boarded_script_entries:
+            return
+
+        last_selected_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        new_entry_index = None if last_selected_index is None else last_selected_index + 1
+        print(new_entry_index)
+
+        self._activity_container.duplicate_script_entries(entries=self._clip_boarded_script_entries,
+                                                          new_index=new_entry_index)
+
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
+
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
@@ -279,5 +307,7 @@ class GuiClass:
             **{
                 i: self.handle_viewed_towers for i in (
                     GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
-                    GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support)}
+                    GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support)},
+            GuiKeys.ScriptBox + GuiKeys.CopyToClipboard: self.handle_copy_on_script,
+            GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script
         }
