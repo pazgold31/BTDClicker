@@ -100,7 +100,7 @@ class GuiClass:
             return
 
         selected_script_entry_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        entry_index_to_select = None if not selected_script_entry_index else selected_script_entry_index + 1
+        entry_index_to_select = None if selected_script_entry_index is None else selected_script_entry_index + 1
         if "Hero" == values[GuiKeys.NewTowerTypeInput]:
             if not self._activity_container.is_hero_placeable():
                 sg.popup("Your Hero is already placed!")
