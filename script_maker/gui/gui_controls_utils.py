@@ -12,12 +12,21 @@ def are_values_set(values: ValuesType, *args: List[str]) -> bool:
     return all(values[i] for i in args)
 
 
-def get_selected_index_for_list_box(window: sg.Window, key: str) -> int:
-    indexes = window[key].get_indexes()
+def get_selected_indexes_for_list_box(window: sg.Window, key: str) -> List[int]:
+    return window[key].get_indexes()
+
+
+def get_first_selected_index_for_list_box(window: sg.Window, key: str) -> int:
+    indexes = get_selected_indexes_for_list_box(window=window, key=key)
     if len(indexes) > 1:
         raise ValueError
 
     return None if len(indexes) == 0 else indexes[0]
+
+
+def get_last_selected_index_for_list_box(window: sg.Window, key: str) -> int:
+    indexes = get_selected_indexes_for_list_box(window=window, key=key)
+    return None if len(indexes) == 0 else indexes[-1]
 
 
 def change_cell_color(listbox_widget: tkinter.Listbox, index: int, color: str):

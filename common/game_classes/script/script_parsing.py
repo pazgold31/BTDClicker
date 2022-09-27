@@ -1,7 +1,7 @@
 from typing import Dict, List
 
-from common.game_classes.script.script_dataclasses import ACTION_KEYWORD, Actions, CreateTowerEntry, UpgradeTowerEntry, \
-    ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata
+from common.game_classes.script.script_dataclasses import ACTION_KEYWORD, Actions, CreateTowerEntry, \
+    UpgradeTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata
 from common.game_classes.tower import Tower, Hero, BaseTower
 
 

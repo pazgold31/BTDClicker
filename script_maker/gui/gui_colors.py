@@ -61,7 +61,6 @@ EXISTING_TOWERS_COLORS = [
     "#ADD8E6",  # light blue
     "#87CEEB",  # sky blue
     "#87CEFA",  # light sky blue
-    "#000080",  # navy
     "#4169E1",  # royal blue
     "#8A2BE2",  # blue violet
     "#4B0082",  # indigo
@@ -105,7 +104,7 @@ EXISTING_TOWERS_COLORS = [
     "#FAF0E6",  # linen
     "#FDF5E6",  # old lace
     "#FFEFD5",  # papaya whip
-    "#FFF5EE",  # sea shell
+    "#FFF5EE",  # seashell
     "#708090",  # slate gray
     "#778899",  # light slate gray
     "#B0C4DE",  # light steel blue

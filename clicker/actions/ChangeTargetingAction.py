@@ -3,8 +3,8 @@ import time
 from ahk import AHK
 
 from clicker.actions.IAction import IAction
-from clicker.consts.timing_consts import CLICK_DELAY
 from clicker.consts.keymap import Keymap
+from clicker.consts.timing_consts import CLICK_DELAY
 from common.game_classes.tower import Tower
 
 
