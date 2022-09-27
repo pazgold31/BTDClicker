@@ -1,5 +1,7 @@
-from PySimpleGUI import Input
+import contextlib
+
 import pyautogui
+from PySimpleGUI import Input
 
 from common.hotkeys import Hotkeys
 
@@ -19,6 +21,14 @@ class ScriptHotkeys:
 
     def stop_recording_towers_position(self):
         Hotkeys.remove_hotkey(self._record_tower)
+
+    @contextlib.contextmanager
+    def pause_capture(self):
+        try:
+            self.stop_recording_towers_position()
+            yield
+        finally:
+            self.record_towers_position()
 
     def __enter__(self):
         self.record_towers_position()

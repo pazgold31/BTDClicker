@@ -43,9 +43,7 @@ EXISTING_TOWERS_COLORS = [
     "#66CDAA",  # medium aqua marine
     "#3CB371",  # medium sea green
     "#20B2AA",  # light sea green
-    "#2F4F4F",  # dark slate gray
     "#008080",  # teal
-    "#008B8B",  # dark cyan
     "#00FFFF",  # aqua
     "#00FFFF",  # cyan
     "#E0FFFF",  # light cyan

@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
-    ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry
+    ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry, ITowerModifyingScriptEntry
 from common.game_classes.tower import Tower
 from common.towers_info.game_info import TOWERS_INFO
 from script_maker.script.script_container import ScriptContainer
@@ -93,7 +93,7 @@ class ActivityContainer:
     def delete_tower(self, tower_id: int):
         self._towers_container.pop(tower_id)
         for entry in copy.copy(self._script_container):
-            if hasattr(entry, "id") and getattr(entry, "id") == tower_id:
+            if isinstance(entry, ITowerModifyingScriptEntry) == tower_id and entry.id == tower_id:
                 self._script_container.remove(entry)
 
     def delete_entry(self, entry_index: int):

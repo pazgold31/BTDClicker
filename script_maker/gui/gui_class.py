@@ -119,12 +119,6 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
 
-    def _handle_modify_tower(self, selected_tower_id: int):
-        self._script_global_hotkeys.stop_recording_towers_position()
-        x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
-        self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
-        self._script_global_hotkeys.record_towers_position()
-
     def handle_tower_modification(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ExistingTowersListBox]:
             sg.popup("You must chose a tower first!")
@@ -156,7 +150,9 @@ class GuiClass:
             self._activity_container.change_special_targeting(tower_id=selected_tower_id,
                                                               index=entry_index_to_select)
         elif event == GuiKeys.ModifyTowerButton:
-            self._handle_modify_tower(selected_tower_id=selected_tower_id)
+            with self._script_global_hotkeys.pause_capture():
+                x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+                self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
         elif event == GuiKeys.DeleteTowerButton:
             self._activity_container.delete_tower(tower_id=selected_tower_id)
         else:
