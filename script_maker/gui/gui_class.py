@@ -175,8 +175,13 @@ class GuiClass:
             return
 
         selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        for selected_entry_index in selected_indexes:
-            self._activity_container.delete_entry(selected_entry_index)
+        for selected_entry_index in selected_indexes[::-1]:
+            # Going in reverse to allow deletion of towers.
+            try:
+                self._activity_container.delete_entry(selected_entry_index)
+            except ValueError:
+                sg.popup("Invalid deletion attempted.")
+                continue
 
         index_to_select = selected_indexes[0] if len(selected_indexes) == 1 else None
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,

@@ -1,6 +1,6 @@
 from typing import List
 
-from common.game_classes.script.script_dataclasses import IScriptEntry, CreateTowerEntry
+from common.game_classes.script.script_dataclasses import IScriptEntry, CreateTowerEntry, ITowerModifyingScriptEntry
 
 
 class ScriptContainer(List[IScriptEntry]):
@@ -13,3 +13,11 @@ class ScriptContainer(List[IScriptEntry]):
             if isinstance(entry, CreateTowerEntry) and entry.id == tower_id:
                 entry.x = x
                 entry.y = y
+
+    def get_entries_for_id(self, tower_id: int) -> List[ITowerModifyingScriptEntry]:
+        output = []
+        for entry in self:
+            if isinstance(entry, ITowerModifyingScriptEntry) and entry.id == tower_id:
+                output.append(entry)
+
+        return output

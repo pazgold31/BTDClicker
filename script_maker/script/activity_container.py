@@ -1,4 +1,3 @@
-import copy
 from typing import List, Dict
 
 from common.game_classes.enums import UpgradeTier
@@ -92,12 +91,27 @@ class ActivityContainer:
 
     def delete_tower(self, tower_id: int):
         self._towers_container.pop(tower_id)
-        for entry in copy.copy(self._script_container):
-            if isinstance(entry, ITowerModifyingScriptEntry) == tower_id and entry.id == tower_id:
-                self._script_container.remove(entry)
+        for entry in self._script_container.get_entries_for_id(tower_id=tower_id):
+            self._script_container.remove(entry)
 
     def delete_entry(self, entry_index: int):
         try:
+            entry = self._script_container[entry_index]
+            if isinstance(entry, CreateTowerEntry):
+                if len(self._script_container.get_entries_for_id(tower_id=entry.id)) != 1:
+                    raise ValueError
+
+                self._towers_container.pop(entry.id)
+
+            if isinstance(entry, UpgradeTowerEntry):
+                self._towers_container[entry.id].tier_map[entry.tier] -= 1
+            elif isinstance(entry, SellTowerEntry):
+                self._towers_container.get_additional_tower_information()[entry.id].sold += False
+            elif isinstance(entry, ChangeTargetingEntry):
+                self._towers_container.get_additional_tower_information()[entry.id].targeting -= 1
+            elif isinstance(entry, ChangeSpecialTargetingEntry):
+                self._towers_container.get_additional_tower_information()[entry.id].s_targeting -= 1
+
             self._script_container.pop(entry_index)
         except IndexError:
             raise ValueError("Invalid entry index")
