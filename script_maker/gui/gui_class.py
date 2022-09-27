@@ -4,7 +4,6 @@ from typing import Dict
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
-from ahk import AHK
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import UpgradeTier, TowerType
@@ -16,6 +15,7 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
+from script_maker.gui.gui_popups import popup_get_position
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
@@ -25,7 +25,9 @@ from script_maker.script.script_hotkeys import ScriptHotkeys
 class GuiClass:
     def __init__(self, ):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
-        ScriptHotkeys(ahk=AHK(), x_pos=self._window[GuiKeys.XPositionInput], y_pos=self._window[GuiKeys.YPositionInput])
+        self._script_global_hotkeys = ScriptHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
+                                                    y_pos=self._window[GuiKeys.YPositionInput])
+        self._script_global_hotkeys.record_towers_position()
 
         self._selected_file_path: str = None
         self._activity_container = ActivityContainer()
@@ -147,6 +149,10 @@ class GuiClass:
         elif event == GuiKeys.SpecialTargetingButton:
             self._activity_container.change_special_targeting(tower_id=selected_tower_id,
                                                               index=entry_index_to_select)
+        elif event == GuiKeys.ModifyTowerButton:
+            with self._script_global_hotkeys.pause_capture():
+                x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+                self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
         elif event == GuiKeys.DeleteTowerButton:
             self._activity_container.delete_tower(tower_id=selected_tower_id)
         else:
@@ -255,7 +261,7 @@ class GuiClass:
                 i: self.handle_tower_modification for i in (
                     GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
                     GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton,
-                    GuiKeys.DeleteTowerButton)},
+                    GuiKeys.ModifyTowerButton, GuiKeys.DeleteTowerButton)},
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,

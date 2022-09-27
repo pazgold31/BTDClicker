@@ -58,7 +58,8 @@ def get_layout() -> List[List[Any]]:
             sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
         ],
         [sg.HSeparator()],
-        [sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)]
+        [sg.Button("Modify Tower", size=(15, 1), enable_events=True, key=GuiKeys.ModifyTowerButton),
+         sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)]
     ]
 
     bottom_left_col = [[sg.Text("Script:")],

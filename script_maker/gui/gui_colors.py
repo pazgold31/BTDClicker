@@ -43,9 +43,7 @@ EXISTING_TOWERS_COLORS = [
     "#66CDAA",  # medium aqua marine
     "#3CB371",  # medium sea green
     "#20B2AA",  # light sea green
-    "#2F4F4F",  # dark slate gray
     "#008080",  # teal
-    "#008B8B",  # dark cyan
     "#00FFFF",  # aqua
     "#00FFFF",  # cyan
     "#E0FFFF",  # light cyan
@@ -63,10 +61,7 @@ EXISTING_TOWERS_COLORS = [
     "#ADD8E6",  # light blue
     "#87CEEB",  # sky blue
     "#87CEFA",  # light sky blue
-    "#191970",  # midnight blue
     "#000080",  # navy
-    "#00008B",  # dark blue
-    "#0000CD",  # medium blue
     "#4169E1",  # royal blue
     "#8A2BE2",  # blue violet
     "#4B0082",  # indigo

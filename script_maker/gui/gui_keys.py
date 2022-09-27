@@ -17,6 +17,7 @@ class GuiKeys:
     SpecialTargetingButton = "-s_targeting_button-"
     ScriptBox = "-script_box-"
     DeleteFromScriptButton = "-delete-from-script"
+    ModifyTowerButton = "-modify-tower-button"
     DeleteTowerButton = "-delete-tower-button"
     MoveDownInScriptButton = "-move-down-in-script"
     MoveUpInScriptButton = "-move-up-in-script"
