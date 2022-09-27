@@ -21,3 +21,6 @@ class GuiKeys:
     DeleteTowerButton = "-delete-tower-button"
     MoveDownInScriptButton = "-move-down-in-script"
     MoveUpInScriptButton = "-move-up-in-script"
+
+    CopyToClipboard = "-copy-to-clipboard-"
+    PasteClipboard = "-paste-clipboard-"

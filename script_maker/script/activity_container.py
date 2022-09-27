@@ -51,8 +51,8 @@ class ActivityContainer:
         else:
             self._script_container.insert(index, entry)
 
-    def add_new_tower(self, name: str, x: int, y: int, index: int = None):
-        tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y)
+    def add_new_tower(self, name: str, x: int, y: int, index: int = None, tower_id: int = None):
+        tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y, tower_id=tower_id)
 
         self._add_entry(CreateTowerEntry(name=name, id=tower_id, x=x, y=y), index=index)
 
@@ -115,3 +115,32 @@ class ActivityContainer:
                 self._script_container[entry_index + 1], self._script_container[entry_index]
         except IndexError:
             raise ValueError("Entry is already at the bottom")
+
+    def duplicate_script_entry(self, entry: IScriptEntry, new_index: int = None, new_id: int = None):
+        if isinstance(entry, ITowerModifyingScriptEntry):
+            id_to_modify = new_id or entry.id
+            if isinstance(entry, CreateTowerEntry):
+                if not new_id or "Hero" == entry.name:
+                    raise RuntimeError
+
+                self.add_new_tower(name=entry.name, x=entry.x, y=entry.y, index=new_index, tower_id=id_to_modify)
+            if isinstance(entry, UpgradeTowerEntry):
+                self.upgrade_tower(tower_id=id_to_modify, tier=entry.tier, index=new_index)
+            elif isinstance(entry, SellTowerEntry):
+                self.sell_tower(tower_id=id_to_modify, index=new_index)
+            elif isinstance(entry, ChangeTargetingEntry):
+                self.change_targeting(tower_id=id_to_modify, index=new_index)
+            elif isinstance(entry, ChangeSpecialTargetingEntry):
+                self.change_special_targeting(tower_id=id_to_modify, index=new_index)
+        else:
+            raise RuntimeError
+
+    def duplicate_script_entries(self, entries: List[IScriptEntry], new_index: int = None):
+        new_tower_id = None
+        if isinstance(entries[0], CreateTowerEntry):
+            new_tower_id = self._towers_container.generate_new_id()
+
+        for entry in entries:
+            self.duplicate_script_entry(entry=entry, new_index=new_index, new_id=new_tower_id)
+            if new_index is not None:
+                new_index += 1

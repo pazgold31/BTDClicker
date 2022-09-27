@@ -16,20 +16,23 @@ class TowersContainer(Dict[int, Tower]):
         self._colors_generator = itertools.chain(EXISTING_TOWERS_COLORS)
         self._colors_map: Dict[int, str] = {}
 
+    def generate_new_id(self) -> int:
+        return next(self._id_generator)
+
     def set_towers(self, value: Dict[int, Tower]):
         super(TowersContainer, self).__init__(value)
         self._additional_tower_information = {i: AdditionalTowerInfo() for i in
                                               self.keys()}  # TODO: load the additional info
         self._id_generator = itertools.count(max(self.keys()) + 1)
 
-    def add_new_tower(self, name: str, x: int, y: int) -> int:
-        tower_id = next(self._id_generator)
+    def add_new_tower(self, name: str, x: int, y: int, tower_id: int = None) -> int:
+        tower_id = tower_id or self.generate_new_id()
         self[tower_id] = Tower(name=name, x=x, y=y)
         self._additional_tower_information[tower_id] = AdditionalTowerInfo()
         return tower_id
 
     def add_hero(self, name: str, x: int, y: int) -> int:
-        tower_id = next(self._id_generator)
+        tower_id = self.generate_new_id()
         self[tower_id] = Hero(name=name, x=x, y=y)
         self._additional_tower_information[tower_id] = AdditionalTowerInfo()
         return tower_id
