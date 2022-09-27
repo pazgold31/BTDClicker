@@ -63,10 +63,7 @@ EXISTING_TOWERS_COLORS = [
     "#ADD8E6",  # light blue
     "#87CEEB",  # sky blue
     "#87CEFA",  # light sky blue
-    "#191970",  # midnight blue
     "#000080",  # navy
-    "#00008B",  # dark blue
-    "#0000CD",  # medium blue
     "#4169E1",  # royal blue
     "#8A2BE2",  # blue violet
     "#4B0082",  # indigo

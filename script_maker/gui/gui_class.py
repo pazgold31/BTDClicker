@@ -25,7 +25,10 @@ from script_maker.script.script_hotkeys import ScriptHotkeys
 class GuiClass:
     def __init__(self, ):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
-        ScriptHotkeys(ahk=AHK(), x_pos=self._window[GuiKeys.XPositionInput], y_pos=self._window[GuiKeys.YPositionInput])
+        self._ahk = AHK()
+        self._script_global_hotkeys = ScriptHotkeys(ahk=self._ahk, x_pos=self._window[GuiKeys.XPositionInput],
+                                                    y_pos=self._window[GuiKeys.YPositionInput])
+        self._script_global_hotkeys.record_towers_position()
 
         self._selected_file_path: str = None
         self._activity_container = ActivityContainer()
@@ -117,6 +120,40 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
 
+    def _handle_modify_tower(self, selected_tower_id: int):
+        x_pos_key = "-ModifyTowerXpos-"
+        y_pos_key = "-ModifyTowerYpos-"
+        save_button_key = "-ModifyTowerSaveButton-"
+        layout = [[sg.Text(f"Modifying tower with id: {selected_tower_id}")],
+                  [sg.Text("Click Ctrl + Shift + R to capture mouse position.")],
+                  [
+                      sg.Text("X"),
+                      sg.In(size=(5, 1), enable_events=True, key=x_pos_key),
+                      sg.Text("Y"),
+                      sg.In(size=(5, 1), enable_events=True, key=y_pos_key)
+                  ],
+                  [sg.Button("Save", enable_events=True, key=save_button_key)]]
+
+        window = sg.Window("Second Window", layout, modal=True)
+        self._script_global_hotkeys.stop_recording_towers_position()
+        with ScriptHotkeys(ahk=self._ahk, x_pos=window[x_pos_key], y_pos=window[y_pos_key]):
+            while True:
+                event, values = window.read()
+                if event == save_button_key:
+                    if not values[x_pos_key] or not values[y_pos_key]:
+                        sg.popup("You must specify position")
+                        continue
+
+                    self._activity_container.change_position(tower_id=selected_tower_id, x=values[x_pos_key],
+                                                             y=values[y_pos_key])
+                    break
+
+                if event == "Exit" or event == sg.WIN_CLOSED:
+                    break
+
+        window.close()
+        self._script_global_hotkeys.record_towers_position()
+
     def handle_tower_modification(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ExistingTowersListBox]:
             sg.popup("You must chose a tower first!")
@@ -147,6 +184,8 @@ class GuiClass:
         elif event == GuiKeys.SpecialTargetingButton:
             self._activity_container.change_special_targeting(tower_id=selected_tower_id,
                                                               index=entry_index_to_select)
+        elif event == GuiKeys.ModifyTowerButton:
+            self._handle_modify_tower(selected_tower_id=selected_tower_id)
         elif event == GuiKeys.DeleteTowerButton:
             self._activity_container.delete_tower(tower_id=selected_tower_id)
         else:
@@ -255,7 +294,7 @@ class GuiClass:
                 i: self.handle_tower_modification for i in (
                     GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
                     GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton,
-                    GuiKeys.DeleteTowerButton)},
+                    GuiKeys.ModifyTowerButton, GuiKeys.DeleteTowerButton)},
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,

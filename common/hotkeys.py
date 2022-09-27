@@ -10,3 +10,7 @@ class Hotkeys:
     @staticmethod
     def add_hotkey(keys: str, callback: Callable):
         keyboard.add_hotkey(keys, callback)
+
+    @staticmethod
+    def remove_hotkey(callback: Callable):
+        keyboard.remove_hotkey(callback)

@@ -73,6 +73,7 @@ class ClickerState:
 def main():
     if not is_language_valid():
         raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
+
     ahk = AHK()
     clicker_state = ClickerState()
     Hotkeys.add_hotkey("ctrl + shift + s", clicker_state.stop)

@@ -1,11 +1,11 @@
 import copy
 from typing import List, Dict
 
-from common.towers_info.game_info import TOWERS_INFO
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry
 from common.game_classes.tower import Tower
+from common.towers_info.game_info import TOWERS_INFO
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
 
@@ -30,7 +30,7 @@ class ActivityContainer:
 
     @script_container.setter
     def script_container(self, value: List[IScriptEntry]):
-        self._script_container = value
+        self._script_container = ScriptContainer(value)
 
     @property
     def towers_container(self) -> TowersContainer:
@@ -60,6 +60,11 @@ class ActivityContainer:
         tower_id = self._towers_container.add_hero(name=name, x=x, y=y)
 
         self._add_entry(CreateTowerEntry(name=name, id=tower_id, x=x, y=y), index=index)
+
+    def change_position(self, tower_id: int, x: int, y: int):
+        self._towers_container[tower_id].x = x
+        self._towers_container[tower_id].y = y
+        self._script_container.change_position(tower_id=tower_id, x=x, y=y)
 
     def upgrade_tower(self, tower_id: int, tier: UpgradeTier, index: int = None):
         if not is_tier_upgradeable(tower=self._towers_container[tower_id], tier=tier):
