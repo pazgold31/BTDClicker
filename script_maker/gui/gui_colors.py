@@ -75,7 +75,6 @@ EXISTING_TOWERS_COLORS = [
     "#D8BFD8",  # thistle
     "#DDA0DD",  # plum
     "#EE82EE",  # violet
-    "#FF00FF",  # magenta / fuchsia
     "#DA70D6",  # orchid
     "#C71585",  # medium violet red
     "#DB7093",  # pale violet red
@@ -125,3 +124,5 @@ random.shuffle(EXISTING_TOWERS_COLORS)
 
 ALTERNATING_DARK_COLOR = "#A9A9A9"
 ALTERNATING_LIGHT_COLOR = "#D3D3D3"
+
+GLOBAL_ENTRIES_COLOR = "#FF00FF"

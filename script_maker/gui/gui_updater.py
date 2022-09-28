@@ -5,9 +5,11 @@ from typing import Callable, Union, List
 import PySimpleGUI as sg
 
 from common.game_classes.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, \
-    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
+    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, PauseEntry, WaitForMoneyEntry, \
+    ITowerModifyingScriptEntry
 from common.towers_info.game_info import HEROES_INFO
 from common.towers_info.info_classes import TowerInfo
+from script_maker.gui.gui_colors import GLOBAL_ENTRIES_COLOR
 from script_maker.gui.gui_controls_utils import get_first_selected_index_for_list_box, change_cell_color, \
     add_alternating_colors, get_selected_indexes_for_list_box
 from script_maker.gui.gui_formatters import GuiFormatters
@@ -82,6 +84,10 @@ class GuiUpdater:
     def update_script_box(self, activity_container: ActivityContainer, selected_index: Union[int, List[int]] = None):
         output = []
         for action in activity_container.script_container:
+            if isinstance(action, PauseEntry):
+                output.append("Pause game.")
+            if isinstance(action, WaitForMoneyEntry):
+                output.append(f"Wait for {action.amount}$")
             if isinstance(action, CreateTowerEntry):
                 output.append(f"Create: {action.name}({action.id}) | X: {action.x} Y: {action.y}")
             elif isinstance(action, UpgradeTowerEntry):
@@ -96,8 +102,11 @@ class GuiUpdater:
         list_box = self._window[GuiKeys.ScriptBox]
         list_box.update(values=output, set_to_index=selected_index)
         for i, script_entry in enumerate(activity_container.script_container):
-            change_cell_color(listbox_widget=list_box.widget, index=i,
-                              color=activity_container.towers_container.get_tower_color(tower_id=script_entry.id))
+            if isinstance(script_entry, ITowerModifyingScriptEntry):
+                change_cell_color(listbox_widget=list_box.widget, index=i,
+                                  color=activity_container.towers_container.get_tower_color(tower_id=script_entry.id))
+            else:
+                change_cell_color(listbox_widget=list_box.widget, index=i, color=GLOBAL_ENTRIES_COLOR)
 
         if selected_index is not None:
             self._window[GuiKeys.ScriptBox].Widget.see(

@@ -27,6 +27,15 @@ class IScriptEntry(BaseModel):
     action: str
 
 
+class PauseEntry(IScriptEntry):
+    action = "PauseGame"
+
+
+class WaitForMoneyEntry(IScriptEntry):
+    action = "PauseGame"
+    amount: int
+
+
 class ITowerModifyingScriptEntry(IScriptEntry):
     id: int
 

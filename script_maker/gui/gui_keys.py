@@ -22,6 +22,9 @@ class GuiKeys:
     DeleteTowerButton = "-delete-tower-button"
     MoveDownInScriptButton = "-move-down-in-script"
     MoveUpInScriptButton = "-move-up-in-script"
+    PauseGameButton = "-pause-game-"
+    WaitForMoneyButton = "-wait-for-money-button-"
+    WaitForMoneyInput = "-wait-for-money-input-"
 
     CopyToClipboard = "-copy-to-clipboard-"
     PasteClipboard = "-paste-clipboard-"
