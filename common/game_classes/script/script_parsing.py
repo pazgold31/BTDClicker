@@ -1,7 +1,8 @@
 from typing import Dict, List
 
 from common.game_classes.script.script_dataclasses import ACTION_KEYWORD, Actions, CreateTowerEntry, \
-    UpgradeTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata
+    UpgradeTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata, \
+    WaitForMoneyEntry, PauseEntry
 from common.game_classes.tower import Tower, Hero, BaseTower
 
 
@@ -9,7 +10,11 @@ def import_script(script_dict: Dict) -> List[IScriptEntry]:
     script: List[IScriptEntry] = []
 
     for action in script_dict:
-        if action[ACTION_KEYWORD] == Actions.create:
+        if action[ACTION_KEYWORD] == Actions.pause:
+            script.append(PauseEntry.parse_obj(action))
+        elif action[ACTION_KEYWORD] == Actions.wait_for_money:
+            script.append(WaitForMoneyEntry.parse_obj(action))
+        elif action[ACTION_KEYWORD] == Actions.create:
             script.append(CreateTowerEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.upgrade:
             script.append(UpgradeTowerEntry.parse_obj(action))
