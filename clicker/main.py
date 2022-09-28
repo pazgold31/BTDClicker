@@ -10,12 +10,15 @@ from actions.UpgradeTowerAction import UpgradeTowerAction
 from clicker.actions.ChangeSpecialTargetingAction import ChangeSpecialTargetingAction
 from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
+from clicker.actions.PauseGameAction import PauseGameAction
 from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
+from clicker.actions.WaitForMoneyAction import WaitForMoneyAction
+from clicker.clicker_state import ClickerState
 from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
-    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata
+    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata, PauseEntry, WaitForMoneyEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.game_classes.tower import BaseTower
 from common.hotkeys import Hotkeys
@@ -32,6 +35,10 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
     tower_map: Dict[int, BaseTower] = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
     script: List[IAction] = []
     for script_entry in script_entries:
+        if isinstance(script_entry, PauseEntry):
+            script.append(PauseGameAction(ahk=ahk))
+        if isinstance(script_entry, WaitForMoneyEntry):
+            script.append(WaitForMoneyAction(ahk=ahk, amount=script_entry.amount))
         if isinstance(script_entry, CreateTowerEntry):
             if "Hero" == script_entry.name:
                 script.append(PlaceHeroAction(ahk=ahk, hero=tower_map[script_entry.id],
@@ -54,30 +61,13 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
     return script, tower_map
 
 
-class ClickerState:
-    def __init__(self):
-        self._stopped = False
-
-    def stop(self):
-        print("Stop")
-        self._stopped = True
-
-    def run(self):
-        print("Running")
-        self._stopped = False
-
-    def is_stopped(self):
-        return self._stopped
-
-
 def main():
     if not is_language_valid():
         raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
 
     ahk = AHK()
-    clicker_state = ClickerState()
-    Hotkeys.add_hotkey("ctrl + shift + s", clicker_state.stop)
-    Hotkeys.add_hotkey("ctrl + shift + c", clicker_state.run)
+    Hotkeys.add_hotkey("ctrl + shift + s", ClickerState().stop)
+    Hotkeys.add_hotkey("ctrl + shift + c", ClickerState().run)
     total_dict = load_script_dict()
     metadata = parse_metadata(json_dict=total_dict)
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
@@ -86,7 +76,7 @@ def main():
     for action in script:
         print(f"Next: {action.get_action_message()}")
         while True:
-            if not clicker_state.is_stopped() and action.can_act():
+            if not ClickerState().is_stopped() and action.can_act():
                 action.act()
                 break
 

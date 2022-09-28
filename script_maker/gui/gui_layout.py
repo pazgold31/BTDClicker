@@ -60,7 +60,12 @@ def get_layout() -> List[List[Any]]:
         [sg.HSeparator()],
         [sg.Button("Modify Tower", size=(15, 1), enable_events=True, key=GuiKeys.ModifyTowerButton),
          sg.Button("Duplicate Tower", size=(15, 1), enable_events=True, key=GuiKeys.DuplicateTowerButton),
-         sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)]
+         sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)],
+        [sg.HSeparator()],
+        [sg.Button("Pause game", size=(15, 1), enable_events=True, key=GuiKeys.PauseGameButton),
+         sg.Frame("", layout=[[sg.In(size=(12, 1), enable_events=True, key=GuiKeys.WaitForMoneyInput),
+                               sg.Button("Wait for amount", size=(15, 1), enable_events=True,
+                                         key=GuiKeys.WaitForMoneyButton)]])]
     ]
 
     bottom_left_col = [[sg.Text("Script:")],

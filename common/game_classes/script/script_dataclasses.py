@@ -8,6 +8,8 @@ ACTION_KEYWORD = "action"
 
 
 class Actions:
+    pause = "pause"
+    wait_for_money = "wait_for_money"
     create = "create"
     upgrade = "upgrade"
     sell = "sell"
@@ -25,6 +27,15 @@ class GameMetadata(BaseModel):
 
 class IScriptEntry(BaseModel):
     action: str
+
+
+class PauseEntry(IScriptEntry):
+    action = Actions.pause
+
+
+class WaitForMoneyEntry(IScriptEntry):
+    action = Actions.wait_for_money
+    amount: int
 
 
 class ITowerModifyingScriptEntry(IScriptEntry):

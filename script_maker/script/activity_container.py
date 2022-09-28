@@ -3,7 +3,8 @@ from typing import List, Dict
 
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
-    ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry, ITowerModifyingScriptEntry
+    ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry, ITowerModifyingScriptEntry, PauseEntry, \
+    WaitForMoneyEntry
 from common.game_classes.tower import Tower
 from common.towers_info.game_info import TOWERS_INFO
 from script_maker.script.script_container import ScriptContainer
@@ -50,6 +51,12 @@ class ActivityContainer:
             self._script_container.append(entry)
         else:
             self._script_container.insert(index, entry)
+
+    def add_pause_entry(self, index: int = None):
+        self._add_entry(PauseEntry(), index=index)
+
+    def add_wait_for_money_entry(self, amount: int, index: int = None):
+        self._add_entry(WaitForMoneyEntry(amount=amount), index=index)
 
     def add_new_tower(self, name: str, x: int, y: int, index: int = None, tower_id: int = None):
         tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y, tower_id=tower_id)

@@ -72,6 +72,10 @@ class GuiClass:
 
         self._window.close()
 
+    def get_next_index_in_script_box(self):
+        last_selected_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        return None if last_selected_index is None else last_selected_index + 1
+
     def handle_change_difficulty(self, event: EventType, values: ValuesType):
         difficulty_str = values[GuiKeys.DifficultyListBox]
         self._metadata.difficulty = DIFFICULTY_MAP[difficulty_str]
@@ -105,8 +109,7 @@ class GuiClass:
             sg.popup("You didn't fill all of the data!")
             return
 
-        selected_script_entry_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        entry_index_to_select = None if selected_script_entry_index is None else selected_script_entry_index + 1
+        entry_index_to_select = self.get_next_index_in_script_box()
         if "Hero" == values[GuiKeys.NewTowerTypeInput]:
             if not self._activity_container.is_hero_placeable():
                 sg.popup("Your Hero is already placed!")
@@ -135,8 +138,7 @@ class GuiClass:
         selected_tower_id = GuiParsers.parse_selected_tower_id(selected_towers_list[0])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
-        selected_script_entry_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        entry_index_to_select = None if selected_script_entry_index is None else selected_script_entry_index + 1
+        entry_index_to_select = self.get_next_index_in_script_box()
 
         if event in upgrade_tiers_map:
             try:
@@ -281,13 +283,30 @@ class GuiClass:
         if not self._clip_boarded_script_entries:
             return
 
-        last_selected_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
-        new_entry_index = None if last_selected_index is None else last_selected_index + 1
+        new_entry_index = self.get_next_index_in_script_box()
 
         self._activity_container.duplicate_script_entries(entries=self._clip_boarded_script_entries,
                                                           new_index=new_entry_index)
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
+
+    def handle_pause_button(self, event: EventType, values: ValuesType):
+        selected_index = self.get_next_index_in_script_box()
+        self._activity_container.add_pause_entry(index=selected_index)
+        self._gui_updater.update_script_box(activity_container=self._activity_container, selected_index=selected_index)
+
+    def handle_wait_for_money(self, event: EventType, values: ValuesType):
+        try:
+            amount_of_money = int(values[GuiKeys.WaitForMoneyInput])
+            if amount_of_money <= 0:
+                raise ValueError
+        except (KeyError, ValueError):
+            sg.popup("Invalid amount of money to wait for")
+            return
+
+        selected_index = self.get_next_index_in_script_box()
+        self._activity_container.add_wait_for_money_entry(amount=amount_of_money, index=selected_index)
+        self._gui_updater.update_script_box(activity_container=self._activity_container, selected_index=selected_index)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
@@ -312,5 +331,7 @@ class GuiClass:
                     GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
                     GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support)},
             GuiKeys.ScriptBox + GuiKeys.CopyToClipboard: self.handle_copy_on_script,
-            GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script
+            GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script,
+            GuiKeys.PauseGameButton: self.handle_pause_button,
+            GuiKeys.WaitForMoneyButton: self.handle_wait_for_money
         }
