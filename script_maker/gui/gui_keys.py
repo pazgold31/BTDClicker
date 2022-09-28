@@ -18,6 +18,7 @@ class GuiKeys:
     ScriptBox = "-script_box-"
     DeleteFromScriptButton = "-delete-from-script"
     ModifyTowerButton = "-modify-tower-button"
+    DuplicateTowerButton = "-duplicate-tower-button"
     DeleteTowerButton = "-delete-tower-button"
     MoveDownInScriptButton = "-move-down-in-script"
     MoveUpInScriptButton = "-move-up-in-script"

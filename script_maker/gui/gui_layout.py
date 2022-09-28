@@ -59,6 +59,7 @@ def get_layout() -> List[List[Any]]:
         ],
         [sg.HSeparator()],
         [sg.Button("Modify Tower", size=(15, 1), enable_events=True, key=GuiKeys.ModifyTowerButton),
+         sg.Button("Duplicate Tower", size=(15, 1), enable_events=True, key=GuiKeys.DuplicateTowerButton),
          sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)]
     ]
 
