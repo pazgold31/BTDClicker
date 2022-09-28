@@ -161,6 +161,10 @@ class GuiClass:
             with self._script_global_hotkeys.pause_capture():
                 x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
                 self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
+        elif event == GuiKeys.DuplicateTowerButton:
+            with self._script_global_hotkeys.pause_capture():
+                x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
+                self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
         elif event == GuiKeys.DeleteTowerButton:
             self._activity_container.delete_tower(tower_id=selected_tower_id)
         else:
@@ -279,7 +283,6 @@ class GuiClass:
 
         last_selected_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         new_entry_index = None if last_selected_index is None else last_selected_index + 1
-        print(new_entry_index)
 
         self._activity_container.duplicate_script_entries(entries=self._clip_boarded_script_entries,
                                                           new_index=new_entry_index)
@@ -298,7 +301,7 @@ class GuiClass:
                 i: self.handle_tower_modification for i in (
                     GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
                     GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton,
-                    GuiKeys.ModifyTowerButton, GuiKeys.DeleteTowerButton)},
+                    GuiKeys.ModifyTowerButton, GuiKeys.DuplicateTowerButton, GuiKeys.DeleteTowerButton)},
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,

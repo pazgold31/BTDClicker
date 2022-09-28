@@ -1,3 +1,4 @@
+import copy
 from typing import List, Dict
 
 from common.game_classes.enums import UpgradeTier
@@ -130,6 +131,18 @@ class ActivityContainer:
         except IndexError:
             raise ValueError("Entry is already at the bottom")
 
+    def duplicate_tower(self, tower_id: int, new_tower_x: int, new_tower_y: int, index: int = None):
+        new_tower_id = self.duplicate_script_entries(
+            entries=self._script_container.get_entries_for_id(tower_id=tower_id),
+            new_index=index)
+        self._towers_container[new_tower_id] = copy.copy(self._towers_container[tower_id])
+        self._towers_container[new_tower_id].x = new_tower_x
+        self._towers_container[new_tower_id].y = new_tower_y
+        for entry in self._script_container.get_entries_for_id(tower_id=new_tower_id):
+            if isinstance(entry, CreateTowerEntry):
+                entry.x = new_tower_x
+                entry.y = new_tower_y
+
     def duplicate_script_entry(self, entry: IScriptEntry, new_index: int = None, new_id: int = None):
         if isinstance(entry, ITowerModifyingScriptEntry):
             id_to_modify = new_id or entry.id
@@ -149,7 +162,7 @@ class ActivityContainer:
         else:
             raise RuntimeError
 
-    def duplicate_script_entries(self, entries: List[IScriptEntry], new_index: int = None):
+    def duplicate_script_entries(self, entries: List[IScriptEntry], new_index: int = None) -> int:
         new_tower_id = None
         if isinstance(entries[0], CreateTowerEntry):
             new_tower_id = self._towers_container.generate_new_id()
@@ -158,3 +171,5 @@ class ActivityContainer:
             self.duplicate_script_entry(entry=entry, new_index=new_index, new_id=new_tower_id)
             if new_index is not None:
                 new_index += 1
+
+        return new_tower_id
