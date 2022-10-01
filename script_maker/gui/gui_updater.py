@@ -11,7 +11,7 @@ from common.towers_info.game_info import HEROES_INFO
 from common.towers_info.info_classes import TowerInfo
 from script_maker.gui.gui_colors import GLOBAL_ENTRIES_COLOR
 from script_maker.gui.gui_controls_utils import get_first_selected_index_for_list_box, change_cell_color, \
-    add_alternating_colors, get_selected_indexes_for_list_box
+    add_alternating_colors, get_selected_indexes_for_list_box, get_selected_index_from_combo
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
@@ -29,16 +29,20 @@ class GuiUpdater:
         self._window[GuiKeys.TowerTypesListBox].update(
             get_tower_options(towers_filter=lambda _: True, difficulty=self._metadata.difficulty,
                               chosen_hero=self._metadata.hero_type), )
-        selected_hero_index = get_first_selected_index_for_list_box(window=self._window, key=GuiKeys.HeroCombo)
+        selected_hero_index = get_selected_index_from_combo(window=self._window, key=GuiKeys.HeroCombo)
         hero_options = get_hero_options(difficulty=self._metadata.difficulty)
         self._window[GuiKeys.HeroCombo].update(values=hero_options, value=hero_options[selected_hero_index])
 
-    def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool]):
+    def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool], selected_value: str):
         tower_options = get_tower_options(difficulty=self._metadata.difficulty,
                                           chosen_hero=self._metadata.hero_type,
                                           towers_filter=towers_filter)
+        selected_index = None
+        if selected_value in tower_options:
+            selected_index = tower_options.index(selected_value)
+
         list_box = self._window[GuiKeys.TowerTypesListBox]
-        list_box.update(values=tower_options)
+        list_box.update(values=tower_options, set_to_index=selected_index)
         add_alternating_colors(listbox_widget=list_box.widget)
 
     def update_selected_difficulty(self):
@@ -113,6 +117,6 @@ class GuiUpdater:
                 selected_index[-1] if isinstance(selected_index, list) else selected_index)
 
     def update_existing_towers_and_script(self, activity_container: ActivityContainer,
-                                          selected_script_index: int = None):
+                                          selected_script_index: Union[int, List[int]] = None):
         self.update_existing_towers(towers_container=activity_container.towers_container)
         self.update_script_box(activity_container=activity_container, selected_index=selected_script_index)

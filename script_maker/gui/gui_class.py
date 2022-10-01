@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
@@ -11,7 +11,7 @@ from common.game_classes.script.script_dataclasses import GameMetadata, Script, 
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.user_files import get_files_dir
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_indexes_for_list_box, \
-    get_last_selected_index_for_list_box
+    get_last_selected_index_for_list_box, get_selected_value_for_list_box
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
@@ -28,10 +28,12 @@ class GuiClass:
     def __init__(self):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
         self._script_global_hotkeys = ScriptHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
-                                                    y_pos=self._window[GuiKeys.YPositionInput])
+                                                    y_pos=self._window[GuiKeys.YPositionInput],
+                                                    tower_types=self._window[GuiKeys.TowerTypesListBox])
         self._script_global_hotkeys.record_towers_position()
+        self._script_global_hotkeys.record_towers_hotkeys()
 
-        self._selected_file_path: str = None
+        self._selected_file_path: Optional[str] = None
         self._activity_container = ActivityContainer()
 
         event, values = self._window.read(0)
@@ -264,15 +266,19 @@ class GuiClass:
 
     def handle_viewed_towers(self, event: EventType, values: ValuesType):
         if GuiMenu.ViewedTowers.Primary == event:
-            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Primary)
+            towers_filter = lambda x: x.type == TowerType.Primary
         elif GuiMenu.ViewedTowers.Military == event:
-            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Military)
+            towers_filter = lambda x: x.type == TowerType.Military
         elif GuiMenu.ViewedTowers.Magic == event:
-            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Magic)
+            towers_filter = lambda x: x.type == TowerType.Magic
         elif GuiMenu.ViewedTowers.Support == event:
-            self._gui_updater.update_tower_types(towers_filter=lambda x: x.type == TowerType.Support)
+            towers_filter = lambda x: x.type == TowerType.Support
         else:
-            self._gui_updater.update_tower_types(towers_filter=lambda _: True)
+            towers_filter = lambda _: True
+
+        self._gui_updater.update_tower_types(
+            towers_filter=towers_filter,
+            selected_value=get_selected_value_for_list_box(values=values, key=GuiKeys.TowerTypesListBox))
 
     def handle_copy_on_script(self, event: EventType, values: ValuesType):
         self._clip_boarded_script_entries = [self._activity_container.script_container[i] for i in

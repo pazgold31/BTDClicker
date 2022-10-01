@@ -20,7 +20,7 @@ def popup_get_position(title: str, ):
 
     window = sg.Window(title, layout, modal=True)
     try:
-        with ScriptHotkeys(x_pos=window[x_pos_key], y_pos=window[y_pos_key]):
+        with ScriptHotkeys(x_pos=window[x_pos_key], y_pos=window[y_pos_key]).capture_positions():
             while True:
                 event, values = window.read()
                 if event == save_button_key:
