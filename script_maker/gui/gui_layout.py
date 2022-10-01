@@ -21,10 +21,10 @@ def get_layout() -> List[List[Any]]:
     left_col = [
         [sg.Frame("Difficulty",
                   layout=[[sg.Combo(values=list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
-                                    key=GuiKeys.DifficultyListBox, enable_events=True)]]),
+                                    key=GuiKeys.DifficultyListBox, enable_events=True, readonly=True)]]),
          sg.Frame("Hero",
                   layout=[[sg.Combo(values=get_hero_options(), default_value=get_hero_options()[0],
-                                    key=GuiKeys.HeroCombo, enable_events=True)],
+                                    key=GuiKeys.HeroCombo, enable_events=True, readonly=True)],
                           [sg.Text("(you still need to manually choose the hero before starting the game)")]])],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],
         [sg.Listbox(values=[],
