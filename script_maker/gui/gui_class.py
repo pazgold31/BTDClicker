@@ -133,47 +133,86 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
 
-    def handle_tower_modification(self, event: EventType, values: ValuesType):
+    def _get_selected_towers_id(self) -> List[int]:
         selected_towers_indexes = get_selected_indexes_for_list_box(window=self._window,
                                                                     key=GuiKeys.ExistingTowersListBox)
-        selected_towers_id = [list(self._activity_container.towers_container.keys())[i] for i in
-                              selected_towers_indexes]
+        return [list(self._activity_container.towers_container.keys())[i] for i in
+                selected_towers_indexes]
 
-        upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
-                             GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
+    def _handle_tower_upgrade(self, tier: UpgradeTier):
+
         entry_index_to_select = self.get_next_index_in_script_box()
 
-        for selected_tower_id in selected_towers_id:
-            if event in upgrade_tiers_map:
-                try:
-                    self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=upgrade_tiers_map[event],
-                                                           index=entry_index_to_select)
-                except ValueError:
-                    sg.popup("Invalid upgrade for tower!")
+        for selected_tower_id in self._get_selected_towers_id():
+            try:
+                self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
+                                                       index=entry_index_to_select)
+            except ValueError:
+                sg.popup("Invalid upgrade for tower!")
 
-            elif event == GuiKeys.SellButton:
-                try:
-                    self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
-                except ValueError:
-                    sg.popup("The tower is already sold!")
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
 
-            elif event == GuiKeys.TargetingButton:
-                self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
-            elif event == GuiKeys.SpecialTargetingButton:
-                self._activity_container.change_special_targeting(tower_id=selected_tower_id,
-                                                                  index=entry_index_to_select)
-            elif event == GuiKeys.ModifyTowerButton:
-                with self._script_global_hotkeys.pause_capture():
-                    x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
-                    self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
-            elif event == GuiKeys.DuplicateTowerButton:
-                with self._script_global_hotkeys.pause_capture():
-                    x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
-                    self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
-            elif event == GuiKeys.DeleteTowerButton:
-                self._activity_container.delete_tower(tower_id=selected_tower_id)
-            else:
-                raise RuntimeError
+    def handle_top_upgrade(self, event: EventType, values: ValuesType):
+        self._handle_tower_upgrade(tier=UpgradeTier.top)
+
+    def handle_middle_upgrade(self, event: EventType, values: ValuesType):
+        self._handle_tower_upgrade(tier=UpgradeTier.middle)
+
+    def handle_bottom_upgrade(self, event: EventType, values: ValuesType):
+        self._handle_tower_upgrade(tier=UpgradeTier.bottom)
+
+    def handle_sell_tower(self, event: EventType, values: ValuesType):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        for selected_tower_id in self._get_selected_towers_id():
+            try:
+                self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
+            except ValueError:
+                sg.popup("The tower is already sold!")
+
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
+
+    def handle_change_targeting(self, event: EventType, values: ValuesType):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        for selected_tower_id in self._get_selected_towers_id():
+            self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
+
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
+
+    def handle_change_special_targeting(self, event: EventType, values: ValuesType):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        for selected_tower_id in self._get_selected_towers_id():
+            self._activity_container.change_special_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
+
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
+
+    def handle_modify_tower(self, event: EventType, values: ValuesType):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        for selected_tower_id in self._get_selected_towers_id():
+            with self._script_global_hotkeys.pause_capture():
+                x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+                self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
+
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
+
+    def handle_duplicate_tower(self, event: EventType, values: ValuesType):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        for selected_tower_id in self._get_selected_towers_id():
+            with self._script_global_hotkeys.pause_capture():
+                x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
+                self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
+
+        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                            selected_script_index=entry_index_to_select)
+
+    def handle_delete_tower(self, event: EventType, values: ValuesType):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        for selected_tower_id in self._get_selected_towers_id():
+            self._activity_container.delete_tower(tower_id=selected_tower_id)
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
@@ -329,11 +368,15 @@ class GuiClass:
             GuiKeys.ExistingTowersListBox: self.handle_select_existing_tower,
             GuiKeys.KeyboardMouseButton: self.handle_keyboard_mouse,
             GuiKeys.SaveTowerButton: self.handle_save_tower,
-            **{
-                i: self.handle_tower_modification for i in (
-                    GuiKeys.TopUpgradeButton, GuiKeys.MiddleUpgradeButton, GuiKeys.BottomUpgradeButton,
-                    GuiKeys.SellButton, GuiKeys.TargetingButton, GuiKeys.SpecialTargetingButton,
-                    GuiKeys.ModifyTowerButton, GuiKeys.DuplicateTowerButton, GuiKeys.DeleteTowerButton)},
+            GuiKeys.TopUpgradeButton: self.handle_top_upgrade,
+            GuiKeys.MiddleUpgradeButton: self.handle_middle_upgrade,
+            GuiKeys.BottomUpgradeButton: self.handle_bottom_upgrade,
+            GuiKeys.SellButton: self.handle_sell_tower,
+            GuiKeys.TargetingButton: self.handle_change_targeting,
+            GuiKeys.SpecialTargetingButton: self.handle_change_special_targeting,
+            GuiKeys.ModifyTowerButton: self.handle_modify_tower,
+            GuiKeys.DuplicateTowerButton: self.handle_duplicate_tower,
+            GuiKeys.DeleteTowerButton: self.handle_delete_tower,
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
