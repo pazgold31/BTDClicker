@@ -15,3 +15,7 @@ class GuiParsers:
     @staticmethod
     def parse_selected_tower_id(tower_str: str):
         return int(tower_str.split(":")[0])
+
+    @staticmethod
+    def is_selected_tower_hero(tower_str: str):
+        return "Hero" in tower_str

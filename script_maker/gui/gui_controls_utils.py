@@ -25,9 +25,12 @@ def get_selected_index_from_combo(window: sg.Window, key: str) -> int:
 
 
 def get_selected_value_for_list_box(values: ValuesType, key: str) -> str:
-    if len(values[key]) > 1:
+    try:
+        if len(values[key]) > 1:
+            raise ValueError
+        return None if not values[key] else values[key][0]
+    except KeyError:
         raise ValueError
-    return None if not values[key] else values[key][0]
 
 
 def get_selected_indexes_for_list_box(window: sg.Window, key: str) -> List[int]:

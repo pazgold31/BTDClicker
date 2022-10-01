@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List, Optional
+from typing import Dict, Optional, List
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
@@ -27,24 +27,21 @@ from script_maker.script.script_hotkeys import ScriptHotkeys
 class GuiClass:
     def __init__(self):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
+        self._selected_file_path: Optional[str] = None
+        self._activity_container = ActivityContainer()
+        event, values = self._window.read(0)
+        self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
+                                      hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
+
         self._script_global_hotkeys = ScriptHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
                                                     y_pos=self._window[GuiKeys.YPositionInput],
                                                     tower_types=self._window[GuiKeys.TowerTypesListBox])
         self._script_global_hotkeys.record_towers_position()
         self._script_global_hotkeys.record_towers_hotkeys()
-
-        self._selected_file_path: Optional[str] = None
-        self._activity_container = ActivityContainer()
-
-        event, values = self._window.read(0)
-        self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
-                                      hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
+        self._clip_boarded_script_entries: List[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
-
         self.handle_viewed_towers(event=event, values=values)
-
-        self._clip_boarded_script_entries: List[IScriptEntry] = []
 
     def _add_hotkey_binds(self):
         self._window.bind("<Control-o>", GuiMenu.File.Import)
@@ -79,31 +76,32 @@ class GuiClass:
         return None if last_selected_index is None else last_selected_index + 1
 
     def handle_change_difficulty(self, event: EventType, values: ValuesType):
-        difficulty_str = values[GuiKeys.DifficultyListBox]
-        self._metadata.difficulty = DIFFICULTY_MAP[difficulty_str]
+        self._metadata.difficulty = DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]]
         self._gui_updater.update_difficulty()
 
     def handle_change_hero(self, event: EventType, values: ValuesType):
-        self._metadata.hero_type = GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo])
+        self._metadata.hero_type = GuiParsers.parse_selected_hero(hero_str=values[GuiKeys.HeroCombo])
         self._gui_updater.update_hero()
 
     def handle_select_tower_type(self, event: EventType, values: ValuesType):
         try:
-            tower_name = GuiParsers.parse_selected_tower(values[GuiKeys.TowerTypesListBox][0])
+            tower_name = GuiParsers.parse_selected_tower(
+                tower_str=get_selected_value_for_list_box(values=values, key=GuiKeys.TowerTypesListBox))
             self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
         except ValueError:
-            sg.popup("You must only select 1 tower type")
+            sg.popup("You must select exactly 1 tower type")
 
     def handle_select_existing_tower(self, event: EventType, values: ValuesType):
         try:
-            selected_tower_value = GuiParsers.parse_existing_tower(values[GuiKeys.ExistingTowersListBox][0])
-            self._gui_updater.update_selected_existing_tower(is_hero="Hero" in selected_tower_value)
-
-        except IndexError:
+            selected_tower_value = GuiParsers.parse_existing_tower(
+                tower_str=get_selected_value_for_list_box(values=values, key=GuiKeys.ExistingTowersListBox))
+            self._gui_updater.update_selected_existing_tower(
+                is_hero=GuiParsers.is_selected_tower_hero(tower_str=selected_tower_value))
+        except ValueError:
             pass
 
-    # noinspection PyMethodMayBeStatic
-    def handle_keyboard_mouse(self, event: EventType, values: ValuesType):
+    @staticmethod
+    def handle_keyboard_mouse(event: EventType, values: ValuesType):
         os.system("start ms-settings:easeofaccess-mouse")
 
     def handle_save_tower(self, event: EventType, values: ValuesType):
@@ -112,67 +110,70 @@ class GuiClass:
             return
 
         entry_index_to_select = self.get_next_index_in_script_box()
+        tower_name = values[GuiKeys.NewTowerTypeInput]
+        tower_x = int(values[GuiKeys.XPositionInput])
+        tower_y = int(values[GuiKeys.YPositionInput])
+
         if "Hero" == values[GuiKeys.NewTowerTypeInput]:
             if not self._activity_container.is_hero_placeable():
                 sg.popup("Your Hero is already placed!")
                 return
 
-            self._activity_container.add_hero(name=values[GuiKeys.NewTowerTypeInput],
-                                              x=int(values[GuiKeys.XPositionInput]),
-                                              y=int(values[GuiKeys.YPositionInput]),
+            self._activity_container.add_hero(name=tower_name,
+                                              x=tower_x,
+                                              y=tower_y,
                                               index=entry_index_to_select)
 
         else:
-            self._activity_container.add_new_tower(name=values[GuiKeys.NewTowerTypeInput],
-                                                   x=int(values[GuiKeys.XPositionInput]),
-                                                   y=int(values[GuiKeys.YPositionInput]),
+            self._activity_container.add_new_tower(name=tower_name,
+                                                   x=tower_x,
+                                                   y=tower_y,
                                                    index=entry_index_to_select)
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
 
     def handle_tower_modification(self, event: EventType, values: ValuesType):
-        selected_towers_list = values[GuiKeys.ExistingTowersListBox]
-        if len(selected_towers_list) != 1:
-            sg.popup("You must chose exactly one tower!")
-            return
+        selected_towers_indexes = get_selected_indexes_for_list_box(window=self._window,
+                                                                    key=GuiKeys.ExistingTowersListBox)
+        selected_towers_id = [list(self._activity_container.towers_container.keys())[i] for i in
+                              selected_towers_indexes]
 
-        selected_tower_id = GuiParsers.parse_selected_tower_id(selected_towers_list[0])
         upgrade_tiers_map = {GuiKeys.TopUpgradeButton: UpgradeTier.top, GuiKeys.MiddleUpgradeButton: UpgradeTier.middle,
                              GuiKeys.BottomUpgradeButton: UpgradeTier.bottom}
         entry_index_to_select = self.get_next_index_in_script_box()
 
-        if event in upgrade_tiers_map:
-            try:
-                self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=upgrade_tiers_map[event],
-                                                       index=entry_index_to_select)
-            except ValueError:
-                sg.popup("Tower is already at max level!")
-                return
+        for selected_tower_id in selected_towers_id:
+            if event in upgrade_tiers_map:
+                try:
+                    self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=upgrade_tiers_map[event],
+                                                           index=entry_index_to_select)
+                except ValueError:
+                    sg.popup("Invalid upgrade for tower!")
 
-        elif event == GuiKeys.SellButton:
-            try:
-                self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
-            except ValueError:
-                sg.popup("The tower is already sold!")
-                return
-        elif event == GuiKeys.TargetingButton:
-            self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
-        elif event == GuiKeys.SpecialTargetingButton:
-            self._activity_container.change_special_targeting(tower_id=selected_tower_id,
-                                                              index=entry_index_to_select)
-        elif event == GuiKeys.ModifyTowerButton:
-            with self._script_global_hotkeys.pause_capture():
-                x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
-                self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
-        elif event == GuiKeys.DuplicateTowerButton:
-            with self._script_global_hotkeys.pause_capture():
-                x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
-                self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
-        elif event == GuiKeys.DeleteTowerButton:
-            self._activity_container.delete_tower(tower_id=selected_tower_id)
-        else:
-            raise RuntimeError
+            elif event == GuiKeys.SellButton:
+                try:
+                    self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
+                except ValueError:
+                    sg.popup("The tower is already sold!")
+
+            elif event == GuiKeys.TargetingButton:
+                self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
+            elif event == GuiKeys.SpecialTargetingButton:
+                self._activity_container.change_special_targeting(tower_id=selected_tower_id,
+                                                                  index=entry_index_to_select)
+            elif event == GuiKeys.ModifyTowerButton:
+                with self._script_global_hotkeys.pause_capture():
+                    x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+                    self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
+            elif event == GuiKeys.DuplicateTowerButton:
+                with self._script_global_hotkeys.pause_capture():
+                    x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
+                    self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
+            elif event == GuiKeys.DeleteTowerButton:
+                self._activity_container.delete_tower(tower_id=selected_tower_id)
+            else:
+                raise RuntimeError
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=entry_index_to_select)
