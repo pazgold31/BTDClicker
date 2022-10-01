@@ -18,6 +18,12 @@ def get_selected_index_from_combo(window: sg.Window, key: str) -> int:
     return widget.current()
 
 
+def get_selected_value_for_list_box(values: ValuesType, key: str) -> str:
+    if len(values[key]) > 1:
+        raise ValueError
+    return None if not values[key] else values[key][0]
+
+
 def get_selected_indexes_for_list_box(window: sg.Window, key: str) -> List[int]:
     return window[key].get_indexes()
 
@@ -35,11 +41,13 @@ def get_last_selected_index_for_list_box(window: sg.Window, key: str) -> int:
     return None if len(indexes) == 0 else indexes[-1]
 
 
-def change_cell_color(listbox_widget: tkinter.Listbox, index: int, color: str):
+def change_cell_color(listbox_widget: tkinter.Widget, index: int, color: str):
+    listbox_widget: tkinter.Listbox
     listbox_widget.itemconfig(index, bg=color)
 
 
-def add_alternating_colors(listbox_widget: tkinter.Listbox):
+def add_alternating_colors(listbox_widget: tkinter.Widget):
+    listbox_widget: tkinter.Listbox
     i = 0
     while True:
         try:
