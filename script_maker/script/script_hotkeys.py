@@ -1,4 +1,5 @@
 import contextlib
+import sys
 from typing import Optional
 
 import pyautogui
@@ -33,6 +34,11 @@ class ScriptHotkeys:
         update_listbox(listbox=self._tower_types, set_to_index=list_values.index(tower_list_row))
 
     def record_towers_hotkeys(self):
+        if sys.gettrace():
+            # Since the hotkeys are single letters. You can't debug when the keybinds are active.
+            print("Debugging is present, skipping hotkeys for towers")
+            return
+
         for tower_name, tower_hotkey in TOWER_KEY_MAP.items():
             Hotkeys.add_hotkey(tower_hotkey, lambda i=tower_name: self._record_towers_hotkeys(tower_name=i))
 
