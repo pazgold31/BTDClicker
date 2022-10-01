@@ -11,7 +11,7 @@ from common.towers_info.game_info import HEROES_INFO
 from common.towers_info.info_classes import TowerInfo
 from script_maker.gui.gui_colors import GLOBAL_ENTRIES_COLOR
 from script_maker.gui.gui_controls_utils import get_first_selected_index_for_list_box, change_cell_color, \
-    add_alternating_colors, get_selected_indexes_for_list_box
+    add_alternating_colors, get_selected_indexes_for_list_box, get_selected_index_from_combo
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
@@ -29,7 +29,7 @@ class GuiUpdater:
         self._window[GuiKeys.TowerTypesListBox].update(
             get_tower_options(towers_filter=lambda _: True, difficulty=self._metadata.difficulty,
                               chosen_hero=self._metadata.hero_type), )
-        selected_hero_index = get_first_selected_index_for_list_box(window=self._window, key=GuiKeys.HeroCombo)
+        selected_hero_index = get_selected_index_from_combo(window=self._window, key=GuiKeys.HeroCombo)
         hero_options = get_hero_options(difficulty=self._metadata.difficulty)
         self._window[GuiKeys.HeroCombo].update(values=hero_options, value=hero_options[selected_hero_index])
 

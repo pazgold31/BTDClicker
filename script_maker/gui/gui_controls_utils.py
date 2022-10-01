@@ -1,4 +1,5 @@
 import tkinter
+from tkinter.ttk import Combobox
 from typing import List
 
 # noinspection PyPep8Naming
@@ -10,6 +11,11 @@ from script_maker.gui.gui_types import ValuesType
 
 def are_values_set(values: ValuesType, *args: List[str]) -> bool:
     return all(values[i] for i in args)
+
+
+def get_selected_index_from_combo(window: sg.Window, key: str) -> int:
+    widget: Combobox = window[key].widget
+    return widget.current()
 
 
 def get_selected_indexes_for_list_box(window: sg.Window, key: str) -> List[int]:

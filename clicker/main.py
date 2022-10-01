@@ -15,7 +15,8 @@ from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
 from clicker.actions.WaitForMoneyAction import WaitForMoneyAction
 from clicker.clicker_state import ClickerState
-from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY
+from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY, \
+    KEYBOARD_LAYOUT_DELAY
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata, PauseEntry, WaitForMoneyEntry
@@ -25,9 +26,13 @@ from common.hotkeys import Hotkeys
 from common.keyboard import is_language_valid
 
 
-def load_script_dict(file_path: Path = Path("../exported.json")) -> Dict:
+def load_script_dict(file_path: Path) -> Dict:
     with file_path.open("r") as of:
         return json.load(of)
+
+
+def get_script_path() -> Path:
+    return Path(input("Enter script path: "))
 
 
 def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, BaseTower]]:
@@ -68,7 +73,7 @@ def main():
     ahk = AHK()
     Hotkeys.add_hotkey("ctrl + shift + s", ClickerState().stop)
     Hotkeys.add_hotkey("ctrl + shift + c", ClickerState().run)
-    total_dict = load_script_dict()
+    total_dict = load_script_dict(file_path=get_script_path())
     metadata = parse_metadata(json_dict=total_dict)
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
     time.sleep(CLICKER_START_DELAY)
@@ -76,6 +81,11 @@ def main():
     for action in script:
         print(f"Next: {action.get_action_message()}")
         while True:
+            if not is_language_valid():
+                print("Invalid keyboard layout, please change it.")
+                time.sleep(KEYBOARD_LAYOUT_DELAY)
+                continue
+
             if not ClickerState().is_stopped() and action.can_act():
                 action.act()
                 break
