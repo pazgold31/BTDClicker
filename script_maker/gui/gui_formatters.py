@@ -1,5 +1,5 @@
 from common.game_classes.enums import UpgradeTier
-from common.game_classes.tower import Hero
+from common.game_classes.tower import Hero, Tower
 from script_maker.script.towers_container import TowersContainer
 
 
@@ -20,12 +20,14 @@ class GuiFormatters:
                               f"Targeting: {GuiFormatters.format_targeting(additional_tower_information.targeting)} | "
                               f"S.Targeting: {additional_tower_information.s_targeting}"
                               f"{' SOLD' if additional_tower_information.sold else ''}")
-            else:
+            elif isinstance(tower, Tower):
                 output.append(
                     f"{tower_id}: {tower.name} | x: {tower.x} y: {tower.y} | {tower.tier_map[UpgradeTier.top]}-"
                     f"{tower.tier_map[UpgradeTier.middle]}-{tower.tier_map[UpgradeTier.bottom]} | "
                     f"Targeting: {GuiFormatters.format_targeting(additional_tower_information.targeting)} | "
                     f"S.Targeting: {additional_tower_information.s_targeting}"
                     f"{' SOLD' if additional_tower_information.sold else ''}")
+            else:
+                raise RuntimeError
 
         return output

@@ -4,13 +4,13 @@ from clicker.actions.IAction import IAction
 from clicker.consts.keymap import TOWER_KEY_MAP
 from clicker.money_extracter import get_amount_of_money
 from common.game_classes.enums import Difficulty
-from common.game_classes.tower import Tower
+from common.game_classes.tower import BaseTower
 from common.towers_info.game_info import TOWERS_INFO
 
 
 class PlaceTowerAction(IAction):
 
-    def __init__(self, ahk: AHK, difficulty: Difficulty, tower: Tower):
+    def __init__(self, ahk: AHK, difficulty: Difficulty, tower: BaseTower):
         self._ahk = ahk
         self._difficulty = difficulty
         self._tower = tower
