@@ -1,4 +1,3 @@
-# noinspection PyPep8Naming
 from typing import Callable, Union, List
 
 # noinspection PyPep8Naming
@@ -26,67 +25,65 @@ class GuiUpdater:
         self._controls_utils = controls_utils
 
     def update_difficulty(self):
-        self._window[GuiKeys.TowerTypesListBox].update(
-            get_tower_options(towers_filter=lambda _: True, difficulty=self._metadata.difficulty,
-                              chosen_hero=self._metadata.hero_type), )
-        selected_hero_index = self._controls_utils.get_selected_index_from_combo(key=GuiKeys.HeroCombo)
-        hero_options = get_hero_options(difficulty=self._metadata.difficulty)
-        self._window[GuiKeys.HeroCombo].update(values=hero_options, value=hero_options[selected_hero_index])
+        self.update_tower_types(towers_filter=lambda _: True)
+        selected_hero_index = self._controls_utils.get_combo_selected_index(key=GuiKeys.HeroCombo)
+        self._controls_utils.update_combo(combo=self._window[GuiKeys.HeroCombo],
+                                          values=get_hero_options(difficulty=self._metadata.difficulty),
+                                          set_to_index=selected_hero_index)
 
-    def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool], selected_value: str):
+    def update_selected_difficulty(self):
+        selected_difficulty_index = list(DIFFICULTY_MAP.values()).index(self._metadata.difficulty)
+        self._controls_utils.update_combo(combo=self._window[GuiKeys.DifficultyListBox],
+                                          set_to_index=selected_difficulty_index)
+
+    def update_hero(self):
+        self.update_tower_types(towers_filter=lambda _: True)
+
+    def update_selected_hero(self):
+        self._controls_utils.update_combo(combo=self._window[GuiKeys.HeroCombo],
+                                          set_to_index=list(HEROES_INFO.keys()).index(self._metadata.hero_type))
+
+    def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool]):
         tower_options = get_tower_options(difficulty=self._metadata.difficulty,
                                           chosen_hero=self._metadata.hero_type,
                                           towers_filter=towers_filter)
-        selected_index = None
-        if selected_value in tower_options:
-            selected_index = tower_options.index(selected_value)
 
         list_box = self._window[GuiKeys.TowerTypesListBox]
-        list_box.update(values=tower_options, set_to_index=selected_index)
+        self._controls_utils.update_listbox(listbox=list_box, values=tower_options,
+                                            set_to_index=self._controls_utils.get_list_box_selected_index(
+                                                key=GuiKeys.TowerTypesListBox))
         self._controls_utils.add_alternating_colors(listbox_widget=list_box.widget)
-
-    def update_selected_difficulty(self):
-        self._window[GuiKeys.DifficultyListBox].update(
-            value={v: k for k, v in DIFFICULTY_MAP.items()}[self._metadata.difficulty])
-
-    def update_hero(self):
-        self._window[GuiKeys.TowerTypesListBox].update(values=get_tower_options(difficulty=self._metadata.difficulty,
-                                                                                chosen_hero=self._metadata.hero_type,
-                                                                                towers_filter=lambda _: True), )
-
-    def update_selected_hero(self):
-        hero_cost = HEROES_INFO[self._metadata.hero_type].base_cost.get_mapping()[self._metadata.difficulty]
-        hero_value = f"{self._metadata.hero_type}: {hero_cost}$"
-        self._window[GuiKeys.HeroCombo].update(value=hero_value)
 
     def update_selected_tower_type(self, selected_tower_text: str):
         try:
-            selected_tower_index = self._controls_utils.get_first_selected_index_for_list_box(
-                key=GuiKeys.TowerTypesListBox)
+            selected_tower_index = self._controls_utils.get_list_box_selected_index(key=GuiKeys.TowerTypesListBox)
         except ValueError:
-            self._window[GuiKeys.TowerTypesListBox].update(None, set_to_index=[])
             raise
 
-        self._window[GuiKeys.TowerTypesListBox].update(None, set_to_index=selected_tower_index)
-        self._window[GuiKeys.NewTowerTypeInput].update(selected_tower_text, )
+        self._controls_utils.update_listbox(listbox=self._window[GuiKeys.TowerTypesListBox],
+                                            set_to_index=selected_tower_index)
+        self._controls_utils.update_input(input_element=self._window[GuiKeys.NewTowerTypeInput],
+                                          value=selected_tower_text)
 
     def update_selected_existing_tower(self, is_hero: bool):
-        self._window[GuiKeys.TopUpgradeButton].update(disabled=is_hero)
-        self._window[GuiKeys.MiddleUpgradeButton].update(disabled=is_hero)
-        self._window[GuiKeys.BottomUpgradeButton].update(disabled=is_hero)
+        if is_hero:
+            self._controls_utils.disable_button(self._window[GuiKeys.TopUpgradeButton])
+            self._controls_utils.disable_button(self._window[GuiKeys.MiddleUpgradeButton])
+            self._controls_utils.disable_button(self._window[GuiKeys.BottomUpgradeButton])
 
     def update_existing_towers(self, towers_container: TowersContainer):
-        list_box = self._window[GuiKeys.ExistingTowersListBox]
-        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ExistingTowersListBox)
-
+        listbox = self._window[GuiKeys.ExistingTowersListBox]
         list_box_items = GuiFormatters.format_existing_towers(towers_container)
-        list_box.update(values=list_box_items, set_to_index=selected_indexes)
+        self._controls_utils.update_listbox(
+            listbox=listbox,
+            values=list_box_items,
+            set_to_index=self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ExistingTowersListBox))
         for i in range(len(list_box_items)):
-            self._controls_utils.change_cell_color(listbox_widget=list_box.widget, index=i,
+            self._controls_utils.change_cell_color(listbox_widget=listbox.widget, index=i,
                                                    color=towers_container.get_tower_color(tower_id=i))
 
     def update_script_box(self, activity_container: ActivityContainer, selected_index: Union[int, List[int]] = None):
-        output = []
+        output: List[str] = []
         for action in activity_container.script_container:
             if isinstance(action, PauseEntry):
                 output.append("Pause game.")
@@ -103,15 +100,15 @@ class GuiUpdater:
             elif isinstance(action, ChangeSpecialTargetingEntry):
                 output.append(f"Change special targeting: ({action.id})")
 
-        list_box = self._window[GuiKeys.ScriptBox]
-        list_box.update(values=output, set_to_index=selected_index)
+        listbox = self._window[GuiKeys.ScriptBox]
+        self._controls_utils.update_listbox(listbox=listbox, set_to_index=selected_index)
         for i, script_entry in enumerate(activity_container.script_container):
             if isinstance(script_entry, ITowerModifyingScriptEntry):
-                self._controls_utils.change_cell_color(listbox_widget=list_box.widget, index=i,
+                self._controls_utils.change_cell_color(listbox_widget=listbox.widget, index=i,
                                                        color=activity_container.towers_container.get_tower_color(
                                                            tower_id=script_entry.id))
             else:
-                self._controls_utils.change_cell_color(listbox_widget=list_box.widget, index=i,
+                self._controls_utils.change_cell_color(listbox_widget=listbox.widget, index=i,
                                                        color=GLOBAL_ENTRIES_COLOR)
 
         if selected_index is not None:

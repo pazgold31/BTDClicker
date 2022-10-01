@@ -89,7 +89,7 @@ class GuiClass:
         self._window.close()
 
     def get_next_index_in_script_box(self):
-        last_selected_index = self._controls_utils.get_last_selected_index_for_list_box(key=GuiKeys.ScriptBox)
+        last_selected_index = self._controls_utils.get_list_box_last_selected_index(key=GuiKeys.ScriptBox)
         return None if last_selected_index is None else last_selected_index + 1
 
     @contextlib.contextmanager
@@ -111,7 +111,7 @@ class GuiClass:
                                                 selected_index=entry_index_to_select)
 
     def _get_selected_towers_id(self) -> List[int]:
-        selected_towers_indexes = self._controls_utils.get_selected_indexes_for_list_box(
+        selected_towers_indexes = self._controls_utils.get_list_box_selected_indexes(
             key=GuiKeys.ExistingTowersListBox)
         return [list(self._activity_container.towers_container.keys())[i] for i in selected_towers_indexes]
 
@@ -130,6 +130,7 @@ class GuiClass:
                                                                                key=GuiKeys.TowerTypesListBox))
             self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
         except ValueError:
+            self._controls_utils.unselect_listbox(key=GuiKeys.TowerTypesListBox)
             sg.popup("You must select exactly 1 tower type")
 
     def handle_select_existing_tower(self, values: ValuesType):
@@ -234,7 +235,7 @@ class GuiClass:
             sg.popup("You must select an entry to remove!")
             return
 
-        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ScriptBox)
+        selected_indexes = self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes[::-1]:
             # Going in reverse to allow deletion of towers.
             try:
@@ -249,7 +250,7 @@ class GuiClass:
 
     def handle_move_up_on_script(self, values: ValuesType):
 
-        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ScriptBox)
+        selected_indexes = self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes:
             # Order of iteration is important to ensure all items can move up.
             try:
@@ -266,7 +267,7 @@ class GuiClass:
             sg.popup("You must select an entry to move!")
             return
 
-        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ScriptBox)
+        selected_indexes = self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes[::-1]:
             # Going in reverse to ensure that the last entry is valid to move
             try:
@@ -311,10 +312,7 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 
     def _handle_view_towers(self, values: ValuesType, towers_filter: Callable[[TowerInfo], bool]):
-        self._gui_updater.update_tower_types(
-            towers_filter=towers_filter,
-            selected_value=self._controls_utils.get_selected_value_for_list_box(values=values,
-                                                                                key=GuiKeys.TowerTypesListBox))
+        self._gui_updater.update_tower_types(towers_filter=towers_filter)
 
     def handle_view_all_towers(self, values: ValuesType):
         self._handle_view_towers(values=values, towers_filter=lambda _: True)
@@ -333,7 +331,7 @@ class GuiClass:
 
     def handle_copy_on_script(self, values: ValuesType):
         self._clip_boarded_script_entries = [self._activity_container.script_container[i] for i in
-                                             self._controls_utils.get_selected_indexes_for_list_box(
+                                             self._controls_utils.get_list_box_selected_indexes(
                                                  key=GuiKeys.ScriptBox)]
 
     def handle_paste_on_script(self, values: ValuesType):
