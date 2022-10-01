@@ -13,8 +13,7 @@ from common.game_classes.script.script_dataclasses import GameMetadata, Script, 
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
-from script_maker.gui.gui_controls_utils import are_values_set, get_selected_indexes_for_list_box, \
-    get_last_selected_index_for_list_box, get_selected_value_for_list_box
+from script_maker.gui.gui_controls_utils import GuiControlsUtils
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
@@ -45,6 +44,7 @@ class GuiClass:
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
         self._selected_file_path: Optional[str] = None
         self._activity_container = ActivityContainer()
+        self._controls_utils = GuiControlsUtils(window=self._window)
         _, values = self._window.read(0)
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
@@ -56,7 +56,8 @@ class GuiClass:
         self._script_global_hotkeys.record_towers_hotkeys()
         self._clip_boarded_script_entries: List[IScriptEntry] = []
 
-        self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
+        self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata,
+                                       controls_utils=self._controls_utils)
         self.handle_view_all_towers(values=values)
 
     def _add_hotkey_binds(self):
@@ -88,7 +89,7 @@ class GuiClass:
         self._window.close()
 
     def get_next_index_in_script_box(self):
-        last_selected_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        last_selected_index = self._controls_utils.get_last_selected_index_for_list_box(key=GuiKeys.ScriptBox)
         return None if last_selected_index is None else last_selected_index + 1
 
     @contextlib.contextmanager
@@ -110,8 +111,8 @@ class GuiClass:
                                                 selected_index=entry_index_to_select)
 
     def _get_selected_towers_id(self) -> List[int]:
-        selected_towers_indexes = get_selected_indexes_for_list_box(window=self._window,
-                                                                    key=GuiKeys.ExistingTowersListBox)
+        selected_towers_indexes = self._controls_utils.get_selected_indexes_for_list_box(
+            key=GuiKeys.ExistingTowersListBox)
         return [list(self._activity_container.towers_container.keys())[i] for i in selected_towers_indexes]
 
     def handle_change_difficulty(self, values: ValuesType):
@@ -125,7 +126,8 @@ class GuiClass:
     def handle_select_tower_type(self, values: ValuesType):
         try:
             tower_name = GuiParsers.parse_selected_tower(
-                tower_str=get_selected_value_for_list_box(values=values, key=GuiKeys.TowerTypesListBox))
+                tower_str=self._controls_utils.get_selected_value_for_list_box(values=values,
+                                                                               key=GuiKeys.TowerTypesListBox))
             self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
         except ValueError:
             sg.popup("You must select exactly 1 tower type")
@@ -133,7 +135,8 @@ class GuiClass:
     def handle_select_existing_tower(self, values: ValuesType):
         try:
             selected_tower_value = GuiParsers.parse_existing_tower(
-                tower_str=get_selected_value_for_list_box(values=values, key=GuiKeys.ExistingTowersListBox))
+                tower_str=self._controls_utils.get_selected_value_for_list_box(values=values,
+                                                                               key=GuiKeys.ExistingTowersListBox))
             self._gui_updater.update_selected_existing_tower(
                 is_hero=GuiParsers.is_selected_tower_hero(tower_str=selected_tower_value))
         except ValueError:
@@ -144,7 +147,8 @@ class GuiClass:
         os.system("start ms-settings:easeofaccess-mouse")
 
     def handle_save_tower(self, values: ValuesType):
-        if not are_values_set(values, GuiKeys.NewTowerTypeInput, GuiKeys.XPositionInput, GuiKeys.YPositionInput):
+        if not self._controls_utils.are_values_set(values, GuiKeys.NewTowerTypeInput, GuiKeys.XPositionInput,
+                                                   GuiKeys.YPositionInput):
             sg.popup("You didn't fill all of the data!")
             return
 
@@ -230,7 +234,7 @@ class GuiClass:
             sg.popup("You must select an entry to remove!")
             return
 
-        selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes[::-1]:
             # Going in reverse to allow deletion of towers.
             try:
@@ -245,7 +249,7 @@ class GuiClass:
 
     def handle_move_up_on_script(self, values: ValuesType):
 
-        selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes:
             # Order of iteration is important to ensure all items can move up.
             try:
@@ -262,7 +266,7 @@ class GuiClass:
             sg.popup("You must select an entry to move!")
             return
 
-        selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
+        selected_indexes = self._controls_utils.get_selected_indexes_for_list_box(key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes[::-1]:
             # Going in reverse to ensure that the last entry is valid to move
             try:
@@ -309,7 +313,8 @@ class GuiClass:
     def _handle_view_towers(self, values: ValuesType, towers_filter: Callable[[TowerInfo], bool]):
         self._gui_updater.update_tower_types(
             towers_filter=towers_filter,
-            selected_value=get_selected_value_for_list_box(values=values, key=GuiKeys.TowerTypesListBox))
+            selected_value=self._controls_utils.get_selected_value_for_list_box(values=values,
+                                                                                key=GuiKeys.TowerTypesListBox))
 
     def handle_view_all_towers(self, values: ValuesType):
         self._handle_view_towers(values=values, towers_filter=lambda _: True)
@@ -328,8 +333,8 @@ class GuiClass:
 
     def handle_copy_on_script(self, values: ValuesType):
         self._clip_boarded_script_entries = [self._activity_container.script_container[i] for i in
-                                             get_selected_indexes_for_list_box(window=self._window,
-                                                                               key=GuiKeys.ScriptBox)]
+                                             self._controls_utils.get_selected_indexes_for_list_box(
+                                                 key=GuiKeys.ScriptBox)]
 
     def handle_paste_on_script(self, values: ValuesType):
         if not self._clip_boarded_script_entries:
