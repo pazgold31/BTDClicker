@@ -7,7 +7,7 @@ class GuiMenu:
 
     class ViewedTowers:
         MenuName = "Viewed Towers"
-        All = "Primary    ctrl + shift + 1"
+        All = "All    ctrl + shift + 1"
         Primary = "Primary    ctrl + shift + 2"
         Military = "Military    ctrl + shift + 3"
         Magic = "Magic    ctrl + shift + 4"
