@@ -1,7 +1,7 @@
 import copy
 from typing import List, Dict
 
-from common.game_classes.enums import UpgradeTier
+from common.game_classes.enums import UpgradeTier, TierLevel
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
     ChangeTargetingEntry, ChangeSpecialTargetingEntry, IScriptEntry, ITowerModifyingScriptEntry, PauseEntry, \
     WaitForMoneyEntry
@@ -12,10 +12,8 @@ from script_maker.script.towers_container import TowersContainer
 
 
 def is_tier_upgradeable(tower: Tower, tier: UpgradeTier) -> bool:
-    current_upgrade = tower.tier_map[tier]
     try:
-        new_cost = TOWERS_INFO[tower.name].upgrades.get_mapping()[tier].get_mapping()[current_upgrade + 1]
-        return new_cost
+        return TierLevel(tower.tier_map[tier] + 1) in TOWERS_INFO[tower.name].upgrades.get_mapping()[tier].get_mapping()
     except KeyError:
         return False
 

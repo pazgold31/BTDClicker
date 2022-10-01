@@ -1,12 +1,12 @@
 import itertools
 from typing import Dict, Generator, Tuple
 
-from common.game_classes.tower import Tower, Hero
+from common.game_classes.tower import Tower, Hero, BaseTower
 from script_maker.gui.gui_colors import EXISTING_TOWERS_COLORS
 from script_maker.script.additional_tower_info import AdditionalTowerInfo
 
 
-class TowersContainer(Dict[int, Tower]):
+class TowersContainer(Dict[int, BaseTower]):
     def __init__(self):
         super(TowersContainer, self).__init__()
 
@@ -48,5 +48,5 @@ class TowersContainer(Dict[int, Tower]):
     def get_additional_tower_information(self) -> Dict[int, AdditionalTowerInfo]:
         return self._additional_tower_information
 
-    def iter_with_additional_information(self) -> Generator[Tuple[int, Tower, AdditionalTowerInfo], None, None]:
+    def iter_with_additional_information(self) -> Generator[Tuple[int, BaseTower, AdditionalTowerInfo], None, None]:
         return ((tower_id, tower, self._additional_tower_information[tower_id]) for tower_id, tower in self.items())

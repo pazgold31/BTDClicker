@@ -1,6 +1,6 @@
 import tkinter
 from tkinter.ttk import Combobox
-from typing import List
+from typing import List, Optional
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
@@ -9,11 +9,17 @@ from script_maker.gui.gui_colors import ALTERNATING_LIGHT_COLOR, ALTERNATING_DAR
 from script_maker.gui.gui_types import ValuesType
 
 
-def are_values_set(values: ValuesType, *args: List[str]) -> bool:
+def update_listbox(listbox: sg.Listbox, values: Optional[List[str]] = None,
+                   set_to_index: Optional[int] = None):
+    listbox.update(values=values, set_to_index=set_to_index)
+
+
+def are_values_set(values: ValuesType, *args: str) -> bool:
     return all(values[i] for i in args)
 
 
 def get_selected_index_from_combo(window: sg.Window, key: str) -> int:
+    # noinspection PyTypeChecker
     widget: Combobox = window[key].widget
     return widget.current()
 

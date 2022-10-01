@@ -21,7 +21,7 @@ from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata, PauseEntry, WaitForMoneyEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.game_classes.tower import BaseTower
+from common.game_classes.tower import BaseTower, Tower
 from common.hotkeys import Hotkeys
 from common.keyboard import is_language_valid
 
@@ -38,6 +38,14 @@ def get_script_path() -> Path:
 def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, BaseTower]]:
     script_entries = import_script(script_dict=script_dict)
     tower_map: Dict[int, BaseTower] = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
+
+    def get_tower_from_map(tower_id: int) -> Tower:
+        tower = tower_map[tower_id]
+        if not isinstance(tower, Tower):
+            raise RuntimeError
+
+        return tower
+
     script: List[IAction] = []
     for script_entry in script_entries:
         if isinstance(script_entry, PauseEntry):
@@ -53,15 +61,15 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
                                                difficulty=metadata.difficulty))
 
         elif isinstance(script_entry, UpgradeTowerEntry):
-            script.append(UpgradeTowerAction(ahk=ahk, tower=tower_map[script_entry.id],
+            script.append(UpgradeTowerAction(ahk=ahk, tower=get_tower_from_map(script_entry.id),
                                              tier=UpgradeTier(script_entry.tier),
                                              difficulty=metadata.difficulty))
         elif isinstance(script_entry, SellTowerEntry):
-            script.append(SellTowerAction(ahk=ahk, tower=tower_map[script_entry.id]))
+            script.append(SellTowerAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
         elif isinstance(script_entry, ChangeTargetingEntry):
-            script.append(ChangeTargetingAction(ahk=ahk, tower=tower_map[script_entry.id]))
+            script.append(ChangeTargetingAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
         elif isinstance(script_entry, ChangeSpecialTargetingEntry):
-            script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=tower_map[script_entry.id]))
+            script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
 
     return script, tower_map
 

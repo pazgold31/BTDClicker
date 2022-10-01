@@ -1,14 +1,16 @@
 import contextlib
+from typing import Optional
 
 import pyautogui
 from PySimpleGUI import Input, Listbox
 
 from clicker.consts.keymap import TOWER_KEY_MAP
 from common.hotkeys import Hotkeys
+from script_maker.gui.gui_controls_utils import update_listbox
 
 
 class ScriptHotkeys:
-    def __init__(self, x_pos: Input, y_pos: Input, tower_types: Listbox):
+    def __init__(self, x_pos: Input, y_pos: Input, tower_types: Optional[Listbox] = None):
         self._x_pos = x_pos
         self._y_pos = y_pos
         self._tower_types = tower_types
@@ -19,13 +21,16 @@ class ScriptHotkeys:
         self._y_pos.update(y)
 
     def _record_towers_hotkeys(self, tower_name: str):
+        if not self._tower_types:
+            raise RuntimeError
+
         list_values = self._tower_types.get_list_values()
         try:
             tower_list_row = [i for i in list_values if tower_name in i][0]
         except IndexError:
             return
 
-        self._tower_types.update(None, set_to_index=list_values.index(tower_list_row))
+        update_listbox(listbox=self._tower_types, set_to_index=list_values.index(tower_list_row))
 
     def record_towers_hotkeys(self):
         for tower_name, tower_hotkey in TOWER_KEY_MAP.items():

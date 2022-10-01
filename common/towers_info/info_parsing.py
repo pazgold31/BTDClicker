@@ -2,7 +2,7 @@ import json
 import re
 from datetime import timedelta, datetime
 from pathlib import Path
-from typing import List, Tuple, Dict, TypeVar
+from typing import List, Tuple, Dict, TypeVar, Type
 from urllib.parse import urljoin
 
 import bs4
@@ -159,6 +159,7 @@ def crawl_hero_info() -> List[HeroInfo]:
     for table in get_hero_headline_title(soup=soup).find_all_next("table")[::2]:
         try:
             # The hero skins headline comes after the prices.
+            # noinspection PyTypeChecker
             get_hero_skins_title(table=table)
             break
         except RuntimeError:
@@ -170,6 +171,7 @@ def crawl_hero_info() -> List[HeroInfo]:
     return heroes
 
 
+OutputInfoType = TypeVar('OutputInfoType', Type[HeroInfo], Type[TowerInfo])
 InfoType = TypeVar('InfoType', HeroInfo, TowerInfo)
 
 
@@ -177,7 +179,7 @@ def convert_to_map(lst: List[InfoType]) -> Dict[str, InfoType]:
     return {i.name: i for i in lst}
 
 
-def load_cached_info(path: Path, output_type: InfoType,
+def load_cached_info(path: Path, output_type: OutputInfoType,
                      update_time: timedelta = INFO_UPDATE_TIME) -> Dict[str, InfoType]:
     if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < update_time:
         with path.open("r") as of:

@@ -16,7 +16,7 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
-from script_maker.gui.gui_popups import popup_get_position
+from script_maker.gui.gui_popups import popup_get_position, popup_get_file
 from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
@@ -235,9 +235,9 @@ class GuiClass:
             return
 
         if not self._selected_file_path:
-            file_path = sg.popup_get_file("Please select file to import", default_path=get_files_dir(),
-                                          file_types=(("Json files", "json"),))
-            self._selected_file_path = file_path
+            self._selected_file_path = popup_get_file(message="Please select file to import",
+                                                      default_path=get_files_dir(),
+                                                      file_types=(("Json files", "json"),))
 
         with open(self._selected_file_path, "w") as of:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
@@ -245,8 +245,9 @@ class GuiClass:
 
     def handle_import_button(self, event: EventType, values: ValuesType):
 
-        self._selected_file_path = sg.popup_get_file("Please select file to import", default_path=get_files_dir(),
-                                                     file_types=(("Json files", "json"),))
+        self._selected_file_path = popup_get_file(message="Please select file to import",
+                                                  default_path=get_files_dir(),
+                                                  file_types=(("Json files", "json"),))
 
         with open(self._selected_file_path, "r") as of:
             json_dict = json.load(of)
@@ -266,15 +267,20 @@ class GuiClass:
 
     def handle_viewed_towers(self, event: EventType, values: ValuesType):
         if GuiMenu.ViewedTowers.Primary == event:
-            towers_filter = lambda x: x.type == TowerType.Primary
+            def towers_filter(x):
+                return x.type == TowerType.Primary
         elif GuiMenu.ViewedTowers.Military == event:
-            towers_filter = lambda x: x.type == TowerType.Military
+            def towers_filter(x):
+                return x.type == TowerType.Military
         elif GuiMenu.ViewedTowers.Magic == event:
-            towers_filter = lambda x: x.type == TowerType.Magic
+            def towers_filter(x):
+                return x.type == TowerType.Magic
         elif GuiMenu.ViewedTowers.Support == event:
-            towers_filter = lambda x: x.type == TowerType.Support
+            def towers_filter(x):
+                return x.type == TowerType.Support
         else:
-            towers_filter = lambda _: True
+            def towers_filter(_):
+                return True
 
         self._gui_updater.update_tower_types(
             towers_filter=towers_filter,
