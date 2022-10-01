@@ -1,5 +1,7 @@
+import contextlib
 import json
 import os
+from functools import wraps
 from typing import Dict, Optional, List
 
 # noinspection PyPep8Naming
@@ -21,6 +23,19 @@ from script_maker.gui.gui_types import EventType, ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.script_hotkeys import ScriptHotkeys
+
+
+def update_existing_towers_and_script(method):
+    @wraps(method)
+    def _impl(self: "GuiClass", *method_args, **method_kwargs):
+        try:
+            return method(self, *method_args, **method_kwargs)
+        finally:
+            entry_index_to_select = self.get_next_index_in_script_box()
+            self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                                selected_script_index=entry_index_to_select)
+
+    return _impl
 
 
 # noinspection PyUnusedLocal
@@ -75,6 +90,20 @@ class GuiClass:
         last_selected_index = get_last_selected_index_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         return None if last_selected_index is None else last_selected_index + 1
 
+    @contextlib.contextmanager
+    def _retrieve_next_script_box_index_and_update(self):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        try:
+            yield entry_index_to_select
+        finally:
+            self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
+                                                                selected_script_index=entry_index_to_select)
+
+    def _get_selected_towers_id(self) -> List[int]:
+        selected_towers_indexes = get_selected_indexes_for_list_box(window=self._window,
+                                                                    key=GuiKeys.ExistingTowersListBox)
+        return [list(self._activity_container.towers_container.keys())[i] for i in selected_towers_indexes]
+
     def handle_change_difficulty(self, event: EventType, values: ValuesType):
         self._metadata.difficulty = DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]]
         self._gui_updater.update_difficulty()
@@ -109,49 +138,35 @@ class GuiClass:
             sg.popup("You didn't fill all of the data!")
             return
 
-        entry_index_to_select = self.get_next_index_in_script_box()
         tower_name = values[GuiKeys.NewTowerTypeInput]
         tower_x = int(values[GuiKeys.XPositionInput])
         tower_y = int(values[GuiKeys.YPositionInput])
+        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+            if "Hero" == values[GuiKeys.NewTowerTypeInput]:
+                if not self._activity_container.is_hero_placeable():
+                    sg.popup("Your Hero is already placed!")
+                    return
 
-        if "Hero" == values[GuiKeys.NewTowerTypeInput]:
-            if not self._activity_container.is_hero_placeable():
-                sg.popup("Your Hero is already placed!")
-                return
+                self._activity_container.add_hero(name=tower_name,
+                                                  x=tower_x,
+                                                  y=tower_y,
+                                                  index=entry_index_to_select)
 
-            self._activity_container.add_hero(name=tower_name,
-                                              x=tower_x,
-                                              y=tower_y,
-                                              index=entry_index_to_select)
-
-        else:
-            self._activity_container.add_new_tower(name=tower_name,
-                                                   x=tower_x,
-                                                   y=tower_y,
-                                                   index=entry_index_to_select)
-
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
-
-    def _get_selected_towers_id(self) -> List[int]:
-        selected_towers_indexes = get_selected_indexes_for_list_box(window=self._window,
-                                                                    key=GuiKeys.ExistingTowersListBox)
-        return [list(self._activity_container.towers_container.keys())[i] for i in
-                selected_towers_indexes]
+            else:
+                self._activity_container.add_new_tower(name=tower_name,
+                                                       x=tower_x,
+                                                       y=tower_y,
+                                                       index=entry_index_to_select)
 
     def _handle_tower_upgrade(self, tier: UpgradeTier):
 
-        entry_index_to_select = self.get_next_index_in_script_box()
-
-        for selected_tower_id in self._get_selected_towers_id():
-            try:
-                self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
-                                                       index=entry_index_to_select)
-            except ValueError:
-                sg.popup("Invalid upgrade for tower!")
-
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
+        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+            for selected_tower_id in self._get_selected_towers_id():
+                try:
+                    self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
+                                                           index=entry_index_to_select)
+                except ValueError:
+                    sg.popup("Invalid upgrade for tower!")
 
     def handle_top_upgrade(self, event: EventType, values: ValuesType):
         self._handle_tower_upgrade(tier=UpgradeTier.top)
@@ -163,59 +178,42 @@ class GuiClass:
         self._handle_tower_upgrade(tier=UpgradeTier.bottom)
 
     def handle_sell_tower(self, event: EventType, values: ValuesType):
-        entry_index_to_select = self.get_next_index_in_script_box()
-        for selected_tower_id in self._get_selected_towers_id():
-            try:
-                self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
-            except ValueError:
-                sg.popup("The tower is already sold!")
-
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
+        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+            for selected_tower_id in self._get_selected_towers_id():
+                try:
+                    self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
+                except ValueError:
+                    sg.popup("The tower is already sold!")
 
     def handle_change_targeting(self, event: EventType, values: ValuesType):
-        entry_index_to_select = self.get_next_index_in_script_box()
-        for selected_tower_id in self._get_selected_towers_id():
-            self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
-
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
+        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+            for selected_tower_id in self._get_selected_towers_id():
+                self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
 
     def handle_change_special_targeting(self, event: EventType, values: ValuesType):
-        entry_index_to_select = self.get_next_index_in_script_box()
-        for selected_tower_id in self._get_selected_towers_id():
-            self._activity_container.change_special_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
+        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+            for selected_tower_id in self._get_selected_towers_id():
+                self._activity_container.change_special_targeting(tower_id=selected_tower_id,
+                                                                  index=entry_index_to_select)
 
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
-
+    @update_existing_towers_and_script
     def handle_modify_tower(self, event: EventType, values: ValuesType):
-        entry_index_to_select = self.get_next_index_in_script_box()
         for selected_tower_id in self._get_selected_towers_id():
             with self._script_global_hotkeys.pause_capture():
                 x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
                 self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
 
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
-
+    @update_existing_towers_and_script
     def handle_duplicate_tower(self, event: EventType, values: ValuesType):
-        entry_index_to_select = self.get_next_index_in_script_box()
         for selected_tower_id in self._get_selected_towers_id():
             with self._script_global_hotkeys.pause_capture():
                 x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
                 self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
 
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
-
+    @update_existing_towers_and_script
     def handle_delete_tower(self, event: EventType, values: ValuesType):
-        entry_index_to_select = self.get_next_index_in_script_box()
         for selected_tower_id in self._get_selected_towers_id():
             self._activity_container.delete_tower(tower_id=selected_tower_id)
-
-        self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                            selected_script_index=entry_index_to_select)
 
     def handle_delete_from_script(self, event: EventType, values: ValuesType):
         if not values[GuiKeys.ScriptBox]:
