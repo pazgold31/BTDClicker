@@ -2,7 +2,7 @@ import contextlib
 import json
 import os
 from functools import wraps
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Callable
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
@@ -11,6 +11,7 @@ from pydantic.json import pydantic_encoder
 from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.script_dataclasses import GameMetadata, Script, IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
+from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
 from script_maker.gui.gui_controls_utils import are_values_set, get_selected_indexes_for_list_box, \
     get_last_selected_index_for_list_box, get_selected_value_for_list_box
@@ -31,9 +32,9 @@ def update_existing_towers_and_script(method):
         try:
             return method(self, *method_args, **method_kwargs)
         finally:
-            entry_index_to_select = self.get_next_index_in_script_box()
-            self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
-                                                                selected_script_index=entry_index_to_select)
+            self._gui_updater.update_existing_towers_and_script(
+                activity_container=self._activity_container,
+                selected_script_index=self.get_next_index_in_script_box())
 
     return _impl
 
@@ -56,7 +57,7 @@ class GuiClass:
         self._clip_boarded_script_entries: List[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata)
-        self.handle_viewed_towers(event=event, values=values)
+        self.handle_view_all_towers(event=event, values=values)
 
     def _add_hotkey_binds(self):
         self._window.bind("<Control-o>", GuiMenu.File.Import)
@@ -91,13 +92,22 @@ class GuiClass:
         return None if last_selected_index is None else last_selected_index + 1
 
     @contextlib.contextmanager
-    def _retrieve_next_script_box_index_and_update(self):
+    def _retrieve_next_script_box_index_and_update_activity(self):
         entry_index_to_select = self.get_next_index_in_script_box()
         try:
             yield entry_index_to_select
         finally:
             self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                                 selected_script_index=entry_index_to_select)
+
+    @contextlib.contextmanager
+    def _retrieve_next_script_box_index_and_update_script(self):
+        entry_index_to_select = self.get_next_index_in_script_box()
+        try:
+            yield entry_index_to_select
+        finally:
+            self._gui_updater.update_script_box(activity_container=self._activity_container,
+                                                selected_index=entry_index_to_select)
 
     def _get_selected_towers_id(self) -> List[int]:
         selected_towers_indexes = get_selected_indexes_for_list_box(window=self._window,
@@ -141,7 +151,7 @@ class GuiClass:
         tower_name = values[GuiKeys.NewTowerTypeInput]
         tower_x = int(values[GuiKeys.XPositionInput])
         tower_y = int(values[GuiKeys.YPositionInput])
-        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+        with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             if "Hero" == values[GuiKeys.NewTowerTypeInput]:
                 if not self._activity_container.is_hero_placeable():
                     sg.popup("Your Hero is already placed!")
@@ -160,7 +170,7 @@ class GuiClass:
 
     def _handle_tower_upgrade(self, tier: UpgradeTier):
 
-        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+        with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
                 try:
                     self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
@@ -178,7 +188,7 @@ class GuiClass:
         self._handle_tower_upgrade(tier=UpgradeTier.bottom)
 
     def handle_sell_tower(self, event: EventType, values: ValuesType):
-        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+        with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
                 try:
                     self._activity_container.sell_tower(tower_id=selected_tower_id, index=entry_index_to_select)
@@ -186,12 +196,12 @@ class GuiClass:
                     sg.popup("The tower is already sold!")
 
     def handle_change_targeting(self, event: EventType, values: ValuesType):
-        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+        with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
                 self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
 
     def handle_change_special_targeting(self, event: EventType, values: ValuesType):
-        with self._retrieve_next_script_box_index_and_update() as entry_index_to_select:
+        with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
                 self._activity_container.change_special_targeting(tower_id=selected_tower_id,
                                                                   index=entry_index_to_select)
@@ -234,9 +244,6 @@ class GuiClass:
                                                             selected_script_index=index_to_select)
 
     def handle_move_up_on_script(self, event: EventType, values: ValuesType):
-        if not values[GuiKeys.ScriptBox]:
-            sg.popup("You must select an entry to move!")
-            return
 
         selected_indexes = get_selected_indexes_for_list_box(window=self._window, key=GuiKeys.ScriptBox)
         for selected_entry_index in selected_indexes:
@@ -268,16 +275,12 @@ class GuiClass:
                                                             selected_script_index=[i + 1 for i in selected_indexes])
 
     def handle_save_button(self, event: EventType, values: ValuesType):
-        if not self._metadata.hero_type:  # TODO: support not giving a hero if it is not used
-            sg.popup("You must select a hero!")
-            return
 
-        if not self._selected_file_path:
-            self._selected_file_path = popup_get_file(message="Please select file to import",
-                                                      default_path=get_files_dir(),
-                                                      file_types=(("Json files", "json"),))
+        self._selected_file_path = self._selected_file_path or popup_get_file(message="Please select file to import",
+                                                                              default_path=get_files_dir(),
+                                                                              file_types=(("Json files", "json"),))
 
-        with open(self._selected_file_path, "w") as of:
+        with self._selected_file_path.open("w") as of:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
                       default=pydantic_encoder)
 
@@ -287,7 +290,7 @@ class GuiClass:
                                                   default_path=get_files_dir(),
                                                   file_types=(("Json files", "json"),))
 
-        with open(self._selected_file_path, "r") as of:
+        with self._selected_file_path.open("r") as of:
             json_dict = json.load(of)
 
         loaded_metadata = parse_metadata(json_dict=json_dict)
@@ -303,26 +306,25 @@ class GuiClass:
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 
-    def handle_viewed_towers(self, event: EventType, values: ValuesType):
-        if GuiMenu.ViewedTowers.Primary == event:
-            def towers_filter(x):
-                return x.type == TowerType.Primary
-        elif GuiMenu.ViewedTowers.Military == event:
-            def towers_filter(x):
-                return x.type == TowerType.Military
-        elif GuiMenu.ViewedTowers.Magic == event:
-            def towers_filter(x):
-                return x.type == TowerType.Magic
-        elif GuiMenu.ViewedTowers.Support == event:
-            def towers_filter(x):
-                return x.type == TowerType.Support
-        else:
-            def towers_filter(_):
-                return True
-
+    def _handle_view_towers(self, values: ValuesType, towers_filter: Callable[[TowerInfo], bool]):
         self._gui_updater.update_tower_types(
             towers_filter=towers_filter,
             selected_value=get_selected_value_for_list_box(values=values, key=GuiKeys.TowerTypesListBox))
+
+    def handle_view_all_towers(self, event: EventType, values: ValuesType):
+        self._handle_view_towers(values=values, towers_filter=lambda _: True)
+
+    def handle_view_primary_towers(self, event: EventType, values: ValuesType):
+        self._handle_view_towers(values=values, towers_filter=lambda x: x.type == TowerType.Primary)
+
+    def handle_view_military_towers(self, event: EventType, values: ValuesType):
+        self._handle_view_towers(values=values, towers_filter=lambda x: x.type == TowerType.Military)
+
+    def handle_view_magic_towers(self, event: EventType, values: ValuesType):
+        self._handle_view_towers(values=values, towers_filter=lambda x: x.type == TowerType.Magic)
+
+    def handle_view_support_towers(self, event: EventType, values: ValuesType):
+        self._handle_view_towers(values=values, towers_filter=lambda x: x.type == TowerType.Support)
 
     def handle_copy_on_script(self, event: EventType, values: ValuesType):
         self._clip_boarded_script_entries = [self._activity_container.script_container[i] for i in
@@ -333,30 +335,23 @@ class GuiClass:
         if not self._clip_boarded_script_entries:
             return
 
-        new_entry_index = self.get_next_index_in_script_box()
-
         self._activity_container.duplicate_script_entries(entries=self._clip_boarded_script_entries,
-                                                          new_index=new_entry_index)
-
+                                                          new_index=self.get_next_index_in_script_box())
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 
     def handle_pause_button(self, event: EventType, values: ValuesType):
-        selected_index = self.get_next_index_in_script_box()
-        self._activity_container.add_pause_entry(index=selected_index)
-        self._gui_updater.update_script_box(activity_container=self._activity_container, selected_index=selected_index)
+        with self._retrieve_next_script_box_index_and_update_script() as selected_index:
+            self._activity_container.add_pause_entry(index=selected_index)
 
     def handle_wait_for_money(self, event: EventType, values: ValuesType):
         try:
-            amount_of_money = int(values[GuiKeys.WaitForMoneyInput])
-            if amount_of_money <= 0:
-                raise ValueError
-        except (KeyError, ValueError):
+            amount_of_money = GuiParsers.parse_amount_of_money(values[GuiKeys.WaitForMoneyInput])
+        except ValueError:
             sg.popup("Invalid amount of money to wait for")
             return
 
-        selected_index = self.get_next_index_in_script_box()
-        self._activity_container.add_wait_for_money_entry(amount=amount_of_money, index=selected_index)
-        self._gui_updater.update_script_box(activity_container=self._activity_container, selected_index=selected_index)
+        with self._retrieve_next_script_box_index_and_update_script() as selected_index:
+            self._activity_container.add_wait_for_money_entry(amount=amount_of_money, index=selected_index)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
@@ -380,10 +375,11 @@ class GuiClass:
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
             GuiMenu.File.Save: self.handle_save_button,
             GuiMenu.File.Import: self.handle_import_button,
-            **{
-                i: self.handle_viewed_towers for i in (
-                    GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
-                    GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support)},
+            GuiMenu.ViewedTowers.All: self.handle_view_all_towers,
+            GuiMenu.ViewedTowers.Primary: self.handle_view_primary_towers,
+            GuiMenu.ViewedTowers.Military: self.handle_view_military_towers,
+            GuiMenu.ViewedTowers.Magic: self.handle_view_magic_towers,
+            GuiMenu.ViewedTowers.Support: self.handle_view_support_towers,
             GuiKeys.ScriptBox + GuiKeys.CopyToClipboard: self.handle_copy_on_script,
             GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script,
             GuiKeys.PauseGameButton: self.handle_pause_button,
