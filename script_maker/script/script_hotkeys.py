@@ -31,7 +31,7 @@ class ScriptHotkeys:
         except IndexError:
             return
 
-        GuiControlsUtils.update_listbox(listbox=self._tower_types, set_to_index=list_values.index(tower_list_row))
+        GuiControlsUtils.update_listbox_item(listbox=self._tower_types, set_to_index=list_values.index(tower_list_row))
 
     def record_towers_hotkeys(self):
         if sys.gettrace():

@@ -112,7 +112,7 @@ class ActivityContainer:
             if isinstance(entry, UpgradeTowerEntry):
                 self._towers_container[entry.id].tier_map[entry.tier] -= 1
             elif isinstance(entry, SellTowerEntry):
-                self._towers_container.get_additional_tower_information()[entry.id].sold += False
+                self._towers_container.get_additional_tower_information()[entry.id].sold = False
             elif isinstance(entry, ChangeTargetingEntry):
                 self._towers_container.get_additional_tower_information()[entry.id].targeting -= 1
             elif isinstance(entry, ChangeSpecialTargetingEntry):
