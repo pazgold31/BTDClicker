@@ -22,7 +22,7 @@ from script_maker.gui.gui_popups import popup_get_position, popup_get_file
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
-from script_maker.script.script_hotkeys import ScriptHotkeys
+from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 
 
 def update_existing_towers_and_script(method):
@@ -49,9 +49,9 @@ class GuiClass:
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
-        self._script_global_hotkeys = ScriptHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
-                                                    y_pos=self._window[GuiKeys.YPositionInput],
-                                                    tower_types=self._window[GuiKeys.TowerTypesListBox])
+        self._script_global_hotkeys = TowerPositionHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
+                                                           y_pos=self._window[GuiKeys.YPositionInput],
+                                                           tower_types=self._window[GuiKeys.TowerTypesListBox])
         self._script_global_hotkeys.record_towers_position()
         self._script_global_hotkeys.record_towers_hotkeys()
         self._clip_boarded_script_entries: List[IScriptEntry] = []

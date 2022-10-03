@@ -10,7 +10,7 @@ from common.hotkeys import Hotkeys
 from script_maker.gui.gui_controls_utils import GuiControlsUtils
 
 
-class ScriptHotkeys:
+class TowerPositionHotkeys:
     def __init__(self, x_pos: Input, y_pos: Input, tower_types: Optional[Listbox] = None):
         self._x_pos = x_pos
         self._y_pos = y_pos
@@ -35,7 +35,7 @@ class ScriptHotkeys:
 
     def record_towers_hotkeys(self):
         if sys.gettrace():
-            # Since the hotkeys are single letters. You can't debug when the keybinds are active.
+            # Since the hotkeys are single letters. You can't debug when the key binds are active.
             print("Debugging is present, skipping hotkeys for towers")
             return
 
