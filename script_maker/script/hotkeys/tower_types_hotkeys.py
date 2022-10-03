@@ -1,28 +1,18 @@
 import sys
-from typing import Optional
-
-from PySimpleGUI import Listbox
+from typing import Callable, Iterable
 
 from clicker.consts.keymap import TOWER_KEY_MAP
 from common.hotkeys import Hotkeys
-from script_maker.gui.gui_controls_utils import GuiControlsUtils
 
 
 class TowerTypesHotkeys:
-    def __init__(self, tower_types: Optional[Listbox] = None):
-        self._tower_types = tower_types
+    def __init__(self, observers: Iterable[Callable[[str], None]]):
+        self._observers = observers
 
     def _record_towers_hotkeys(self, tower_name: str):
-        if not self._tower_types:
-            raise RuntimeError
 
-        list_values = self._tower_types.get_list_values()
-        try:
-            tower_list_row = [i for i in list_values if tower_name in i][0]
-        except IndexError:
-            return
-
-        GuiControlsUtils.update_listbox_item(listbox=self._tower_types, set_to_index=list_values.index(tower_list_row))
+        for observer in self._observers:
+            observer(tower_name)
 
     def record_towers_hotkeys(self):
         if sys.gettrace():

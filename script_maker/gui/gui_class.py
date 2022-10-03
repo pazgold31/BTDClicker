@@ -50,16 +50,32 @@ class GuiClass:
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
-        self._tower_position_hotkeys = TowerPositionHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
-                                                            y_pos=self._window[GuiKeys.YPositionInput])
+        self._tower_position_hotkeys = TowerPositionHotkeys(
+            observers=(lambda x, y: self._controls_utils.update_input(key=GuiKeys.XPositionInput, value=x),
+                       lambda x, y: self._controls_utils.update_input(key=GuiKeys.YPositionInput, value=y)))
+
         self._tower_position_hotkeys.record_towers_position()
-        self._tower_types_hotkeys = TowerTypesHotkeys(tower_types=self._window[GuiKeys.TowerTypesListBox])
+        self._tower_types_hotkeys = self._initialize_tower_types_hotkeys()
         self._tower_types_hotkeys.record_towers_hotkeys()
         self._clip_boarded_script_entries: List[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata,
                                        controls_utils=self._controls_utils)
         self.handle_view_all_towers(values=values)
+
+    def _initialize_tower_types_hotkeys(self) -> TowerTypesHotkeys:
+        def observer(tower_name: str):
+            list_values = self._window[GuiKeys.TowerTypesListBox].get_list_values()
+            try:
+                tower_list_row = [i for i in list_values if tower_name in i][0]
+            except IndexError:
+                return
+
+            self._controls_utils.update_listbox(key=GuiKeys.TowerTypesListBox,
+                                                set_to_index=list_values.index(tower_list_row))
+            self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
+
+        return TowerTypesHotkeys(observers=(observer,))
 
     def _add_hotkey_binds(self):
         self._window.bind("<Control-o>", GuiMenu.File.Import)
