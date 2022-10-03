@@ -18,7 +18,7 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
-from script_maker.gui.gui_popups import popup_get_position, popup_get_file
+from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
@@ -231,11 +231,17 @@ class GuiClass:
                                                                   index=entry_index_to_select)
 
     @update_existing_towers_and_script
-    def handle_modify_tower(self, values: ValuesType):
+    def handle_modify_tower_position(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
             with self._tower_position_hotkeys.pause_capture():
                 x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
                 self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
+
+    @update_existing_towers_and_script
+    def handle_modify_tower_type(self, values: ValuesType):
+        for selected_tower_id in self._get_selected_towers_id():
+            tower_type = popup_get_tower_type(title=f"Select type for tower: {selected_tower_id}")
+            self._activity_container.change_tower_type(tower_id=selected_tower_id, tower_type=tower_type)
 
     @update_existing_towers_and_script
     def handle_duplicate_tower(self, values: ValuesType):
@@ -395,7 +401,8 @@ class GuiClass:
             GuiKeys.SellButton: self.handle_sell_tower,
             GuiKeys.TargetingButton: self.handle_change_targeting,
             GuiKeys.SpecialTargetingButton: self.handle_change_special_targeting,
-            GuiKeys.ModifyTowerButton: self.handle_modify_tower,
+            GuiKeys.ModifyTowerPositionButton: self.handle_modify_tower_position,
+            GuiKeys.ModifyTowerTypeButton: self.handle_modify_tower_type,
             GuiKeys.DuplicateTowerButton: self.handle_duplicate_tower,
             GuiKeys.DeleteTowerButton: self.handle_delete_tower,
             GuiKeys.DeleteFromScriptButton: self.handle_delete_from_script,

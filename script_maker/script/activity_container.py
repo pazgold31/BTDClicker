@@ -75,6 +75,10 @@ class ActivityContainer:
         self._towers_container[tower_id].y = y
         self._script_container.change_position(tower_id=tower_id, x=x, y=y)
 
+    def change_tower_type(self, tower_id: int, tower_type: str):
+        self._towers_container[tower_id].name = tower_type
+        self._script_container.change_tower_type(tower_id=tower_id, tower_type=tower_type)
+
     def upgrade_tower(self, tower_id: int, tier: UpgradeTier, index: int = None):
         if not is_tier_upgradeable(tower=self._towers_container[tower_id], tier=tier):
             raise ValueError("Tier is at max level")
