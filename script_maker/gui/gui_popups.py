@@ -3,7 +3,8 @@ from pathlib import Path
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from script_maker.script.script_hotkeys import ScriptHotkeys
+from script_maker.gui.gui_controls_utils import GuiControlsUtils
+from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 
 
 def popup_get_file(message: str, *args, **kwargs) -> Path:
@@ -25,8 +26,11 @@ def popup_get_position(title: str, ):
               [sg.Button("Save", enable_events=True, key=save_button_key)]]
 
     window = sg.Window(title, layout, modal=True)
+    gui_controls_utils = GuiControlsUtils(window=window)
     try:
-        with ScriptHotkeys(x_pos=window[x_pos_key], y_pos=window[y_pos_key], tower_types=None).capture_positions():
+        with TowerPositionHotkeys(
+                observers=(lambda x, y: gui_controls_utils.update_input(key=x_pos_key, value=x),
+                           lambda x, y: gui_controls_utils.update_input(key=x_pos_key, value=y))).capture_positions():
             while True:
                 event, values = window.read()
                 if event == save_button_key:

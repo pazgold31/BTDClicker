@@ -13,7 +13,6 @@ from script_maker.gui.gui_controls_utils import GuiControlsUtils
 from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
-from script_maker.gui.gui_options import get_tower_options, get_hero_options
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.towers_container import TowersContainer
 
@@ -28,7 +27,8 @@ class GuiUpdater:
         self.update_tower_types(towers_filter=lambda _: True)
         selected_hero_index = self._controls_utils.get_combo_selected_index(key=GuiKeys.HeroCombo)
         self._controls_utils.update_combo(key=GuiKeys.HeroCombo,
-                                          values=get_hero_options(difficulty=self._metadata.difficulty),
+                                          values=GuiFormatters.format_hero_options(
+                                              difficulty=self._metadata.difficulty),
                                           set_to_index=selected_hero_index)
 
     def update_selected_difficulty(self):
@@ -44,9 +44,9 @@ class GuiUpdater:
                                           set_to_index=list(HEROES_INFO.keys()).index(self._metadata.hero_type))
 
     def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool]):
-        tower_options = get_tower_options(difficulty=self._metadata.difficulty,
-                                          chosen_hero=self._metadata.hero_type,
-                                          towers_filter=towers_filter)
+        tower_options = GuiFormatters.format_tower_options(difficulty=self._metadata.difficulty,
+                                                           chosen_hero=self._metadata.hero_type,
+                                                           towers_filter=towers_filter)
 
         self._controls_utils.update_listbox(key=GuiKeys.TowerTypesListBox, values=tower_options,
                                             set_to_index=self._controls_utils.get_list_box_selected_index(
