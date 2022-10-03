@@ -4,9 +4,9 @@ from typing import List, Any
 import PySimpleGUI as sg
 
 from common.game_classes.enums import Difficulty
+from script_maker.gui.gui_formatters import GuiFormatters
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_menu import GuiMenu
-from script_maker.gui.gui_options import get_hero_options
 
 DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "impopable": Difficulty.impopable}
@@ -23,7 +23,8 @@ def get_layout() -> List[List[Any]]:
                   layout=[[sg.Combo(values=list(DIFFICULTY_MAP.keys()), default_value=list(DIFFICULTY_MAP.keys())[0],
                                     key=GuiKeys.DifficultyListBox, enable_events=True, readonly=True)]]),
          sg.Frame("Hero",
-                  layout=[[sg.Combo(values=get_hero_options(), default_value=get_hero_options()[0],
+                  layout=[[sg.Combo(values=GuiFormatters.format_hero_options(),
+                                    default_value=GuiFormatters.format_hero_options()[0],
                                     key=GuiKeys.HeroCombo, enable_events=True, readonly=True)],
                           [sg.Text("(you still need to manually choose the hero before starting the game)")]])],
         [sg.Text("Towers", size=(30, 1), font="Lucida", justification="left")],

@@ -66,14 +66,15 @@ class GuiClass:
     def _initialize_tower_types_hotkeys(self) -> TowerTypesHotkeys:
         def observer(tower_name: str):
             list_values = self._window[GuiKeys.TowerTypesListBox].get_list_values()
-            try:
-                tower_list_row = [i for i in list_values if tower_name in i][0]
-            except IndexError:
-                return
 
-            self._controls_utils.update_listbox(key=GuiKeys.TowerTypesListBox,
-                                                set_to_index=list_values.index(tower_list_row))
+            tower_list_row = next(filter(lambda i: tower_name in i, list_values), None)
+
             self._gui_updater.update_selected_tower_type(selected_tower_text=tower_name)
+            try:
+                self._controls_utils.update_listbox(key=GuiKeys.TowerTypesListBox,
+                                                    set_to_index=list_values.index(tower_list_row))
+            except ValueError:
+                pass
 
         return TowerTypesHotkeys(observers=(observer,))
 
