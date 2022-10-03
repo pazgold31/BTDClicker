@@ -10,15 +10,16 @@ class BaseTower:
     x: int
     y: int
 
+    sold: bool = False
+    targeting: int = 0
+    s_targeting: int = 0
+
 
 @dataclass
 class Tower(BaseTower):
     tier_map: Dict[UpgradeTier, int] = field(default_factory=lambda: {i: 0 for i in UpgradeTier})
-    targeting: int = 0
-    special_targeting: int = 0
 
 
 @dataclass
 class Hero(BaseTower):
-    targeting: int = 0
-    special_targeting: int = 0
+    pass

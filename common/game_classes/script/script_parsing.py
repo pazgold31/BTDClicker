@@ -36,8 +36,22 @@ def parse_towers_from_script(script_entries: List[IScriptEntry], metadata: GameM
                 tower = Hero(name=metadata.hero_type, x=script_entry.x, y=script_entry.y)
             else:
                 tower = Tower(name=script_entry.name, x=script_entry.x, y=script_entry.y)
-
             tower_map[script_entry.id] = tower
+
+        elif isinstance(script_entry, UpgradeTowerEntry):
+            tower_obj = tower_map[script_entry.id]
+            if not isinstance(tower_obj, Tower):
+                raise RuntimeError
+
+            tower_obj.tier_map[script_entry.tier] += 1
+
+        elif isinstance(script_entry, SellTowerEntry):
+            tower_map[script_entry.id].sold = True
+        elif isinstance(script_entry, ChangeTargetingEntry):
+            tower_map[script_entry.id].targeting += 1
+        elif isinstance(script_entry, ChangeSpecialTargetingEntry):
+            tower_map[script_entry.id].s_targeting += 1
+
     return tower_map
 
 

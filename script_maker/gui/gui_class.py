@@ -300,9 +300,11 @@ class GuiClass:
 
         loaded_metadata = parse_metadata(json_dict=json_dict)
         self._metadata.difficulty = loaded_metadata.difficulty
-        self._gui_updater.update_selected_difficulty()
         self._metadata.hero_type = loaded_metadata.hero_type
+        self._gui_updater.update_selected_difficulty()
         self._gui_updater.update_selected_hero()
+        self._gui_updater.update_hero()
+        self._gui_updater.update_difficulty()
 
         self._activity_container.script_container = import_script(script_dict=json_dict["script"])
         self._activity_container.towers_container = parse_towers_from_script(

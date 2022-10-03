@@ -79,20 +79,18 @@ class ActivityContainer:
         self._add_entry(UpgradeTowerEntry(id=tower_id, tier=tier), index=index)
 
     def sell_tower(self, tower_id: int, index: int = None):
-        additional_tower_info = self._towers_container.get_additional_tower_information()[tower_id]
-
-        if additional_tower_info.sold:
+        if self._towers_container[tower_id].sold:
             raise ValueError("Tower already sold")
 
-        additional_tower_info.sold = True
+        self._towers_container[tower_id].sold = True
         self._add_entry(SellTowerEntry(id=tower_id), index=index)
 
     def change_targeting(self, tower_id: int, index: int = None):
-        self._towers_container.get_additional_tower_information()[tower_id].targeting += 1
+        self._towers_container[tower_id].targeting += 1
         self._add_entry(ChangeTargetingEntry(id=tower_id), index=index)
 
     def change_special_targeting(self, tower_id: int, index: int = None):
-        self._towers_container.get_additional_tower_information()[tower_id].s_targeting += 1
+        self._towers_container[tower_id].s_targeting += 1
         self._add_entry(ChangeSpecialTargetingEntry(id=tower_id), index=index)
 
     def delete_tower(self, tower_id: int):
@@ -112,11 +110,11 @@ class ActivityContainer:
             if isinstance(entry, UpgradeTowerEntry):
                 self._towers_container[entry.id].tier_map[entry.tier] -= 1
             elif isinstance(entry, SellTowerEntry):
-                self._towers_container.get_additional_tower_information()[entry.id].sold = False
+                self._towers_container[entry.id].sold = False
             elif isinstance(entry, ChangeTargetingEntry):
-                self._towers_container.get_additional_tower_information()[entry.id].targeting -= 1
+                self._towers_container[entry.id].targeting -= 1
             elif isinstance(entry, ChangeSpecialTargetingEntry):
-                self._towers_container.get_additional_tower_information()[entry.id].s_targeting -= 1
+                self._towers_container[entry.id].s_targeting -= 1
 
             self._script_container.pop(entry_index)
         except IndexError:

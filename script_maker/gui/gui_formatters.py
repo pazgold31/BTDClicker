@@ -14,19 +14,19 @@ class GuiFormatters:
     @staticmethod
     def format_existing_towers(towers_container: TowersContainer):
         output = []
-        for tower_id, tower, additional_tower_information in towers_container.iter_with_additional_information():
+        for tower_id, tower in towers_container.items():
             if isinstance(tower, Hero):
                 output.append(f"{tower_id}: {tower.name} | x: {tower.x} y: {tower.y} |"
-                              f"Targeting: {GuiFormatters.format_targeting(additional_tower_information.targeting)} | "
-                              f"S.Targeting: {additional_tower_information.s_targeting}"
-                              f"{' SOLD' if additional_tower_information.sold else ''}")
+                              f"Targeting: {GuiFormatters.format_targeting(tower.targeting)} | "
+                              f"S.Targeting: {tower.s_targeting}"
+                              f"{' SOLD' if tower.sold else ''}")
             elif isinstance(tower, Tower):
                 output.append(
                     f"{tower_id}: {tower.name} | x: {tower.x} y: {tower.y} | {tower.tier_map[UpgradeTier.top]}-"
                     f"{tower.tier_map[UpgradeTier.middle]}-{tower.tier_map[UpgradeTier.bottom]} | "
-                    f"Targeting: {GuiFormatters.format_targeting(additional_tower_information.targeting)} | "
-                    f"S.Targeting: {additional_tower_information.s_targeting}"
-                    f"{' SOLD' if additional_tower_information.sold else ''}")
+                    f"Targeting: {GuiFormatters.format_targeting(tower.targeting)} | "
+                    f"S.Targeting: {tower.s_targeting}"
+                    f"{' SOLD' if tower.sold else ''}")
             else:
                 raise RuntimeError
 
