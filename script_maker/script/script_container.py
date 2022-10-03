@@ -14,6 +14,11 @@ class ScriptContainer(List[IScriptEntry]):
                 entry.x = x
                 entry.y = y
 
+    def change_tower_type(self, tower_id: int, tower_type: str):
+        for entry in self:
+            if isinstance(entry, CreateTowerEntry) and entry.id == tower_id:
+                entry.name = tower_type
+
     def get_entries_for_id(self, tower_id: int) -> List[ITowerModifyingScriptEntry]:
         output = []
         for entry in self:

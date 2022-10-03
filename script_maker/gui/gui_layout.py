@@ -59,9 +59,10 @@ def get_layout() -> List[List[Any]]:
             sg.Button("S. Targeting", size=(15, 1), enable_events=True, key=GuiKeys.SpecialTargetingButton)
         ],
         [sg.HSeparator()],
-        [sg.Button("Modify Tower", size=(15, 1), enable_events=True, key=GuiKeys.ModifyTowerButton),
+        [sg.Button("Modify Position", size=(15, 1), enable_events=True, key=GuiKeys.ModifyTowerPositionButton),
          sg.Button("Duplicate Tower", size=(15, 1), enable_events=True, key=GuiKeys.DuplicateTowerButton),
          sg.Button("Delete Tower", size=(15, 1), enable_events=True, key=GuiKeys.DeleteTowerButton)],
+        [sg.Button("Modify Type", size=(15, 1), enable_events=True, key=GuiKeys.ModifyTowerTypeButton)],
         [sg.HSeparator()],
         [sg.Button("Pause game", size=(15, 1), enable_events=True, key=GuiKeys.PauseGameButton),
          sg.Frame("", layout=[[sg.In(size=(12, 1), enable_events=True, key=GuiKeys.WaitForMoneyInput),
