@@ -39,6 +39,10 @@ class ActivityContainer:
     def towers_container(self, value: Dict[int, Tower]):
         self._towers_container.set_towers(value=value)
 
+    def reset_activity(self):
+        self._script_container = ScriptContainer()
+        self._towers_container = TowersContainer()
+
     def is_hero_placeable(self) -> bool:
         # TODO: support sold hero
         is_hero_placed = any(i for i in self._script_container if isinstance(i, CreateTowerEntry) and i.name == "Hero")
