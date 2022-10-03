@@ -79,6 +79,7 @@ class GuiClass:
         return TowerTypesHotkeys(observers=(observer,))
 
     def _add_hotkey_binds(self):
+        self._window.bind("<Control-n>", GuiMenu.File.New)
         self._window.bind("<Control-o>", GuiMenu.File.Import)
         self._window.bind("<Control-s>", GuiMenu.File.Save)
         self._window.bind("<Control-Shift-S>", GuiMenu.File.SaveAs)
@@ -297,6 +298,10 @@ class GuiClass:
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container,
                                                             selected_script_index=[i + 1 for i in selected_indexes])
 
+    @update_existing_towers_and_script
+    def handle_new_button(self, values: ValuesType):
+        self._activity_container.reset_activity()
+
     def handle_save_button(self, values: ValuesType):
 
         self._selected_file_path = self._selected_file_path or popup_get_file(message="Please select file to import",
@@ -397,6 +402,7 @@ class GuiClass:
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
             GuiMenu.File.Save: self.handle_save_button,
+            GuiMenu.File.New: self.handle_new_button,
             GuiMenu.File.Import: self.handle_import_button,
             GuiMenu.ViewedTowers.All: self.handle_view_all_towers,
             GuiMenu.ViewedTowers.Primary: self.handle_view_primary_towers,

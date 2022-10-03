@@ -1,6 +1,7 @@
 class GuiMenu:
     class File:
         MenuName = "File"
+        New = "New    ctrl + n"
         Import = "Import    ctrl + o"
         Save = "Save    ctrl + s"
         SaveAs = "Save as    ctrl + shift + s"
