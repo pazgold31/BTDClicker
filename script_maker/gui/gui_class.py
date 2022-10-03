@@ -23,6 +23,7 @@ from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
+from script_maker.script.hotkeys.tower_types_hotkeys import TowerTypesHotkeys
 
 
 def update_existing_towers_and_script(method):
@@ -49,11 +50,11 @@ class GuiClass:
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
-        self._script_global_hotkeys = TowerPositionHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
-                                                           y_pos=self._window[GuiKeys.YPositionInput],
-                                                           tower_types=self._window[GuiKeys.TowerTypesListBox])
-        self._script_global_hotkeys.record_towers_position()
-        self._script_global_hotkeys.record_towers_hotkeys()
+        self._tower_position_hotkeys = TowerPositionHotkeys(x_pos=self._window[GuiKeys.XPositionInput],
+                                                            y_pos=self._window[GuiKeys.YPositionInput])
+        self._tower_position_hotkeys.record_towers_position()
+        self._tower_types_hotkeys = TowerTypesHotkeys(tower_types=self._window[GuiKeys.TowerTypesListBox])
+        self._tower_types_hotkeys.record_towers_hotkeys()
         self._clip_boarded_script_entries: List[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata,
@@ -214,14 +215,14 @@ class GuiClass:
     @update_existing_towers_and_script
     def handle_modify_tower(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
-            with self._script_global_hotkeys.pause_capture():
+            with self._tower_position_hotkeys.pause_capture():
                 x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
                 self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
 
     @update_existing_towers_and_script
     def handle_duplicate_tower(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
-            with self._script_global_hotkeys.pause_capture():
+            with self._tower_position_hotkeys.pause_capture():
                 x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
                 self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
 
