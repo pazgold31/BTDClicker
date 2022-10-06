@@ -206,11 +206,10 @@ class GuiClass:
             pass
 
     def handle_save_upgraded(self, values: ValuesType):
-        text = popup_get_text(message="Enter tower upgrade(e.g: 102): ",
-                              validator=is_tiers_text_valid,
-                              error_message="Invalid tower upgrades entered!")
-
         try:
+            text = popup_get_text(message="Enter tower upgrade(e.g: 102): ",
+                                  validator=is_tiers_text_valid,
+                                  error_message="Invalid tower upgrades entered!")
             selected_tower_id = self._handle_save_tower(values=values)
         except ValueError:
             return
@@ -289,21 +288,31 @@ class GuiClass:
     def handle_modify_tower_position(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
             with self._tower_position_hotkeys.pause_capture():
-                x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
-                self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
+                try:
+                    x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+                    self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
+                except ValueError:
+                    pass
 
     @update_existing_towers_and_script
     def handle_modify_tower_type(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
-            tower_type = popup_get_tower_type(title=f"Select type for tower: {selected_tower_id}")
+            try:
+                tower_type = popup_get_tower_type(title=f"Select type for tower: {selected_tower_id}")
+            except ValueError:
+                continue
+
             self._activity_container.change_tower_type(tower_id=selected_tower_id, tower_type=tower_type)
 
     @update_existing_towers_and_script
     def handle_duplicate_tower(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
             with self._tower_position_hotkeys.pause_capture():
-                x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
-                self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
+                try:
+                    x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
+                    self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
+                except ValueError:
+                    pass
 
     @update_existing_towers_and_script
     def handle_delete_tower(self, values: ValuesType):
@@ -364,21 +373,25 @@ class GuiClass:
         self._activity_container.reset_activity()
 
     def handle_save_button(self, values: ValuesType):
-
-        self._selected_file_path = self._selected_file_path or popup_get_file(
-            message="Please select file to import",
-            default_path=get_files_dir(),
-            file_types=(("Json files", "json"),))
+        try:
+            self._selected_file_path = self._selected_file_path or popup_get_file(
+                message="Please select file to import",
+                default_path=get_files_dir(),
+                file_types=(("Json files", "json"),))
+        except ValueError:
+            return
 
         with self._selected_file_path.open("w") as of:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
                       default=pydantic_encoder)
 
     def handle_import_button(self, values: ValuesType):
-
-        self._selected_file_path = popup_get_file(message="Please select file to import",
-                                                  default_path=get_files_dir(),
-                                                  file_types=(("Json files", "json"),))
+        try:
+            self._selected_file_path = popup_get_file(message="Please select file to import",
+                                                      default_path=get_files_dir(),
+                                                      file_types=(("Json files", "json"),))
+        except ValueError:
+            return
 
         with self._selected_file_path.open("r") as of:
             json_dict = json.load(of)
