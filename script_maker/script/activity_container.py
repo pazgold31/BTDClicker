@@ -60,15 +60,17 @@ class ActivityContainer:
     def add_wait_for_money_entry(self, amount: int, index: int = None):
         self._add_entry(WaitForMoneyEntry(amount=amount), index=index)
 
-    def add_new_tower(self, name: str, x: int, y: int, index: int = None, tower_id: int = None):
+    def add_new_tower(self, name: str, x: int, y: int, index: int = None, tower_id: int = None) -> int:
         tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y, tower_id=tower_id)
 
         self._add_entry(CreateTowerEntry(name=name, id=tower_id, x=x, y=y), index=index)
+        return tower_id
 
-    def add_hero(self, name: str, x: int, y: int, index: int = None):
+    def add_hero(self, name: str, x: int, y: int, index: int = None) -> int:
         tower_id = self._towers_container.add_hero(name=name, x=x, y=y)
 
         self._add_entry(CreateTowerEntry(name=name, id=tower_id, x=x, y=y), index=index)
+        return tower_id
 
     def change_position(self, tower_id: int, x: int, y: int):
         self._towers_container[tower_id].x = x

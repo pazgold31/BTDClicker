@@ -18,12 +18,13 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
-from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type
+from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 from script_maker.script.hotkeys.tower_types_hotkeys import TowerTypesHotkeys
+from script_maker.utils.math_utils import increment_if_set
 
 
 def update_existing_towers_and_script(method):
@@ -109,7 +110,7 @@ class GuiClass:
 
     def get_next_index_in_script_box(self):
         last_selected_index = self._controls_utils.get_list_box_last_selected_index(key=GuiKeys.ScriptBox)
-        return None if last_selected_index is None else last_selected_index + 1
+        return increment_if_set(value=last_selected_index)
 
     @contextlib.contextmanager
     def _retrieve_next_script_box_index_and_update_activity(self):
@@ -171,11 +172,11 @@ class GuiClass:
     def handle_keyboard_mouse(values: ValuesType):
         os.system("start ms-settings:easeofaccess-mouse")
 
-    def handle_save_tower(self, values: ValuesType):
+    def _handle_save_tower(self, values: ValuesType) -> int:
         if not self._controls_utils.are_values_set(values, GuiKeys.NewTowerTypeInput, GuiKeys.XPositionInput,
                                                    GuiKeys.YPositionInput):
             sg.popup("You didn't fill all of the data!")
-            return
+            raise ValueError
 
         tower_name = values[GuiKeys.NewTowerTypeInput]
         tower_x = int(values[GuiKeys.XPositionInput])
@@ -184,18 +185,47 @@ class GuiClass:
             if "Hero" == values[GuiKeys.NewTowerTypeInput]:
                 if not self._activity_container.is_hero_placeable():
                     sg.popup("Your Hero is already placed!")
-                    return
+                    raise ValueError
 
-                self._activity_container.add_hero(name=tower_name,
-                                                  x=tower_x,
-                                                  y=tower_y,
-                                                  index=entry_index_to_select)
+                return self._activity_container.add_hero(name=tower_name,
+                                                         x=tower_x,
+                                                         y=tower_y,
+                                                         index=entry_index_to_select)
 
             else:
-                self._activity_container.add_new_tower(name=tower_name,
-                                                       x=tower_x,
-                                                       y=tower_y,
-                                                       index=entry_index_to_select)
+                return self._activity_container.add_new_tower(name=tower_name,
+                                                              x=tower_x,
+                                                              y=tower_y,
+                                                              index=entry_index_to_select)
+
+    def handle_save_tower(self, values: ValuesType):
+        try:
+            self._handle_save_tower(values=values)
+        except ValueError:
+            pass
+
+    def handle_save_upgraded(self, values: ValuesType):
+        text = popup_get_text(message="Enter tower upgrade(e.g: 102): ",
+                              regex=r"(?=.*[0])(?=^[0-2]*[3-6]?[0-2]*$)(?=^[0-6]{3}$)")
+
+        try:
+            selected_tower_id = self._handle_save_tower(values=values)
+        except ValueError:
+            return
+
+        tier_map = {
+            tier: level for tier, level in zip((UpgradeTier.top, UpgradeTier.middle, UpgradeTier.bottom),
+                                               (int(i) for i in text))
+        }
+        with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
+            for tier, level in tier_map.items():
+                if not level:
+                    continue
+
+                for _ in range(level):
+                    self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
+                                                           index=entry_index_to_select)
+                    entry_index_to_select = increment_if_set(value=entry_index_to_select)
 
     def _handle_tower_upgrade(self, tier: UpgradeTier):
 
@@ -401,6 +431,7 @@ class GuiClass:
             GuiKeys.ExistingTowersListBox: self.handle_select_existing_tower,
             GuiKeys.KeyboardMouseButton: self.handle_keyboard_mouse,
             GuiKeys.SaveTowerButton: self.handle_save_tower,
+            GuiKeys.SaveUpgradedButton: self.handle_save_upgraded,
             GuiKeys.TopUpgradeButton: self.handle_top_upgrade,
             GuiKeys.MiddleUpgradeButton: self.handle_middle_upgrade,
             GuiKeys.BottomUpgradeButton: self.handle_bottom_upgrade,
