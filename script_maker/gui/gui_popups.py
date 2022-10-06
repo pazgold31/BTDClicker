@@ -1,7 +1,7 @@
 from pathlib import Path
-# noinspection PyPep8Naming
 from typing import Callable
 
+# noinspection PyPep8Naming
 import PySimpleGUI as sg
 
 from common.towers_info.game_info import TOWERS_INFO
@@ -10,7 +10,10 @@ from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotk
 
 
 def popup_get_file(message: str, *args, **kwargs) -> Path:
-    return Path(sg.popup_get_file(message, *args, **kwargs))
+    try:
+        return Path(sg.popup_get_file(message, *args, **kwargs))
+    except TypeError:
+        raise ValueError
 
 
 def popup_get_text(message: str, validator: Callable[[str], bool] = None,
