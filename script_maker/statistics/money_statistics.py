@@ -1,6 +1,6 @@
 from typing import Dict
 
-from common.cost_utils import get_base_cost, get_upgrade_cost
+from common.utils.cost_utils import get_base_cost, get_upgrade_cost
 from common.game_classes.enums import Difficulty
 from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry
 from common.game_classes.tower import Tower

@@ -13,6 +13,7 @@ from common.game_classes.script.script_dataclasses import GameMetadata, Script, 
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
+from common.utils.upgrades_utils import is_tiers_text_valid
 from script_maker.gui.gui_controls_utils import GuiControlsUtils
 from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
@@ -206,7 +207,8 @@ class GuiClass:
 
     def handle_save_upgraded(self, values: ValuesType):
         text = popup_get_text(message="Enter tower upgrade(e.g: 102): ",
-                              regex=r"(?=.*[0])(?=^[0-2]*[3-6]?[0-2]*$)(?=^[0-6]{3}$)")
+                              validator=is_tiers_text_valid,
+                              error_message="Invalid tower upgrades entered!")
 
         try:
             selected_tower_id = self._handle_save_tower(values=values)

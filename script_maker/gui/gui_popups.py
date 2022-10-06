@@ -1,7 +1,7 @@
-import re
 from pathlib import Path
-
 # noinspection PyPep8Naming
+from typing import Callable
+
 import PySimpleGUI as sg
 
 from common.towers_info.game_info import TOWERS_INFO
@@ -13,13 +13,15 @@ def popup_get_file(message: str, *args, **kwargs) -> Path:
     return Path(sg.popup_get_file(message, *args, **kwargs))
 
 
-def popup_get_text(message: str, regex: str = None, *args, **kwargs) -> str:
+def popup_get_text(message: str, validator: Callable[[str], bool] = None,
+                   error_message: str = "", *args, **kwargs) -> str:
     while True:
         text = sg.popup_get_text(message, *args, **kwargs)
-        if re.match(regex, text):
-            break
+        if bool(validator) and not validator(text):
+            sg.popup(error_message)
+            continue
 
-        sg.popup("Invalid text entered!")
+        break
 
     return text
 

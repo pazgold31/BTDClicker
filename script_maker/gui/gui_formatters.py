@@ -1,7 +1,7 @@
 from typing import Callable, List
 
 from clicker.consts.keymap import TOWER_KEY_MAP
-from common.cost_utils import get_base_cost
+from common.utils.cost_utils import get_base_cost
 from common.game_classes.enums import UpgradeTier, Difficulty
 from common.game_classes.tower import Hero, Tower
 from common.towers_info.game_info import HEROES_INFO, TOWERS_INFO
