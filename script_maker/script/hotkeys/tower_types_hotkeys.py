@@ -9,7 +9,7 @@ class TowerTypesHotkeys:
     def __init__(self, observers: Iterable[Callable[[str], None]]):
         self._observers = observers
 
-    def _record_towers_hotkeys(self, tower_name: str):
+    def _hotkey_callback(self, tower_name: str):
 
         for observer in self._observers:
             observer(tower_name)
@@ -21,4 +21,4 @@ class TowerTypesHotkeys:
             return
 
         for tower_name, tower_hotkey in TOWER_KEY_MAP.items():
-            Hotkeys.add_hotkey(tower_hotkey, lambda i=tower_name: self._record_towers_hotkeys(tower_name=i))
+            Hotkeys.add_hotkey(tower_hotkey, lambda i=tower_name: self._hotkey_callback(tower_name=i))

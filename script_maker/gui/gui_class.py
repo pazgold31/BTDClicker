@@ -24,6 +24,9 @@ from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.hotkey_map import ScriptHotkeyMap
 from script_maker.script.activity_container import ActivityContainer
+from script_maker.script.hotkeys.duplicate_tower_hotkeys import DuplicateTowerHotkeys
+from script_maker.script.hotkeys.modify_tower_position_hotkeys import ModifyTowerPositionHotkeys
+from script_maker.script.hotkeys.save_tower_hotkeys import SaveTowerHotkeys
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 from script_maker.script.hotkeys.tower_types_hotkeys import TowerTypesHotkeys
 from script_maker.utils.math_utils import increment_if_set
@@ -53,18 +56,33 @@ class GuiClass:
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
-        self._tower_position_hotkeys = TowerPositionHotkeys(
-            observers=(lambda x, y: self._controls_utils.update_input(key=GuiKeys.XPositionInput, value=x),
-                       lambda x, y: self._controls_utils.update_input(key=GuiKeys.YPositionInput, value=y)))
-
-        self._tower_position_hotkeys.record_towers_position()
-        self._tower_types_hotkeys = self._initialize_tower_types_hotkeys()
-        self._tower_types_hotkeys.record_towers_hotkeys()
+        self._initialize_hotkey_classes()
         self._clip_boarded_script_entries: List[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata,
                                        controls_utils=self._controls_utils)
         self.handle_view_all_towers(values=values)
+
+    def _initialize_hotkey_classes(self):
+        self._tower_position_hotkeys = TowerPositionHotkeys(
+            observers=(lambda x, y: self._controls_utils.update_input(key=GuiKeys.XPositionInput, value=x),
+                       lambda x, y: self._controls_utils.update_input(key=GuiKeys.YPositionInput, value=y)))
+        self._tower_position_hotkeys.record_towers_position()
+
+        self._save_tower_hotkeys = SaveTowerHotkeys(
+            observers=(lambda: self._controls_utils.click_button(GuiKeys.SaveTowerButton),))
+        self._save_tower_hotkeys.record_towers_saving()
+
+        self._duplicate_tower_hotkeys = DuplicateTowerHotkeys(
+            observers=(lambda: self._controls_utils.click_button(GuiKeys.DuplicateTowerButton),))
+        self._duplicate_tower_hotkeys.record_towers_saving()
+
+        self._modify_tower_position_hotkeys = ModifyTowerPositionHotkeys(
+            observers=(lambda: self._controls_utils.click_button(GuiKeys.ModifyTowerPositionButton),))
+        self._modify_tower_position_hotkeys.record_towers_saving()
+
+        self._tower_types_hotkeys = self._initialize_tower_types_hotkeys()
+        self._tower_types_hotkeys.record_towers_hotkeys()
 
     def _initialize_tower_types_hotkeys(self) -> TowerTypesHotkeys:
         def observer(tower_name: str):

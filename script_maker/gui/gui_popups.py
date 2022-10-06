@@ -48,7 +48,7 @@ def popup_get_position(title: str, ):
     try:
         with TowerPositionHotkeys(
                 observers=(lambda x, y: gui_controls_utils.update_input(key=x_pos_key, value=x),
-                           lambda x, y: gui_controls_utils.update_input(key=x_pos_key, value=y))).capture_positions():
+                           lambda x, y: gui_controls_utils.update_input(key=y_pos_key, value=y))).capture_positions():
             while True:
                 event, values = window.read()
                 if event == save_button_key:

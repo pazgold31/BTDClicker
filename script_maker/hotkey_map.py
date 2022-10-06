@@ -7,6 +7,8 @@ class ScriptMakerHotkeys(BaseModel):
     # Global system hotkeys.
     capture_tower_position: str = "ctrl + shift + r"
     save_tower: str = "ctrl + shift + s"
+    duplicate_tower: str = "ctrl + shift + d"
+    modify_tower_position: str = "ctrl + shift + p"
 
     # Window specific hotkeys
     new_script: str = "<Control-n>"
