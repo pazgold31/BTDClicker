@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 # noinspection PyPep8Naming
@@ -10,6 +11,17 @@ from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotk
 
 def popup_get_file(message: str, *args, **kwargs) -> Path:
     return Path(sg.popup_get_file(message, *args, **kwargs))
+
+
+def popup_get_text(message: str, regex: str = None, *args, **kwargs) -> str:
+    while True:
+        text = sg.popup_get_text(message, *args, **kwargs)
+        if re.match(regex, text):
+            break
+
+        sg.popup("Invalid text entered!")
+
+    return text
 
 
 def popup_get_position(title: str, ):

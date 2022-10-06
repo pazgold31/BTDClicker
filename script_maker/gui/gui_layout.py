@@ -46,6 +46,7 @@ def get_layout() -> List[List[Any]]:
         [sg.Text("Type:"),
          sg.In(size=(40, 1), disabled=True, key=GuiKeys.NewTowerTypeInput)],
         [sg.Button("Save", enable_events=True, key=GuiKeys.SaveTowerButton),
+         sg.Button("Save Upgraded", enable_events=True, key=GuiKeys.SaveUpgradedButton),
          sg.Button("Keyboard mouse", enable_events=True, key=GuiKeys.KeyboardMouseButton)],
         [sg.HSeparator()],
         [
