@@ -74,14 +74,14 @@ class GuiUpdater:
         total_cost = calculate_cost(script_container=activity_container.script_container,
                                     towers_container=activity_container.towers_container,
                                     difficulty=self._metadata.difficulty)
-        self._controls_utils.update_text(key=GuiKeys.TotalCostText, value=f"Total cost: {total_cost}")
+        self._controls_utils.update_text(key=GuiKeys.TotalCostText, value=f"Total cost: {total_cost}$")
 
         to_selection_cost = calculate_cost(script_container=activity_container.script_container,
                                            towers_container=activity_container.towers_container,
                                            difficulty=self._metadata.difficulty,
                                            end=selected_script_index)
         self._controls_utils.update_text(key=GuiKeys.CostToSelectionText,
-                                         value=f"Cost to selection: {to_selection_cost}")
+                                         value=f"Cost to selection: {to_selection_cost}$")
 
     def update_existing_towers(self, towers_container: TowersContainer):
         list_box_items = GuiFormatters.format_existing_towers(towers_container)

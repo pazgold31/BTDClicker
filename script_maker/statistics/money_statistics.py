@@ -10,10 +10,10 @@ from script_maker.script.towers_container import TowersContainer
 
 def calculate_cost(script_container: ScriptContainer, towers_container: TowersContainer, difficulty: Difficulty,
                    start: int = 0, end: int = None, sell_ratio: float = 0.7) -> int:
-    tower_cost_map: Dict[int, int] = {tower_id: 0 for tower_id, _ in towers_container.items()}
-    end = end if end is not None else len(script_container)
 
-    # TODO: improve this to a way that makes more sense and support start argument.
+    tower_cost_map: Dict[int, int] = {tower_id: 0 for tower_id, _ in towers_container.items()}
+    end = end or len(script_container)
+
     tower_tier_map: Dict[int, Tower] = {tower_id: Tower(name=tower.name, x=tower.x, y=tower.y) for tower_id, tower in
                                         towers_container.items()}
 
