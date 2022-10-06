@@ -24,6 +24,7 @@ from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 from script_maker.script.hotkeys.tower_types_hotkeys import TowerTypesHotkeys
+from script_maker.utils.math_utils import increment_if_set
 
 
 def update_existing_towers_and_script(method):
@@ -107,13 +108,9 @@ class GuiClass:
 
         self._window.close()
 
-    @staticmethod
-    def _get_next_index(current_index):
-        return None if current_index is None else current_index + 1
-
     def get_next_index_in_script_box(self):
         last_selected_index = self._controls_utils.get_list_box_last_selected_index(key=GuiKeys.ScriptBox)
-        return self._get_next_index(current_index=last_selected_index)
+        return increment_if_set(value=last_selected_index)
 
     @contextlib.contextmanager
     def _retrieve_next_script_box_index_and_update_activity(self):
@@ -228,7 +225,7 @@ class GuiClass:
                 for _ in range(level):
                     self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
                                                            index=entry_index_to_select)
-                    entry_index_to_select = self._get_next_index(current_index=entry_index_to_select)
+                    entry_index_to_select = increment_if_set(value=entry_index_to_select)
 
     def _handle_tower_upgrade(self, tier: UpgradeTier):
 
