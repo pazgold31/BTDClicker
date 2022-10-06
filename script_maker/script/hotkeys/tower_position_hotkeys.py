@@ -4,6 +4,7 @@ from typing import Callable, Iterable
 import pyautogui
 
 from common.hotkeys import Hotkeys
+from script_maker.hotkey_map import ScriptHotkeyMap
 
 
 class TowerPositionHotkeys:
@@ -16,7 +17,7 @@ class TowerPositionHotkeys:
             observer(x, y)
 
     def record_towers_position(self):
-        Hotkeys.add_hotkey('ctrl + shift + r', self._record_tower)
+        Hotkeys.add_hotkey(ScriptHotkeyMap.capture_tower_position, self._record_tower)
 
     def stop_recording_towers_position(self):
         Hotkeys.remove_hotkey(self._record_tower)

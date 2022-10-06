@@ -22,6 +22,7 @@ from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
+from script_maker.hotkey_map import ScriptHotkeyMap
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 from script_maker.script.hotkeys.tower_types_hotkeys import TowerTypesHotkeys
@@ -81,19 +82,19 @@ class GuiClass:
         return TowerTypesHotkeys(observers=(observer,))
 
     def _add_hotkey_binds(self):
-        self._window.bind("<Control-n>", GuiMenu.File.New)
-        self._window.bind("<Control-o>", GuiMenu.File.Import)
-        self._window.bind("<Control-s>", GuiMenu.File.Save)
-        self._window.bind("<Control-Shift-S>", GuiMenu.File.SaveAs)
+        self._window.bind(ScriptHotkeyMap.new_script, GuiMenu.File.New)
+        self._window.bind(ScriptHotkeyMap.import_script, GuiMenu.File.Import)
+        self._window.bind(ScriptHotkeyMap.save_script, GuiMenu.File.Save)
+        self._window.bind(ScriptHotkeyMap.save_script_as, GuiMenu.File.SaveAs)
 
-        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.All)
-        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Primary)
-        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Military)
-        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Magic)
-        self._window.bind("<Control_L>5", GuiMenu.ViewedTowers.Support)
+        self._window.bind(ScriptHotkeyMap.view_all_towers, GuiMenu.ViewedTowers.All)
+        self._window.bind(ScriptHotkeyMap.view_primary_towers, GuiMenu.ViewedTowers.Primary)
+        self._window.bind(ScriptHotkeyMap.view_military_towers, GuiMenu.ViewedTowers.Military)
+        self._window.bind(ScriptHotkeyMap.view_magic_towers, GuiMenu.ViewedTowers.Magic)
+        self._window.bind(ScriptHotkeyMap.view_support_towers, GuiMenu.ViewedTowers.Support)
 
-        self._window[GuiKeys.ScriptBox].bind("<Control_L>c", GuiKeys.CopyToClipboard)
-        self._window[GuiKeys.ScriptBox].bind("<Control_L>v", GuiKeys.PasteClipboard)
+        self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.copy_towers_to_clipboard, GuiKeys.CopyToClipboard)
+        self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.paste_towers_from_clipboard, GuiKeys.PasteClipboard)
 
     def run(self):
         callback_map = self.get_callback_map()
