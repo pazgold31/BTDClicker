@@ -69,7 +69,8 @@ def get_layout() -> List[List[Any]]:
                                sg.Button("Wait for amount", size=(15, 1), enable_events=True,
                                          key=GuiKeys.WaitForMoneyButton)]])],
         [sg.HSeparator()],
-        [sg.Text("Total cost: ", key=GuiKeys.TotalCostText)]
+        [sg.Text("Total cost: ", key=GuiKeys.TotalCostText)],
+        [sg.Text("Cost to selection: ", key=GuiKeys.CostToSelectionText)]
     ]
 
     bottom_left_col = [[sg.Text("Script:")],

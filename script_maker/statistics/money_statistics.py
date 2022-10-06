@@ -17,7 +17,7 @@ def calculate_cost(script_container: ScriptContainer, towers_container: TowersCo
     tower_tier_map: Dict[int, Tower] = {tower_id: Tower(name=tower.name, x=tower.x, y=tower.y) for tower_id, tower in
                                         towers_container.items()}
 
-    for entry in script_container[start: end]:
+    for entry in script_container[start: end + 1]:
         if isinstance(entry, CreateTowerEntry):
             tower_cost_map[entry.id] += TOWERS_INFO[entry.name].base_cost.get_mapping()[difficulty]
         elif isinstance(entry, UpgradeTowerEntry):
