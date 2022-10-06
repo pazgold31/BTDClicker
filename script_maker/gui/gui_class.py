@@ -152,6 +152,11 @@ class GuiClass:
             self._controls_utils.unselect_listbox(key=GuiKeys.TowerTypesListBox)
             sg.popup("You must select exactly 1 tower type")
 
+    def handle_select_script_box(self, values: ValuesType):
+        self._gui_updater.update_total_cost(
+            activity_container=self._activity_container,
+            selected_script_index=self._controls_utils.get_list_box_last_selected_index(key=GuiKeys.ScriptBox))
+
     def handle_select_existing_tower(self, values: ValuesType):
         try:
             selected_tower_value = GuiParsers.parse_existing_tower(
@@ -392,6 +397,7 @@ class GuiClass:
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
             GuiKeys.HeroCombo: self.handle_change_hero,
             GuiKeys.TowerTypesListBox: self.handle_select_tower_type,
+            GuiKeys.ScriptBox: self.handle_select_script_box,
             GuiKeys.ExistingTowersListBox: self.handle_select_existing_tower,
             GuiKeys.KeyboardMouseButton: self.handle_keyboard_mouse,
             GuiKeys.SaveTowerButton: self.handle_save_tower,

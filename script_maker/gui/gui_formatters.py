@@ -1,6 +1,7 @@
 from typing import Callable, List
 
 from clicker.consts.keymap import TOWER_KEY_MAP
+from common.cost_utils import get_base_cost
 from common.game_classes.enums import UpgradeTier, Difficulty
 from common.game_classes.tower import Hero, Tower
 from common.towers_info.game_info import HEROES_INFO, TOWERS_INFO
@@ -18,8 +19,8 @@ class GuiFormatters:
         hero_prefix = f"Hero({TOWER_KEY_MAP['Hero']})"
         hero_str = hero_prefix if not chosen_hero else f"{hero_prefix} | {chosen_hero}: {hero_cost}"
         return [hero_str] + \
-               [f"{name}({TOWER_KEY_MAP[name]}): {tower_info.base_cost.get_mapping()[difficulty]}$" for name, tower_info
-                in TOWERS_INFO.items() if towers_filter(tower_info)]
+               [f"{name}({TOWER_KEY_MAP[name]}): {get_base_cost(tower_name=name, difficulty=difficulty)}$" for
+                name, tower_info in TOWERS_INFO.items() if towers_filter(tower_info)]
 
     @staticmethod
     def format_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:

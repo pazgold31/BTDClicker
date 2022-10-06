@@ -15,6 +15,7 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import DIFFICULTY_MAP
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.towers_container import TowersContainer
+from script_maker.statistics.money_statistics import calculate_cost
 
 
 class GuiUpdater:
@@ -68,6 +69,20 @@ class GuiUpdater:
             self._controls_utils.disable_button(key=GuiKeys.MiddleUpgradeButton)
             self._controls_utils.disable_button(key=GuiKeys.BottomUpgradeButton)
 
+    def update_total_cost(self, activity_container: ActivityContainer,
+                          selected_script_index: Union[int, List[int]] = None):
+        total_cost = calculate_cost(script_container=activity_container.script_container,
+                                    towers_container=activity_container.towers_container,
+                                    difficulty=self._metadata.difficulty)
+        self._controls_utils.update_text(key=GuiKeys.TotalCostText, value=f"Total cost: {total_cost}$")
+
+        to_selection_cost = calculate_cost(script_container=activity_container.script_container,
+                                           towers_container=activity_container.towers_container,
+                                           difficulty=self._metadata.difficulty,
+                                           end=selected_script_index)
+        self._controls_utils.update_text(key=GuiKeys.CostToSelectionText,
+                                         value=f"Cost to selection: {to_selection_cost}$")
+
     def update_existing_towers(self, towers_container: TowersContainer):
         list_box_items = GuiFormatters.format_existing_towers(towers_container)
         self._controls_utils.update_listbox(
@@ -115,3 +130,4 @@ class GuiUpdater:
                                           selected_script_index: Union[int, List[int]] = None):
         self.update_existing_towers(towers_container=activity_container.towers_container)
         self.update_script_box(activity_container=activity_container, selected_index=selected_script_index)
+        self.update_total_cost(activity_container=activity_container, selected_script_index=selected_script_index)
