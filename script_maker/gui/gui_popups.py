@@ -20,6 +20,9 @@ def popup_get_text(message: str, validator: Callable[[str], bool] = None,
                    error_message: str = "", *args, **kwargs) -> str:
     while True:
         text = sg.popup_get_text(message, *args, **kwargs)
+        if text is None:
+            raise ValueError
+
         if bool(validator) and not validator(text):
             sg.popup(error_message)
             continue
@@ -48,7 +51,7 @@ def popup_get_position(title: str, ):
     try:
         with TowerPositionHotkeys(
                 observers=(lambda x, y: gui_controls_utils.update_input(key=x_pos_key, value=x),
-                           lambda x, y: gui_controls_utils.update_input(key=x_pos_key, value=y))).capture_positions():
+                           lambda x, y: gui_controls_utils.update_input(key=y_pos_key, value=y))).capture_positions():
             while True:
                 event, values = window.read()
                 if event == save_button_key:

@@ -22,7 +22,11 @@ from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
+from script_maker.hotkey_map import ScriptHotkeyMap
 from script_maker.script.activity_container import ActivityContainer
+from script_maker.script.hotkeys.duplicate_tower_hotkeys import DuplicateTowerHotkeys
+from script_maker.script.hotkeys.modify_tower_position_hotkeys import ModifyTowerPositionHotkeys
+from script_maker.script.hotkeys.save_tower_hotkeys import SaveTowerHotkeys
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 from script_maker.script.hotkeys.tower_types_hotkeys import TowerTypesHotkeys
 from script_maker.utils.math_utils import increment_if_set
@@ -52,18 +56,33 @@ class GuiClass:
         self._metadata = GameMetadata(difficulty=DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]],
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
-        self._tower_position_hotkeys = TowerPositionHotkeys(
-            observers=(lambda x, y: self._controls_utils.update_input(key=GuiKeys.XPositionInput, value=x),
-                       lambda x, y: self._controls_utils.update_input(key=GuiKeys.YPositionInput, value=y)))
-
-        self._tower_position_hotkeys.record_towers_position()
-        self._tower_types_hotkeys = self._initialize_tower_types_hotkeys()
-        self._tower_types_hotkeys.record_towers_hotkeys()
+        self._initialize_hotkey_classes()
         self._clip_boarded_script_entries: List[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata,
                                        controls_utils=self._controls_utils)
         self.handle_view_all_towers(values=values)
+
+    def _initialize_hotkey_classes(self):
+        self._tower_position_hotkeys = TowerPositionHotkeys(
+            observers=(lambda x, y: self._controls_utils.update_input(key=GuiKeys.XPositionInput, value=x),
+                       lambda x, y: self._controls_utils.update_input(key=GuiKeys.YPositionInput, value=y)))
+        self._tower_position_hotkeys.record_towers_position()
+
+        self._save_tower_hotkeys = SaveTowerHotkeys(
+            observers=(lambda: self._controls_utils.click_button(GuiKeys.SaveTowerButton),))
+        self._save_tower_hotkeys.record_towers_saving()
+
+        self._duplicate_tower_hotkeys = DuplicateTowerHotkeys(
+            observers=(lambda: self._controls_utils.click_button(GuiKeys.DuplicateTowerButton),))
+        self._duplicate_tower_hotkeys.record_towers_saving()
+
+        self._modify_tower_position_hotkeys = ModifyTowerPositionHotkeys(
+            observers=(lambda: self._controls_utils.click_button(GuiKeys.ModifyTowerPositionButton),))
+        self._modify_tower_position_hotkeys.record_towers_saving()
+
+        self._tower_types_hotkeys = self._initialize_tower_types_hotkeys()
+        self._tower_types_hotkeys.record_towers_hotkeys()
 
     def _initialize_tower_types_hotkeys(self) -> TowerTypesHotkeys:
         def observer(tower_name: str):
@@ -81,19 +100,34 @@ class GuiClass:
         return TowerTypesHotkeys(observers=(observer,))
 
     def _add_hotkey_binds(self):
-        self._window.bind("<Control-n>", GuiMenu.File.New)
-        self._window.bind("<Control-o>", GuiMenu.File.Import)
-        self._window.bind("<Control-s>", GuiMenu.File.Save)
-        self._window.bind("<Control-Shift-S>", GuiMenu.File.SaveAs)
+        self._window.bind(ScriptHotkeyMap.new_script, GuiMenu.File.New)
+        self._window.bind(ScriptHotkeyMap.import_script, GuiMenu.File.Import)
+        self._window.bind(ScriptHotkeyMap.save_script, GuiMenu.File.Save)
+        self._window.bind(ScriptHotkeyMap.save_script_as, GuiMenu.File.SaveAs)
 
-        self._window.bind("<Control_L>1", GuiMenu.ViewedTowers.All)
-        self._window.bind("<Control_L>2", GuiMenu.ViewedTowers.Primary)
-        self._window.bind("<Control_L>3", GuiMenu.ViewedTowers.Military)
-        self._window.bind("<Control_L>4", GuiMenu.ViewedTowers.Magic)
-        self._window.bind("<Control_L>5", GuiMenu.ViewedTowers.Support)
+        self._window.bind(ScriptHotkeyMap.view_all_towers, GuiMenu.ViewedTowers.All)
+        self._window.bind(ScriptHotkeyMap.view_primary_towers, GuiMenu.ViewedTowers.Primary)
+        self._window.bind(ScriptHotkeyMap.view_military_towers, GuiMenu.ViewedTowers.Military)
+        self._window.bind(ScriptHotkeyMap.view_magic_towers, GuiMenu.ViewedTowers.Magic)
+        self._window.bind(ScriptHotkeyMap.view_support_towers, GuiMenu.ViewedTowers.Support)
 
-        self._window[GuiKeys.ScriptBox].bind("<Control_L>c", GuiKeys.CopyToClipboard)
-        self._window[GuiKeys.ScriptBox].bind("<Control_L>v", GuiKeys.PasteClipboard)
+        self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.copy_towers_to_clipboard, GuiKeys.CopyToClipboard)
+        self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.paste_towers_from_clipboard, GuiKeys.PasteClipboard)
+
+        self._window.bind(ScriptHotkeyMap.save_upgraded, GuiKeys.SaveUpgradedButton)
+        self._window.bind(ScriptHotkeyMap.keyboard_mouse, GuiKeys.KeyboardMouseButton)
+        self._window.bind(ScriptHotkeyMap.upgrade_top, GuiKeys.TopUpgradeButton)
+        self._window.bind(ScriptHotkeyMap.upgrade_middle, GuiKeys.MiddleUpgradeButton)
+        self._window.bind(ScriptHotkeyMap.upgrade_bottom, GuiKeys.BottomUpgradeButton)
+        self._window.bind(ScriptHotkeyMap.sell, GuiKeys.SellButton)
+        self._window.bind(ScriptHotkeyMap.change_targeting, GuiKeys.TargetingButton)
+        self._window.bind(ScriptHotkeyMap.change_special_targeting, GuiKeys.SpecialTargetingButton)
+        self._window.bind(ScriptHotkeyMap.delete_tower, GuiKeys.DeleteTowerButton)
+        self._window.bind(ScriptHotkeyMap.modify_tower_type, GuiKeys.ModifyTowerTypeButton)
+        self._window.bind(ScriptHotkeyMap.pause_game, GuiKeys.PauseGameButton)
+        self._window.bind(ScriptHotkeyMap.delete_script, GuiKeys.DeleteFromScriptButton)
+        self._window.bind(ScriptHotkeyMap.delete_up_script, GuiKeys.MoveUpInScriptButton)
+        self._window.bind(ScriptHotkeyMap.move_down_script, GuiKeys.MoveDownInScriptButton)
 
     def run(self):
         callback_map = self.get_callback_map()
@@ -338,8 +372,12 @@ class GuiClass:
                                                             selected_script_index=index_to_select)
 
     def handle_move_up_on_script(self, values: ValuesType):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to move!")
+            return
 
         selected_indexes = self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ScriptBox)
+
         for selected_entry_index in selected_indexes:
             # Order of iteration is important to ensure all items can move up.
             try:

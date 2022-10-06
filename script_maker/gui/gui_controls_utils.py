@@ -60,6 +60,13 @@ class GuiControlsUtils:
         return widget.current()
 
     @staticmethod
+    def click_button_item(button: sg.Button):
+        button.click()
+
+    def click_button(self, key: str):
+        self.click_button_item(button=self._window[key])
+
+    @staticmethod
     def get_selected_value_for_list_box(values: ValuesType, key: str) -> str:
         try:
             if len(values[key]) > 1:
