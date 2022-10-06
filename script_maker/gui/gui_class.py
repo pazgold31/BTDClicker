@@ -114,6 +114,21 @@ class GuiClass:
         self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.copy_towers_to_clipboard, GuiKeys.CopyToClipboard)
         self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.paste_towers_from_clipboard, GuiKeys.PasteClipboard)
 
+        self._window.bind(ScriptHotkeyMap.save_upgraded, GuiKeys.SaveUpgradedButton)
+        self._window.bind(ScriptHotkeyMap.keyboard_mouse, GuiKeys.KeyboardMouseButton)
+        self._window.bind(ScriptHotkeyMap.upgrade_top, GuiKeys.TopUpgradeButton)
+        self._window.bind(ScriptHotkeyMap.upgrade_middle, GuiKeys.MiddleUpgradeButton)
+        self._window.bind(ScriptHotkeyMap.upgrade_bottom, GuiKeys.BottomUpgradeButton)
+        self._window.bind(ScriptHotkeyMap.sell, GuiKeys.SellButton)
+        self._window.bind(ScriptHotkeyMap.change_targeting, GuiKeys.TargetingButton)
+        self._window.bind(ScriptHotkeyMap.change_special_targeting, GuiKeys.SpecialTargetingButton)
+        self._window.bind(ScriptHotkeyMap.delete_tower, GuiKeys.DeleteTowerButton)
+        self._window.bind(ScriptHotkeyMap.modify_tower_type, GuiKeys.ModifyTowerTypeButton)
+        self._window.bind(ScriptHotkeyMap.pause_game, GuiKeys.PauseGameButton)
+        self._window.bind(ScriptHotkeyMap.delete_script, GuiKeys.DeleteFromScriptButton)
+        self._window.bind(ScriptHotkeyMap.delete_up_script, GuiKeys.MoveUpInScriptButton)
+        self._window.bind(ScriptHotkeyMap.move_down_script, GuiKeys.MoveDownInScriptButton)
+
     def run(self):
         callback_map = self.get_callback_map()
         self._add_hotkey_binds()
@@ -357,8 +372,12 @@ class GuiClass:
                                                             selected_script_index=index_to_select)
 
     def handle_move_up_on_script(self, values: ValuesType):
+        if not values[GuiKeys.ScriptBox]:
+            sg.popup("You must select an entry to move!")
+            return
 
         selected_indexes = self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ScriptBox)
+
         for selected_entry_index in selected_indexes:
             # Order of iteration is important to ensure all items can move up.
             try:

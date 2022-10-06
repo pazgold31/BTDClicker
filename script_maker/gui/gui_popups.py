@@ -20,6 +20,9 @@ def popup_get_text(message: str, validator: Callable[[str], bool] = None,
                    error_message: str = "", *args, **kwargs) -> str:
     while True:
         text = sg.popup_get_text(message, *args, **kwargs)
+        if text is None:
+            raise ValueError
+
         if bool(validator) and not validator(text):
             sg.popup(error_message)
             continue
