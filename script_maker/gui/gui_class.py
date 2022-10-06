@@ -109,12 +109,12 @@ class GuiClass:
 
         self._window.close()
 
-    def get_next_index_in_script_box(self):
+    def get_next_index_in_script_box(self) -> int:
         last_selected_index = self._controls_utils.get_list_box_last_selected_index(key=GuiKeys.ScriptBox)
         return increment_if_set(value=last_selected_index)
 
     @contextlib.contextmanager
-    def _retrieve_next_script_box_index_and_update_activity(self):
+    def _retrieve_next_script_box_index_and_update_activity(self) -> int:
         entry_index_to_select = self.get_next_index_in_script_box()
         try:
             yield entry_index_to_select
@@ -229,10 +229,18 @@ class GuiClass:
                                                            index=entry_index_to_select)
                     entry_index_to_select = increment_if_set(value=entry_index_to_select)
 
+    def _is_tower_modifiable(self, tower_id: int) -> bool:
+        return not self._activity_container.towers_container[tower_id].sold
+
     def _handle_tower_upgrade(self, tier: UpgradeTier):
 
         with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
+                if not self._is_tower_modifiable(tower_id=selected_tower_id):
+                    # TODO: enable upgrading the lines before selling.
+                    sg.popup("Tower can't be modified!")
+                    continue
+
                 try:
                     self._activity_container.upgrade_tower(tower_id=selected_tower_id, tier=tier,
                                                            index=entry_index_to_select)
@@ -259,11 +267,21 @@ class GuiClass:
     def handle_change_targeting(self, values: ValuesType):
         with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
+                if not self._is_tower_modifiable(tower_id=selected_tower_id):
+                    # TODO: enable upgrading the lines before selling.
+                    sg.popup("Tower can't be modified!")
+                    continue
+
                 self._activity_container.change_targeting(tower_id=selected_tower_id, index=entry_index_to_select)
 
     def handle_change_special_targeting(self, values: ValuesType):
         with self._retrieve_next_script_box_index_and_update_activity() as entry_index_to_select:
             for selected_tower_id in self._get_selected_towers_id():
+                if not self._is_tower_modifiable(tower_id=selected_tower_id):
+                    # TODO: enable upgrading the lines before selling.
+                    sg.popup("Tower can't be modified!")
+                    continue
+
                 self._activity_container.change_special_targeting(tower_id=selected_tower_id,
                                                                   index=entry_index_to_select)
 
@@ -347,9 +365,10 @@ class GuiClass:
 
     def handle_save_button(self, values: ValuesType):
 
-        self._selected_file_path = self._selected_file_path or popup_get_file(message="Please select file to import",
-                                                                              default_path=get_files_dir(),
-                                                                              file_types=(("Json files", "json"),))
+        self._selected_file_path = self._selected_file_path or popup_get_file(
+            message="Please select file to import",
+            default_path=get_files_dir(),
+            file_types=(("Json files", "json"),))
 
         with self._selected_file_path.open("w") as of:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
