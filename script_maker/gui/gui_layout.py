@@ -67,7 +67,9 @@ def get_layout() -> List[List[Any]]:
         [sg.Button("Pause game", size=(15, 1), enable_events=True, key=GuiKeys.PauseGameButton),
          sg.Frame("", layout=[[sg.In(size=(12, 1), enable_events=True, key=GuiKeys.WaitForMoneyInput),
                                sg.Button("Wait for amount", size=(15, 1), enable_events=True,
-                                         key=GuiKeys.WaitForMoneyButton)]])]
+                                         key=GuiKeys.WaitForMoneyButton)]])],
+        [sg.HSeparator()],
+        [sg.Text("Total cost: ", key=GuiKeys.TotalCostText)]
     ]
 
     bottom_left_col = [[sg.Text("Script:")],

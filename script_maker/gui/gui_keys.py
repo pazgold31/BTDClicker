@@ -26,6 +26,7 @@ class GuiKeys:
     PauseGameButton = "-pause-game-"
     WaitForMoneyButton = "-wait-for-money-button-"
     WaitForMoneyInput = "-wait-for-money-input-"
+    TotalCostText = "-total-cost-text-"
 
     CopyToClipboard = "-copy-to-clipboard-"
     PasteClipboard = "-paste-clipboard-"

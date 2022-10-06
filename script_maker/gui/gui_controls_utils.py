@@ -37,6 +37,13 @@ class GuiControlsUtils:
         self.update_input_item(input_element=self._window[key], value=value)
 
     @staticmethod
+    def update_text_item(text_element: sg.Text, value: Optional[str] = None):
+        text_element.update(value=value)
+
+    def update_text(self, key: str, value: Optional[str] = None):
+        self.update_text_item(text_element=self._window[key], value=value)
+
+    @staticmethod
     def disable_button_item(button: sg.Button):
         button.update(disabled=True)
 
