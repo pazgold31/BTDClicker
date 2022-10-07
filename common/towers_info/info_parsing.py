@@ -6,17 +6,16 @@ from typing import List, Tuple, Dict, TypeVar, Type
 from urllib.parse import urljoin
 
 import bs4
-import requests
 from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
 from pydantic import parse_raw_as
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import TowerType
 from common.towers_info.info_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerInfo, HeroInfo
 from common.user_files import get_files_dir
+from common.wiki_crawl.crawling_utils import get_page_soup
+from common.wiki_crawl.wiki_consts import BASE_WIKI_URL
 
-BASE_WIKI_URL = r"https://bloons.fandom.com"
 TOWERS_PRICES_URL = urljoin(BASE_WIKI_URL, r"wiki/Tower_Price_Lists")
 HERO_PRICES_URL = urljoin(BASE_WIKI_URL, r"wiki/Heroes")
 
@@ -72,12 +71,6 @@ def parse_towers_chunk(data: List[List[str]], towers_type: TowerType) -> List[To
                                 upgrades=parse_upgrades(tower_lines)))
 
     return output
-
-
-def get_page_soup(url: str) -> BeautifulSoup:
-    fake_ua = UserAgent()
-    page = requests.get(url, headers={"User-Agent": fake_ua.chrome})
-    return BeautifulSoup(page.content, "html.parser")
 
 
 def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> List[TowerInfo]:
