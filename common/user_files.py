@@ -8,3 +8,10 @@ def get_files_dir() -> Path:
     if not path.exists():
         path.mkdir()
     return path
+
+
+def get_knowledge_images_dir(subdirectory: str = "") -> Path:
+    path = get_files_dir() / "KnowledgePictures" / subdirectory
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path
