@@ -12,18 +12,8 @@ from PIL import Image
 from ahk import AHK
 
 from common.monkey_knowledge.knowledge_dataclasses import KnowledgeCategory, KnowledgeEntry
-from common.monkey_knowledge.knowledge_wiki_crawler import download_knowledge_pictures
 from common.user_files import get_knowledge_images_dir, get_files_dir
 from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
-
-
-def convert_image_to_cv2(image: Image.Image) -> np.ndarray:
-    # noinspection PyTypeChecker
-    cv_image = np.array(image)  # 'image' Color order: RGBA
-    red = cv_image[:, :, 0].copy()  # Copy R from RGBA
-    cv_image[:, :, 0] = cv_image[:, :, 2].copy()  # Copy B to first order. Color order: BGBA
-    cv_image[:, :, 2] = red  # Copy R to the third order. Color order: BGRA
-    return cv_image
 
 
 class KnowledgeDirectories:
@@ -50,11 +40,28 @@ NEXT_BUTTON_IMAGE = Image.open(str(get_knowledge_images_dir() / "NextButton.png"
 
 KNOWLEDGE_UPDATE_TIME = timedelta(days=14)
 
-KNOWLEDGE_THRESHOLD = 0.1
+DEFAULT_KNOWLEDGE_THRESHOLD = 0.1
 KNOWLEDGE_MENU_THRESHOLD = 0.15
 NEXT_BUTTON_THRESHOLD = 0.01
 PRIMARY_MENU_THRESHOLD = 0.03
 DEFAULT_MOUTH_POSITION = (815, 105)
+
+
+def get_knowledge_threshold(knowledge_name: str):
+    # TODO: find a better way to do this.
+    if "Sub Admiral" == knowledge_name:
+        return 0.02
+    else:
+        return DEFAULT_KNOWLEDGE_THRESHOLD
+
+
+def convert_image_to_cv2(image: Image.Image) -> np.ndarray:
+    # noinspection PyTypeChecker
+    cv_image = np.array(image)  # 'image' Color order: RGBA
+    red = cv_image[:, :, 0].copy()  # Copy R from RGBA
+    cv_image[:, :, 0] = cv_image[:, :, 2].copy()  # Copy B to first order. Color order: BGBA
+    cv_image[:, :, 2] = red  # Copy R to the third order. Color order: BGRA
+    return cv_image
 
 
 def get_inner_image_position(image: Image.Image, inner_image: Image.Image, threshold: float) -> Tuple[int, int]:
@@ -98,7 +105,8 @@ def get_knowledge_map(images_directory: Path, screenshot: Image.Image) -> Dict[s
         knowledge_name = file_path.stem
         file_image = Image.open(str(file_path))
         try:
-            get_inner_image_position(image=screenshot, inner_image=file_image, threshold=KNOWLEDGE_THRESHOLD)
+            get_inner_image_position(image=screenshot, inner_image=file_image,
+                                     threshold=get_knowledge_threshold(knowledge_name=knowledge_name))
             output[knowledge_name] = True
         except ValueError:
             output[knowledge_name] = False
@@ -120,7 +128,7 @@ def get_category_knowledge(images_directory: Path, screenshots: List[Image.Image
 def get_category_screenshots(ahk) -> List[Image.Image]:
     output = [pyautogui.screenshot()]
     scroll_down(ahk=ahk)
-    time.sleep(0.2)
+    time.sleep(0.5)
     output.append(pyautogui.screenshot())
 
     return output
@@ -137,14 +145,14 @@ def move_mouse_from_button(ahk: AHK):
 def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
     ahk = AHK()
     open_monkey_knowledge(ahk=ahk)
-    time.sleep(0.3)
+    time.sleep(0.5)
     open_primary_monkey_knowledge(ahk=ahk)
-    time.sleep(0.3)
+    time.sleep(0.5)
     threads = []
     output_queue = Queue()
     for images_directory in KNOWLEDGE_DIRECTORIES_ORDER:
         move_mouse_from_button(ahk=ahk)
-        time.sleep(0.1)
+        time.sleep(0.5)
         category_screenshots = get_category_screenshots(ahk=ahk)
 
         def run_and_add_to_queue(category_images_directory: Path, screenshots: List[Image.Image]):
@@ -153,7 +161,7 @@ def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
 
         threads.append(threading.Thread(target=run_and_add_to_queue, args=(images_directory, category_screenshots,)))
         click_next_button(ahk=ahk)
-        time.sleep(0.2)
+        time.sleep(0.5)
 
     for t in threads:
         t.start()
@@ -169,7 +177,7 @@ def get_monkey_knowledge_info() -> List[KnowledgeCategory]:
     try:
         return load_cached_dataclass(path=path, output_type=List[KnowledgeCategory], update_time=KNOWLEDGE_UPDATE_TIME)
     except FileNotFoundError:
-        download_knowledge_pictures()
+        # download_knowledge_pictures()
         info_data = crawl_monkey_knowledge()
         save_dataclass_to_cache(path=path, info_data=info_data)
         return info_data
