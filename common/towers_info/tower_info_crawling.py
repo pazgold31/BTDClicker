@@ -1,18 +1,15 @@
-import json
 import re
-from datetime import timedelta, datetime
-from pathlib import Path
+from datetime import timedelta
 from typing import List, Tuple, Dict, TypeVar, Type
 from urllib.parse import urljoin
 
 import bs4
 from bs4 import BeautifulSoup
-from pydantic import parse_raw_as
-from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import TowerType
 from common.towers_info.info_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerInfo, HeroInfo
 from common.user_files import get_files_dir
+from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
 from common.wiki_crawl.crawling_utils import get_page_soup
 from common.wiki_crawl.wiki_consts import BASE_WIKI_URL
 
@@ -172,33 +169,21 @@ def convert_to_map(lst: List[InfoType]) -> Dict[str, InfoType]:
     return {i.name: i for i in lst}
 
 
-def load_cached_info(path: Path, output_type: OutputInfoType,
-                     update_time: timedelta = INFO_UPDATE_TIME) -> Dict[str, InfoType]:
-    if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < update_time:
-        with path.open("r") as of:
-            return convert_to_map(parse_raw_as(List[output_type], of.read()))
-
-
-def save_info_to_cache(path: Path, info_data: List[InfoType]):
-    with path.open("w") as of:
-        json.dump(info_data, of, default=pydantic_encoder)
-
-
 def get_heroes_info() -> Dict[str, HeroInfo]:
     path = get_files_dir() / "heroes_info.json"
     try:
-        return load_cached_info(path=path, output_type=HeroInfo)
+        return convert_to_map(load_cached_dataclass(path=path, output_type=List[HeroInfo], update_time=INFO_UPDATE_TIME))
     except FileNotFoundError:
         info_data = crawl_hero_info()
-        save_info_to_cache(path=path, info_data=info_data)
+        save_dataclass_to_cache(path=path, info_data=info_data)
         return convert_to_map(info_data)
 
 
 def get_towers_info() -> Dict[str, TowerInfo]:
     path = get_files_dir() / "towers_info.json"
     try:
-        return load_cached_info(path=path, output_type=TowerInfo)
+        return convert_to_map(load_cached_dataclass(path=path, output_type=List[TowerInfo], update_time=INFO_UPDATE_TIME))
     except FileNotFoundError:
         info_data = crawl_towers_info()
-        save_info_to_cache(path=path, info_data=info_data)
+        save_dataclass_to_cache(path=path, info_data=info_data)
         return convert_to_map(info_data)
