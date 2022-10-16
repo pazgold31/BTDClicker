@@ -3,7 +3,7 @@ import time
 from datetime import timedelta
 from pathlib import Path
 from queue import Queue
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Optional
 
 import cv2
 import numpy as np
@@ -12,6 +12,7 @@ from PIL import Image
 from ahk import AHK
 
 from common.monkey_knowledge.knowledge_dataclasses import KnowledgeCategory, KnowledgeEntry
+from common.monkey_knowledge.knowledge_wiki_crawler import download_knowledge_pictures
 from common.user_files import get_knowledge_images_dir, get_files_dir
 from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
 
@@ -172,12 +173,16 @@ def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
     return list(output_queue.queue)
 
 
-def get_monkey_knowledge_info() -> List[KnowledgeCategory]:
+def update_monkey_knowledge_info():
+    path = get_files_dir() / "monkey_knowledge.json"
+    # download_knowledge_pictures()
+    info_data = crawl_monkey_knowledge()
+    save_dataclass_to_cache(path=path, info_data=info_data)
+
+
+def get_monkey_knowledge_info() -> Optional[List[KnowledgeCategory]]:
     path = get_files_dir() / "monkey_knowledge.json"
     try:
         return load_cached_dataclass(path=path, output_type=List[KnowledgeCategory], update_time=KNOWLEDGE_UPDATE_TIME)
     except FileNotFoundError:
-        # download_knowledge_pictures()
-        info_data = crawl_monkey_knowledge()
-        save_dataclass_to_cache(path=path, info_data=info_data)
-        return info_data
+        return None

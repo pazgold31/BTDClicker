@@ -16,3 +16,9 @@ class GuiMenu:
         Military = f"Military    {format_to_text(ScriptHotkeyMap.view_military_towers)}"
         Magic = f"Magic    {format_to_text(ScriptHotkeyMap.view_magic_towers)}"
         Support = f"Support    {format_to_text(ScriptHotkeyMap.view_support_towers)}"
+
+    class Scan:
+        MenuName = "Scan"
+        TowersInfo = "Towers info"
+        HeroesInfo = "Heroes info"
+        MonkeyKnowledge = "Monkey knowledge"

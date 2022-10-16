@@ -13,10 +13,13 @@ DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
 
 
 def get_layout() -> List[List[Any]]:
-    menu = [[GuiMenu.File.MenuName, [GuiMenu.File.New, GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]],
-            [GuiMenu.ViewedTowers.MenuName,
-             [GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
-              GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support]]]
+    file_menu = [GuiMenu.File.MenuName, [GuiMenu.File.New, GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]]
+    viewed_towers_menu = [GuiMenu.ViewedTowers.MenuName,
+                          [GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,
+                           GuiMenu.ViewedTowers.Magic, GuiMenu.ViewedTowers.Support]]
+    scan_menu = [GuiMenu.Scan.MenuName,
+                 [GuiMenu.Scan.TowersInfo, GuiMenu.Scan.HeroesInfo, GuiMenu.Scan.MonkeyKnowledge]]
+    menu = [file_menu, viewed_towers_menu, scan_menu]
 
     left_col = [
         [sg.Frame("Difficulty",

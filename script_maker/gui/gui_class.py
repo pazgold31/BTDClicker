@@ -1,6 +1,7 @@
 import contextlib
 import json
 import os
+import time
 from functools import wraps
 from typing import Dict, Optional, List, Callable
 
@@ -11,6 +12,7 @@ from pydantic.json import pydantic_encoder
 from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.script_dataclasses import GameMetadata, Script, IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
+from common.monkey_knowledge.monkey_knowledge import MonkeyKnowledge
 from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
 from common.utils.upgrades_utils import is_tiers_text_valid
@@ -19,7 +21,8 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
-from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text
+from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text, \
+    popup_yes_no, popup_execute_method
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.hotkey_map import ScriptHotkeyMap
@@ -494,6 +497,24 @@ class GuiClass:
         with self._retrieve_next_script_box_index_and_update_script() as selected_index:
             self._activity_container.add_wait_for_money_entry(amount=amount_of_money, index=selected_index)
 
+    def handle_scan_towers_info(self, values: ValuesType):
+        pass
+
+    def handle_scan_heroes_info(self, values: ValuesType):
+        pass
+
+    @staticmethod
+    def handle_scan_monkey_knowledge_info(values: ValuesType):
+        if not popup_yes_no("Knowledge", title="Monkey knowledge update"):
+            return
+
+        def xxx():
+            time.sleep(3)
+            MonkeyKnowledge().update_knowledge()
+
+        popup_execute_method("Please don't touch your computer until finished", title="Scanning knowledge",
+                             method=xxx)
+
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
@@ -525,6 +546,9 @@ class GuiClass:
             GuiMenu.ViewedTowers.Military: self.handle_view_military_towers,
             GuiMenu.ViewedTowers.Magic: self.handle_view_magic_towers,
             GuiMenu.ViewedTowers.Support: self.handle_view_support_towers,
+            GuiMenu.Scan.TowersInfo: self.handle_scan_towers_info,
+            GuiMenu.Scan.HeroesInfo: self.handle_scan_heroes_info,
+            GuiMenu.Scan.MonkeyKnowledge: self.handle_scan_monkey_knowledge_info,
             GuiKeys.ScriptBox + GuiKeys.CopyToClipboard: self.handle_copy_on_script,
             GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script,
             GuiKeys.PauseGameButton: self.handle_pause_button,
