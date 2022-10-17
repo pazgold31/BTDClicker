@@ -12,6 +12,7 @@ from PIL import Image
 from ahk import AHK
 
 from common.monkey_knowledge.knowledge_dataclasses import KnowledgeCategory, KnowledgeEntry
+from common.monkey_knowledge.knowledge_wiki_crawler import download_knowledge_pictures
 from common.user_files import get_knowledge_images_dir, get_files_dir
 from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
 
@@ -177,7 +178,7 @@ def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
 
 def update_monkey_knowledge_info():
     path = get_files_dir() / "monkey_knowledge.json"
-    # download_knowledge_pictures()
+    download_knowledge_pictures()
     info_data = crawl_monkey_knowledge()
     save_dataclass_to_cache(path=path, info_data=info_data)
 

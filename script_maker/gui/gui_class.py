@@ -557,7 +557,7 @@ class GuiClass:
         def _scan():
             print("Scanning knowledge")
             time.sleep(3)
-            MonkeyKnowledge().update_knowledge()
+            MonkeyKnowledge().update_info()
 
         popup_execute_method("Please don't touch your computer until finished", title="Scanning knowledge",
                              method=_scan, done_text="Done scanning, you can use your computer",
