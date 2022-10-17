@@ -1,22 +1,18 @@
-import json
 import re
-from datetime import timedelta, datetime
-from pathlib import Path
+from datetime import timedelta
 from typing import List, Tuple, Dict, TypeVar, Type
 from urllib.parse import urljoin
 
 import bs4
-import requests
 from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
-from pydantic import parse_raw_as
-from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import TowerType
 from common.towers_info.info_classes import Cost, Upgrade, UpgradeTierCost, UpgradesCost, TowerInfo, HeroInfo
 from common.user_files import get_files_dir
+from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
+from common.wiki_crawl.crawling_utils import get_page_soup
+from common.wiki_crawl.wiki_consts import BASE_WIKI_URL
 
-BASE_WIKI_URL = r"https://bloons.fandom.com"
 TOWERS_PRICES_URL = urljoin(BASE_WIKI_URL, r"wiki/Tower_Price_Lists")
 HERO_PRICES_URL = urljoin(BASE_WIKI_URL, r"wiki/Heroes")
 
@@ -72,12 +68,6 @@ def parse_towers_chunk(data: List[List[str]], towers_type: TowerType) -> List[To
                                 upgrades=parse_upgrades(tower_lines)))
 
     return output
-
-
-def get_page_soup(url: str) -> BeautifulSoup:
-    fake_ua = UserAgent()
-    page = requests.get(url, headers={"User-Agent": fake_ua.chrome})
-    return BeautifulSoup(page.content, "html.parser")
 
 
 def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> List[TowerInfo]:
@@ -179,33 +169,29 @@ def convert_to_map(lst: List[InfoType]) -> Dict[str, InfoType]:
     return {i.name: i for i in lst}
 
 
-def load_cached_info(path: Path, output_type: OutputInfoType,
-                     update_time: timedelta = INFO_UPDATE_TIME) -> Dict[str, InfoType]:
-    if datetime.now() - datetime.fromtimestamp(path.stat().st_mtime) < update_time:
-        with path.open("r") as of:
-            return convert_to_map(parse_raw_as(List[output_type], of.read()))
-
-
-def save_info_to_cache(path: Path, info_data: List[InfoType]):
-    with path.open("w") as of:
-        json.dump(info_data, of, default=pydantic_encoder)
-
-
-def get_heroes_info() -> Dict[str, HeroInfo]:
+def get_heroes_info(force_scan: bool = False) -> Dict[str, HeroInfo]:
     path = get_files_dir() / "heroes_info.json"
-    try:
-        return load_cached_info(path=path, output_type=HeroInfo)
-    except FileNotFoundError:
-        info_data = crawl_hero_info()
-        save_info_to_cache(path=path, info_data=info_data)
-        return convert_to_map(info_data)
+    if not force_scan:
+        try:
+            return convert_to_map(
+                load_cached_dataclass(path=path, output_type=List[HeroInfo], update_time=INFO_UPDATE_TIME))
+        except FileNotFoundError:
+            pass
+
+    info_data = crawl_hero_info()
+    save_dataclass_to_cache(path=path, info_data=info_data)
+    return convert_to_map(info_data)
 
 
-def get_towers_info() -> Dict[str, TowerInfo]:
+def get_towers_info(force_scan: bool = False) -> Dict[str, TowerInfo]:
     path = get_files_dir() / "towers_info.json"
-    try:
-        return load_cached_info(path=path, output_type=TowerInfo)
-    except FileNotFoundError:
-        info_data = crawl_towers_info()
-        save_info_to_cache(path=path, info_data=info_data)
-        return convert_to_map(info_data)
+    if not force_scan:
+        try:
+            return convert_to_map(
+                load_cached_dataclass(path=path, output_type=List[TowerInfo], update_time=INFO_UPDATE_TIME))
+        except FileNotFoundError:
+            pass
+
+    info_data = crawl_towers_info()
+    save_dataclass_to_cache(path=path, info_data=info_data)
+    return convert_to_map(info_data)

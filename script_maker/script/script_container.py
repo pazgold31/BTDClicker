@@ -1,9 +1,10 @@
+from collections import UserList
 from typing import List
 
 from common.game_classes.script.script_dataclasses import IScriptEntry, CreateTowerEntry, ITowerModifyingScriptEntry
 
 
-class ScriptContainer(List[IScriptEntry]):
+class ScriptContainer(UserList[IScriptEntry]):
     def __init__(self, values: List[IScriptEntry] = None):
         values = values or []
         super(ScriptContainer, self).__init__(values)

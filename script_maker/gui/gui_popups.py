@@ -1,10 +1,11 @@
+import threading
 from pathlib import Path
 from typing import Callable
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.towers_info.game_info import TOWERS_INFO
+from common.towers_info.game_info import TowersInfo
 from script_maker.gui.gui_controls_utils import GuiControlsUtils
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 
@@ -30,6 +31,10 @@ def popup_get_text(message: str, validator: Callable[[str], bool] = None,
         break
 
     return text
+
+
+def popup_yes_no(*args: str, title: str, **kwargs) -> bool:
+    return "Yes" == sg.popup_yes_no(*args, **kwargs, title=title)
 
 
 def popup_get_position(title: str, ):
@@ -71,7 +76,7 @@ def popup_get_tower_type(title: str, ):
     combo_key = "-combo-"
     save_button_key = "-save-"
     layout = [[sg.Text(f"Select type"),
-               sg.Combo(values=list(TOWERS_INFO.keys()), key=combo_key, enable_events=True, readonly=True)],
+               sg.Combo(values=list(TowersInfo().keys()), key=combo_key, enable_events=True, readonly=True)],
               [sg.Button("Save", enable_events=True, key=save_button_key)]]
 
     window = sg.Window(title, layout, modal=True)
@@ -87,5 +92,32 @@ def popup_get_tower_type(title: str, ):
 
             if event == "Exit" or event == sg.WIN_CLOSED:
                 raise ValueError("No position selected!")
+    finally:
+        window.close()
+
+
+def popup_execute_method(*args, title: str, method: Callable, done_text: str = None, **kwargs):
+    ok_key = "-ok-"
+    done_text_key = "-done-"
+    layout = [[sg.Text(i) for i in args],
+              [sg.Text("", key=done_text_key)] if done_text else [],
+              [sg.Button("ok", enable_events=True, disabled=True, key=ok_key)]]
+
+    window = sg.Window(title, layout, no_titlebar=True, modal=True, **kwargs)
+    t = threading.Thread(target=method)
+    t.start()
+    try:
+        while True:
+            event, values = window.read(timeout=200)
+            if event == ok_key:
+                break
+
+            if not t.is_alive():
+                window[ok_key].update(disabled=False)
+                if done_text:
+                    window[done_text_key].update(value=done_text)
+
+                window.keep_on_top_set()
+
     finally:
         window.close()

@@ -1,11 +1,12 @@
 import itertools
+from collections import UserDict
 from typing import Dict
 
 from common.game_classes.tower import Tower, Hero, BaseTower
 from script_maker.gui.gui_colors import EXISTING_TOWERS_COLORS
 
 
-class TowersContainer(Dict[int, BaseTower]):
+class TowersContainer(UserDict[int, BaseTower]):
     def __init__(self):
         super(TowersContainer, self).__init__()
 
@@ -18,7 +19,7 @@ class TowersContainer(Dict[int, BaseTower]):
         return next(self._id_generator)
 
     def set_towers(self, value: Dict[int, Tower]):
-        super(TowersContainer, self).__init__(value)
+        self.data = value
 
         self._id_generator = itertools.count(max(self.keys()) + 1)
 

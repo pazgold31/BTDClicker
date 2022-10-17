@@ -1,8 +1,9 @@
 import contextlib
 import json
 import os
+import time
 from functools import wraps
-from typing import Dict, Optional, List, Callable
+from typing import Dict, Optional, List, Callable, Tuple
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
@@ -11,6 +12,8 @@ from pydantic.json import pydantic_encoder
 from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.script_dataclasses import GameMetadata, Script, IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
+from common.monkey_knowledge.monkey_knowledge import MonkeyKnowledge
+from common.towers_info.game_info import TowersInfo, HeroesInfo
 from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
 from common.utils.upgrades_utils import is_tiers_text_valid
@@ -19,7 +22,8 @@ from script_maker.gui.gui_keys import GuiKeys
 from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
-from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text
+from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text, \
+    popup_yes_no, popup_execute_method
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.hotkey_map import ScriptHotkeyMap
@@ -165,6 +169,11 @@ class GuiClass:
             self._gui_updater.update_script_box(activity_container=self._activity_container,
                                                 selected_index=entry_index_to_select)
 
+    def _get_popups_position(self) -> Tuple[int, int]:
+        window_location = self._window.current_location()
+        return (int(window_location[0] + (self._window.size[0] / 2)),
+                int(window_location[1] + (self._window.size[1] / 2)))
+
     def _get_selected_towers_id(self) -> List[int]:
         selected_towers_indexes = self._controls_utils.get_list_box_selected_indexes(
             key=GuiKeys.ExistingTowersListBox)
@@ -172,7 +181,7 @@ class GuiClass:
 
     def handle_change_difficulty(self, values: ValuesType):
         self._metadata.difficulty = DIFFICULTY_MAP[values[GuiKeys.DifficultyListBox]]
-        self._gui_updater.update_difficulty()
+        self._gui_updater.update_tower_and_hero_choices()
 
     def handle_change_hero(self, values: ValuesType):
         self._metadata.hero_type = GuiParsers.parse_selected_hero(hero_str=values[GuiKeys.HeroCombo])
@@ -440,7 +449,7 @@ class GuiClass:
         self._gui_updater.update_selected_difficulty()
         self._gui_updater.update_selected_hero()
         self._gui_updater.update_hero()
-        self._gui_updater.update_difficulty()
+        self._gui_updater.update_tower_and_hero_choices()
 
         self._activity_container.script_container = import_script(script_dict=json_dict["script"])
         self._activity_container.towers_container = parse_towers_from_script(
@@ -494,6 +503,66 @@ class GuiClass:
         with self._retrieve_next_script_box_index_and_update_script() as selected_index:
             self._activity_container.add_wait_for_money_entry(amount=amount_of_money, index=selected_index)
 
+    def handle_scan_towers_info(self, values: ValuesType):
+        if not popup_yes_no(
+                "Towers scan: Scanning towers information for prices from wiki.\n"
+                "NOTE: this might take a few minutes\n"
+                "Press yes to start scan",
+                title="Towers update",
+                location=self._get_popups_position()):
+            return
+
+        def _scan():
+            print("Scanning towers info")
+            TowersInfo().update_info()
+
+        popup_execute_method("Scanning towers.\nYou can use your computer normally.", title="Scanning towers",
+                             method=_scan, done_text="Done scanning.",
+                             location=self._get_popups_position())
+        self._gui_updater.update_tower_and_hero_choices()
+
+    def handle_scan_heroes_info(self, values: ValuesType):
+        if not popup_yes_no(
+                "Heroes scan: Scanning heroes information for prices from wiki.\n"
+                "NOTE: this might take a few minutes\n"
+                "Press yes to start scan",
+                title="Heroes update",
+                location=self._get_popups_position()):
+            return
+
+        def _scan():
+            print("Scanning heroes info")
+            HeroesInfo().update_info()
+
+        popup_execute_method("Scanning heroes.\nYou can use your computer normally.", title="Scanning heroes",
+                             method=_scan, done_text="Done scanning.",
+                             location=self._get_popups_position())
+        self._gui_updater.update_tower_and_hero_choices()
+
+    def handle_scan_monkey_knowledge_info(self, values: ValuesType):
+        # TODO: Enable touching after the screenshots are taken
+        # TODO: center the popups
+        if not popup_yes_no(
+                "Knowledge scan: In order to perform a knowledge scan you need to open BTD6 on the main screen.\n"
+                "Please do not touch your computer until the scan is completed\n"
+                "Right after clicking yes please click on BTD6 to keep it on focus and on top\n"
+                "You could start to use the computer after you see the primary tab for the 2nd time\n"
+                "NOTE: this might take a few minutes\n"
+                "Press yes to start scan",
+                title="Monkey knowledge update",
+                line_width=1000,
+                location=self._get_popups_position()):
+            return
+
+        def _scan():
+            print("Scanning knowledge")
+            time.sleep(3)
+            MonkeyKnowledge().update_info()
+
+        popup_execute_method("Please don't touch your computer until finished", title="Scanning knowledge",
+                             method=_scan, done_text="Done scanning, you can use your computer",
+                             location=self._get_popups_position())
+
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
@@ -525,6 +594,9 @@ class GuiClass:
             GuiMenu.ViewedTowers.Military: self.handle_view_military_towers,
             GuiMenu.ViewedTowers.Magic: self.handle_view_magic_towers,
             GuiMenu.ViewedTowers.Support: self.handle_view_support_towers,
+            GuiMenu.Scan.TowersInfo: self.handle_scan_towers_info,
+            GuiMenu.Scan.HeroesInfo: self.handle_scan_heroes_info,
+            GuiMenu.Scan.MonkeyKnowledge: self.handle_scan_monkey_knowledge_info,
             GuiKeys.ScriptBox + GuiKeys.CopyToClipboard: self.handle_copy_on_script,
             GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script,
             GuiKeys.PauseGameButton: self.handle_pause_button,
