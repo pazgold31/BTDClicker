@@ -5,7 +5,7 @@ from clicker.consts.keymap import Keymap
 from clicker.money_extracter import get_amount_of_money
 from common.game_classes.enums import Difficulty
 from common.game_classes.tower import BaseTower
-from common.towers_info.game_info import HEROES_INFO, HeroesInfo
+from common.towers_info.game_info import HeroesInfo
 
 
 class PlaceHeroAction(IAction):

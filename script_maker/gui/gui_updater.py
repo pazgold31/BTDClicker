@@ -16,6 +16,7 @@ from script_maker.gui.gui_layout import DIFFICULTY_MAP
 from script_maker.script.activity_container import ActivityContainer
 from script_maker.script.towers_container import TowersContainer
 from script_maker.statistics.money_statistics import calculate_cost
+from script_maker.utils.math_utils import get_last_if_list
 
 
 class GuiUpdater:
@@ -73,13 +74,13 @@ class GuiUpdater:
                           selected_script_index: Union[int, List[int]] = None):
         total_cost = calculate_cost(script_container=activity_container.script_container,
                                     towers_container=activity_container.towers_container,
-                                    difficulty=self._metadata.difficulty)
+                                    metadata=self._metadata)
         self._controls_utils.update_text(key=GuiKeys.TotalCostText, value=f"Total cost: {total_cost}$")
 
         to_selection_cost = calculate_cost(script_container=activity_container.script_container,
                                            towers_container=activity_container.towers_container,
-                                           difficulty=self._metadata.difficulty,
-                                           end=selected_script_index)
+                                           metadata=self._metadata,
+                                           end=get_last_if_list(selected_script_index))
         self._controls_utils.update_text(key=GuiKeys.CostToSelectionText,
                                          value=f"Cost to selection: {to_selection_cost}$")
 
@@ -123,8 +124,7 @@ class GuiUpdater:
             self._controls_utils.change_cell_color(key=GuiKeys.ScriptBox, index=i, color=color)
 
         if selected_index is not None:
-            self._window[GuiKeys.ScriptBox].Widget.see(
-                selected_index[-1] if isinstance(selected_index, list) else selected_index)
+            self._window[GuiKeys.ScriptBox].Widget.see(get_last_if_list(selected_index))
 
     def update_existing_towers_and_script(self, activity_container: ActivityContainer,
                                           selected_script_index: Union[int, List[int]] = None):

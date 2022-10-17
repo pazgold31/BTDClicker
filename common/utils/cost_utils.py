@@ -6,6 +6,10 @@ def get_base_cost(tower_name: str, difficulty: Difficulty) -> int:
     return TowersInfo()[tower_name].base_cost.get_mapping()[difficulty]
 
 
+def get_hero_base_cost(hero_type: str, difficulty: Difficulty) -> int:
+    return HEROES_INFO[hero_type].base_cost.get_mapping()[difficulty]
+
+
 def get_upgrade_cost(tower_name: str, tier: UpgradeTier, upgrade_index: int, difficulty: Difficulty) -> int:
     tiers_cost = TowersInfo()[tower_name].upgrades.get_mapping()[tier]
     current_tier_costs = tiers_cost.get_mapping()[TierLevel(upgrade_index)]
