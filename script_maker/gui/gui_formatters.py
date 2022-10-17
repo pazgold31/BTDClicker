@@ -1,11 +1,11 @@
 from typing import Callable, List
 
 from clicker.consts.keymap import TOWER_KEY_MAP
-from common.utils.cost_utils import get_base_cost
 from common.game_classes.enums import UpgradeTier, Difficulty
 from common.game_classes.tower import Hero, Tower
-from common.towers_info.game_info import HEROES_INFO, TOWERS_INFO
+from common.towers_info.game_info import HeroesInfo, TowersInfo
 from common.towers_info.info_classes import TowerInfo
+from common.utils.cost_utils import get_base_cost
 from script_maker.script.towers_container import TowersContainer
 
 
@@ -15,16 +15,16 @@ class GuiFormatters:
     def format_tower_options(towers_filter: Callable[[TowerInfo], bool],
                              difficulty: Difficulty = Difficulty.easy,
                              chosen_hero: str = None) -> List[str]:
-        hero_cost = HEROES_INFO[chosen_hero].base_cost.get_mapping()[difficulty]
+        hero_cost = HeroesInfo()[chosen_hero].base_cost.get_mapping()[difficulty]
         hero_prefix = f"Hero({TOWER_KEY_MAP['Hero']})"
         hero_str = hero_prefix if not chosen_hero else f"{hero_prefix} | {chosen_hero}: {hero_cost}"
         return [hero_str] + \
                [f"{name}({TOWER_KEY_MAP[name]}): {get_base_cost(tower_name=name, difficulty=difficulty)}$" for
-                name, tower_info in TOWERS_INFO.items() if towers_filter(tower_info)]
+                name, tower_info in TowersInfo().items() if towers_filter(tower_info)]
 
     @staticmethod
     def format_hero_options(difficulty: Difficulty = Difficulty.easy) -> List[str]:
-        return [f"{name}: {hero_info.base_cost.get_mapping()[difficulty]}$" for name, hero_info in HEROES_INFO.items()]
+        return [f"{name}: {hero_info.base_cost.get_mapping()[difficulty]}$" for name, hero_info in HeroesInfo().items()]
 
     @staticmethod
     def format_targeting(targeting: int):

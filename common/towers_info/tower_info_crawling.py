@@ -169,21 +169,29 @@ def convert_to_map(lst: List[InfoType]) -> Dict[str, InfoType]:
     return {i.name: i for i in lst}
 
 
-def get_heroes_info() -> Dict[str, HeroInfo]:
+def get_heroes_info(force_scan: bool = False) -> Dict[str, HeroInfo]:
     path = get_files_dir() / "heroes_info.json"
-    try:
-        return convert_to_map(load_cached_dataclass(path=path, output_type=List[HeroInfo], update_time=INFO_UPDATE_TIME))
-    except FileNotFoundError:
-        info_data = crawl_hero_info()
-        save_dataclass_to_cache(path=path, info_data=info_data)
-        return convert_to_map(info_data)
+    if not force_scan:
+        try:
+            return convert_to_map(
+                load_cached_dataclass(path=path, output_type=List[HeroInfo], update_time=INFO_UPDATE_TIME))
+        except FileNotFoundError:
+            pass
+
+    info_data = crawl_hero_info()
+    save_dataclass_to_cache(path=path, info_data=info_data)
+    return convert_to_map(info_data)
 
 
-def get_towers_info() -> Dict[str, TowerInfo]:
+def get_towers_info(force_scan: bool = False) -> Dict[str, TowerInfo]:
     path = get_files_dir() / "towers_info.json"
-    try:
-        return convert_to_map(load_cached_dataclass(path=path, output_type=List[TowerInfo], update_time=INFO_UPDATE_TIME))
-    except FileNotFoundError:
-        info_data = crawl_towers_info()
-        save_dataclass_to_cache(path=path, info_data=info_data)
-        return convert_to_map(info_data)
+    if not force_scan:
+        try:
+            return convert_to_map(
+                load_cached_dataclass(path=path, output_type=List[TowerInfo], update_time=INFO_UPDATE_TIME))
+        except FileNotFoundError:
+            pass
+
+    info_data = crawl_towers_info()
+    save_dataclass_to_cache(path=path, info_data=info_data)
+    return convert_to_map(info_data)
