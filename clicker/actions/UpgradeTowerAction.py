@@ -6,9 +6,9 @@ from clicker.actions.IAction import IAction
 from clicker.consts.keymap import Keymap, UPGRADE_TIER_MAPPING
 from clicker.consts.timing_consts import CLICK_DELAY
 from clicker.money_extracter import get_amount_of_money
-from common.utils.cost_utils import get_upgrade_cost
 from common.game_classes.enums import Difficulty, UpgradeTier
 from common.game_classes.tower import Tower
+from common.utils.cost_utils import get_upgrade_cost
 
 
 class UpgradeTowerAction(IAction):

@@ -35,9 +35,20 @@ def get_script_path() -> Path:
     return Path(input("Enter script path: "))
 
 
+def remove_towers_upgrades(tower_map: Dict[int, BaseTower]):
+    for t in tower_map.values():
+        if not isinstance(t, Tower):
+            continue
+
+        t.tier_map[UpgradeTier.top] = 0
+        t.tier_map[UpgradeTier.middle] = 0
+        t.tier_map[UpgradeTier.bottom] = 0
+
+
 def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, BaseTower]]:
     script_entries = import_script(script_dict=script_dict)
     tower_map: Dict[int, BaseTower] = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
+    remove_towers_upgrades(tower_map=tower_map)
 
     def get_tower_from_map(tower_id: int) -> Tower:
         tower = tower_map[tower_id]
