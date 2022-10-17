@@ -12,7 +12,6 @@ from PIL import Image
 from ahk import AHK
 
 from common.monkey_knowledge.knowledge_dataclasses import KnowledgeCategory, KnowledgeEntry
-from common.monkey_knowledge.knowledge_wiki_crawler import download_knowledge_pictures
 from common.user_files import get_knowledge_images_dir, get_files_dir
 from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
 
@@ -44,7 +43,7 @@ KNOWLEDGE_UPDATE_TIME = timedelta(days=14)
 DEFAULT_KNOWLEDGE_THRESHOLD = 0.1
 KNOWLEDGE_MENU_THRESHOLD = 0.15
 NEXT_BUTTON_THRESHOLD = 0.01
-PRIMARY_MENU_THRESHOLD = 0.03
+PRIMARY_MENU_THRESHOLD = 0.05
 DEFAULT_MOUTH_POSITION = (815, 105)
 
 
@@ -143,17 +142,20 @@ def move_mouse_from_button(ahk: AHK):
     ahk.mouse_position = DEFAULT_MOUTH_POSITION
 
 
+SLEEP_INTERVAL = 0.8
+
+
 def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
     ahk = AHK()
     open_monkey_knowledge(ahk=ahk)
-    time.sleep(0.5)
+    time.sleep(SLEEP_INTERVAL)
     open_primary_monkey_knowledge(ahk=ahk)
-    time.sleep(0.5)
+    time.sleep(SLEEP_INTERVAL)
     threads = []
     output_queue = Queue()
     for images_directory in KNOWLEDGE_DIRECTORIES_ORDER:
         move_mouse_from_button(ahk=ahk)
-        time.sleep(0.5)
+        time.sleep(SLEEP_INTERVAL)
         category_screenshots = get_category_screenshots(ahk=ahk)
 
         def run_and_add_to_queue(category_images_directory: Path, screenshots: List[Image.Image]):
@@ -162,7 +164,7 @@ def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
 
         threads.append(threading.Thread(target=run_and_add_to_queue, args=(images_directory, category_screenshots,)))
         click_next_button(ahk=ahk)
-        time.sleep(0.5)
+        time.sleep(SLEEP_INTERVAL)
 
     for t in threads:
         t.start()

@@ -503,17 +503,30 @@ class GuiClass:
     def handle_scan_heroes_info(self, values: ValuesType):
         pass
 
-    @staticmethod
-    def handle_scan_monkey_knowledge_info(values: ValuesType):
-        if not popup_yes_no("Knowledge", title="Monkey knowledge update"):
+    def handle_scan_monkey_knowledge_info(self, values: ValuesType):
+        # TODO: Enable touching after the screenshots are taken
+        # TODO: center the popups
+        window_location = self._window.current_location()
+        popups_location = tuple(window_location[i] + (self._window.size[i] / 2) for i in (0, 1))
+        if not popup_yes_no(
+                "Knowledge scan: In order to perform a knowledge scan you need to open BTD6 on the main screen.\n"
+                "Please do not touch your computer until the scan is completed\n"
+                "Right after clicking yes please click on BTD6 to keep it on focus and on top\n"
+                "You could start to use the computer after you see the primary tab for the 2nd time\n"
+                "Press yes to start scan",
+                title="Monkey knowledge update",
+                line_width=1000,
+                location=popups_location):
             return
 
-        def xxx():
+        def _scan_knowledge():
+            print("Scanning knowledge")
             time.sleep(3)
             MonkeyKnowledge().update_knowledge()
 
         popup_execute_method("Please don't touch your computer until finished", title="Scanning knowledge",
-                             method=xxx)
+                             method=_scan_knowledge, done_text="Done scanning, you can use your computer",
+                             location=popups_location)
 
     def get_callback_map(self) -> Dict[str, CallbackMethod]:
         return {

@@ -33,8 +33,8 @@ def popup_get_text(message: str, validator: Callable[[str], bool] = None,
     return text
 
 
-def popup_yes_no(*args: str, title: str) -> bool:
-    return "Yes" == sg.popup_yes_no(*args, title=title)
+def popup_yes_no(*args: str, title: str, **kwargs) -> bool:
+    return "Yes" == sg.popup_yes_no(*args, **kwargs, title=title)
 
 
 def popup_get_position(title: str, ):
@@ -96,24 +96,27 @@ def popup_get_tower_type(title: str, ):
         window.close()
 
 
-def popup_execute_method(*args, title: str, method: Callable):
+def popup_execute_method(*args, title: str, method: Callable, done_text: str = None, **kwargs):
     ok_key = "-ok-"
     done_text_key = "-done-"
     layout = [[sg.Text(i) for i in args],
-              [sg.Text("", key=done_text_key)],
+              [sg.Text("", key=done_text_key)] if done_text else [],
               [sg.Button("ok", enable_events=True, disabled=True, key=ok_key)]]
 
-    window = sg.Window(title, layout, no_titlebar=True, modal=True)
+    window = sg.Window(title, layout, no_titlebar=True, modal=True, **kwargs)
     t = threading.Thread(target=method)
+    t.start()
     try:
         while True:
-            event, values = window.read()
+            event, values = window.read(timeout=200)
             if event == ok_key:
                 break
 
             if not t.is_alive():
                 window[ok_key].update(disabled=False)
-                window[done_text_key].update(value="Done scanning, you can use your computer")
+                if done_text:
+                    window[done_text_key].update(value=done_text)
+
                 window.keep_on_top_set()
 
     finally:
