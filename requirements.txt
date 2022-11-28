@@ -1,0 +1,12 @@
+pysimplegui
+pyautogui
+pydantic
+opencv-python
+pillow
+ahk
+beautifulsoup4
+appdirs
+requests
+fake_useragent
+keyboard
+pytesseract
