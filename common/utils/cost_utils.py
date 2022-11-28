@@ -1,5 +1,5 @@
 from common.game_classes.enums import Difficulty, UpgradeTier, TierLevel
-from common.towers_info.game_info import TowersInfo
+from common.towers_info.game_info import TowersInfo, HeroesInfo
 
 
 def get_base_cost(tower_name: str, difficulty: Difficulty) -> int:
@@ -7,7 +7,7 @@ def get_base_cost(tower_name: str, difficulty: Difficulty) -> int:
 
 
 def get_hero_base_cost(hero_type: str, difficulty: Difficulty) -> int:
-    return HEROES_INFO[hero_type].base_cost.get_mapping()[difficulty]
+    return HeroesInfo()[hero_type].base_cost.get_mapping()[difficulty]
 
 
 def get_upgrade_cost(tower_name: str, tier: UpgradeTier, upgrade_index: int, difficulty: Difficulty) -> int:

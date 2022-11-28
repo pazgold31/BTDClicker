@@ -10,7 +10,8 @@ import PySimpleGUI as sg
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import UpgradeTier, TowerType
-from common.game_classes.script.script_dataclasses import GameMetadata, Script, IScriptEntry
+from common.game_classes.script.actual_script_dataclass import Script
+from common.game_classes.script.script_dataclasses import GameMetadata, IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.monkey_knowledge.monkey_knowledge import MonkeyKnowledge
 from common.towers_info.game_info import TowersInfo, HeroesInfo

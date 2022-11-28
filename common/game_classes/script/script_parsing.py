@@ -4,6 +4,7 @@ from common.game_classes.script.script_dataclasses import ACTION_KEYWORD, Action
     UpgradeTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata, \
     WaitForMoneyEntry, PauseEntry
 from common.game_classes.tower import Tower, Hero, BaseTower
+from script_maker.script.script_container import ScriptContainer
 
 
 def import_script(script_dict: Dict) -> List[IScriptEntry]:
@@ -28,7 +29,7 @@ def import_script(script_dict: Dict) -> List[IScriptEntry]:
     return script
 
 
-def parse_towers_from_script(script_entries: List[IScriptEntry], metadata: GameMetadata):
+def parse_towers_from_script(script_entries: ScriptContainer, metadata: GameMetadata):
     tower_map: Dict[int, BaseTower] = {}
     for script_entry in script_entries:
         if isinstance(script_entry, CreateTowerEntry):

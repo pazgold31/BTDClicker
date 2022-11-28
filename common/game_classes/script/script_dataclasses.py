@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 from common.game_classes.enums import UpgradeTier, Difficulty
@@ -69,6 +67,3 @@ class ChangeSpecialTargetingEntry(ITowerModifyingScriptEntry):
     action: str = Actions.change_special_targeting
 
 
-class Script(BaseModel):
-    metadata: GameMetadata
-    script: List[IScriptEntry]
