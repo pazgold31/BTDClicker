@@ -1,7 +1,4 @@
-from common.singleton import Singleton
-
-
-class ClickerState(metaclass=Singleton):
+class ClickerState:
     def __init__(self):
         self._stopped = False
 
@@ -15,3 +12,6 @@ class ClickerState(metaclass=Singleton):
 
     def is_stopped(self):
         return self._stopped
+
+
+g_clicker_state = ClickerState()

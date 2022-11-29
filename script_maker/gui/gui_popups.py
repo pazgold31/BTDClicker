@@ -5,7 +5,7 @@ from typing import Callable
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.towers_info.game_info import TowersInfo
+from common.towers_info.game_info import g_towers_info
 from script_maker.gui.gui_controls_utils import GuiControlsUtils
 from script_maker.script.hotkeys.tower_position_hotkeys import TowerPositionHotkeys
 
@@ -76,7 +76,7 @@ def popup_get_tower_type(title: str, ):
     combo_key = "-combo-"
     save_button_key = "-save-"
     layout = [[sg.Text(f"Select type"),
-               sg.Combo(values=list(TowersInfo().keys()), key=combo_key, enable_events=True, readonly=True)],
+               sg.Combo(values=list(g_towers_info.keys()), key=combo_key, enable_events=True, readonly=True)],
               [sg.Button("Save", enable_events=True, key=save_button_key)]]
 
     window = sg.Window(title, layout, modal=True)

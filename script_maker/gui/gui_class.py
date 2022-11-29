@@ -10,10 +10,12 @@ import PySimpleGUI as sg
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import UpgradeTier, TowerType
-from common.game_classes.script.script_dataclasses import GameMetadata, Script, IScriptEntry
+from common.game_classes.script.script_dataclasses import Script
+from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_entries_dataclasses import IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.monkey_knowledge.monkey_knowledge import MonkeyKnowledge
-from common.towers_info.game_info import TowersInfo, HeroesInfo
+from common.monkey_knowledge.monkey_knowledge import g_monkey_knowledge
+from common.towers_info.game_info import g_towers_info, g_heroes_info
 from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
 from common.utils.upgrades_utils import is_tiers_text_valid
@@ -514,7 +516,7 @@ class GuiClass:
 
         def _scan():
             print("Scanning towers info")
-            TowersInfo().update_info()
+            g_towers_info.update_info()
 
         popup_execute_method("Scanning towers.\nYou can use your computer normally.", title="Scanning towers",
                              method=_scan, done_text="Done scanning.",
@@ -532,7 +534,7 @@ class GuiClass:
 
         def _scan():
             print("Scanning heroes info")
-            HeroesInfo().update_info()
+            g_heroes_info.update_info()
 
         popup_execute_method("Scanning heroes.\nYou can use your computer normally.", title="Scanning heroes",
                              method=_scan, done_text="Done scanning.",
@@ -557,7 +559,7 @@ class GuiClass:
         def _scan():
             print("Scanning knowledge")
             time.sleep(3)
-            MonkeyKnowledge().update_info()
+            g_monkey_knowledge.update_info()
 
         popup_execute_method("Please don't touch your computer until finished", title="Scanning knowledge",
                              method=_scan, done_text="Done scanning, you can use your computer",

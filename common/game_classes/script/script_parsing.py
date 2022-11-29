@@ -1,12 +1,15 @@
 from typing import Dict, List
 
-from common.game_classes.script.script_dataclasses import ACTION_KEYWORD, Actions, CreateTowerEntry, \
-    UpgradeTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata, \
-    WaitForMoneyEntry, PauseEntry
+from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, WaitForMoneyEntry, \
+    CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.game_classes.tower import Tower, Hero, BaseTower
+from script_maker.script.script_container import ScriptContainer
+
+ACTION_KEYWORD = "action"
 
 
-def import_script(script_dict: Dict) -> List[IScriptEntry]:
+def import_script(script_dict: Dict) -> ScriptContainer:
     script: List[IScriptEntry] = []
 
     for action in script_dict:
@@ -25,10 +28,10 @@ def import_script(script_dict: Dict) -> List[IScriptEntry]:
         elif action[ACTION_KEYWORD] == Actions.change_special_targeting:
             script.append(ChangeSpecialTargetingEntry.parse_obj(action))
 
-    return script
+    return ScriptContainer(script)
 
 
-def parse_towers_from_script(script_entries: List[IScriptEntry], metadata: GameMetadata):
+def parse_towers_from_script(script_entries: ScriptContainer, metadata: GameMetadata):
     tower_map: Dict[int, BaseTower] = {}
     for script_entry in script_entries:
         if isinstance(script_entry, CreateTowerEntry):

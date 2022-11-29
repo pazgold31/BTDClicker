@@ -3,9 +3,9 @@ from ahk import AHK
 from clicker.actions.IAction import IAction
 from clicker.consts.keymap import TOWER_KEY_MAP
 from clicker.money_extracter import get_amount_of_money
-from common.utils.cost_utils import get_base_cost
 from common.game_classes.enums import Difficulty
 from common.game_classes.tower import BaseTower
+from common.utils.cost_utils import get_base_cost
 
 
 class PlaceTowerAction(IAction):

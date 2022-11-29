@@ -5,7 +5,7 @@ from clicker.consts.keymap import Keymap
 from clicker.money_extracter import get_amount_of_money
 from common.game_classes.enums import Difficulty
 from common.game_classes.tower import BaseTower
-from common.towers_info.game_info import HeroesInfo
+from common.towers_info.game_info import g_heroes_info
 
 
 class PlaceHeroAction(IAction):
@@ -23,7 +23,7 @@ class PlaceHeroAction(IAction):
     def can_act(self) -> bool:
         # noinspection PyBroadException
         try:
-            tower_price = HeroesInfo()[self._hero.name].base_cost.get_mapping()[self._difficulty]
+            tower_price = g_heroes_info[self._hero.name].base_cost.get_mapping()[self._difficulty]
             return get_amount_of_money() >= tower_price
         except Exception:
             # TODO: add max tries
