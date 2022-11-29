@@ -187,8 +187,8 @@ def get_towers_info(force_scan: bool = False) -> Dict[str, TowerInfo]:
     path = get_files_dir() / "towers_info.json"
     if not force_scan:
         try:
-            return convert_to_map(
-                load_cached_dataclass(path=path, output_type=List[TowerInfo], update_time=INFO_UPDATE_TIME))
+            return convert_to_map(load_cached_dataclass(path=path, output_type=List[TowerInfo],
+                                                        update_time=INFO_UPDATE_TIME))
         except (FileNotFoundError, TypeError):
             pass
 

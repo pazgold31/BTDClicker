@@ -7,7 +7,7 @@ from common.game_classes.tower import Tower, Hero, BaseTower
 from script_maker.script.script_container import ScriptContainer
 
 
-def import_script(script_dict: Dict) -> List[IScriptEntry]:
+def import_script(script_dict: Dict) -> ScriptContainer:
     script: List[IScriptEntry] = []
 
     for action in script_dict:
@@ -26,7 +26,7 @@ def import_script(script_dict: Dict) -> List[IScriptEntry]:
         elif action[ACTION_KEYWORD] == Actions.change_special_targeting:
             script.append(ChangeSpecialTargetingEntry.parse_obj(action))
 
-    return script
+    return ScriptContainer(script)
 
 
 def parse_towers_from_script(script_entries: ScriptContainer, metadata: GameMetadata):

@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 from common.game_classes.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, \
     SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, PauseEntry, WaitForMoneyEntry, \
     ITowerModifyingScriptEntry
-from common.towers_info.game_info import HeroesInfo
+from common.towers_info.game_info import g_heroes_info
 from common.towers_info.info_classes import TowerInfo
 from script_maker.gui.gui_colors import GLOBAL_ENTRIES_COLOR
 from script_maker.gui.gui_controls_utils import GuiControlsUtils
@@ -43,7 +43,7 @@ class GuiUpdater:
 
     def update_selected_hero(self):
         self._controls_utils.update_combo(key=GuiKeys.HeroCombo,
-                                          set_to_index=list(HeroesInfo().keys()).index(self._metadata.hero_type))
+                                          set_to_index=list(g_heroes_info.keys()).index(self._metadata.hero_type))
 
     def update_tower_types(self, towers_filter: Callable[[TowerInfo], bool]):
         tower_options = GuiFormatters.format_tower_options(difficulty=self._metadata.difficulty,

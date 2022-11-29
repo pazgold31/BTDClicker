@@ -65,5 +65,3 @@ class ChangeTargetingEntry(ITowerModifyingScriptEntry):
 
 class ChangeSpecialTargetingEntry(ITowerModifyingScriptEntry):
     action: str = Actions.change_special_targeting
-
-

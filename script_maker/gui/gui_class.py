@@ -14,7 +14,7 @@ from common.game_classes.script.actual_script_dataclass import Script
 from common.game_classes.script.script_dataclasses import GameMetadata, IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.monkey_knowledge.monkey_knowledge import MonkeyKnowledge
-from common.towers_info.game_info import TowersInfo, HeroesInfo
+from common.towers_info.game_info import g_towers_info, g_heroes_info
 from common.towers_info.info_classes import TowerInfo
 from common.user_files import get_files_dir
 from common.utils.upgrades_utils import is_tiers_text_valid
@@ -515,7 +515,7 @@ class GuiClass:
 
         def _scan():
             print("Scanning towers info")
-            TowersInfo().update_info()
+            g_towers_info.update_info()
 
         popup_execute_method("Scanning towers.\nYou can use your computer normally.", title="Scanning towers",
                              method=_scan, done_text="Done scanning.",
@@ -533,7 +533,7 @@ class GuiClass:
 
         def _scan():
             print("Scanning heroes info")
-            HeroesInfo().update_info()
+            g_heroes_info.update_info()
 
         popup_execute_method("Scanning heroes.\nYou can use your computer normally.", title="Scanning heroes",
                              method=_scan, done_text="Done scanning.",
