@@ -37,7 +37,7 @@ def parse_tower_base_cost(data: str) -> Tuple[str, Cost]:
     :return: a tuple of the towers name and base towers_info.
     """
     match = TOWER_INFO_REGEX.search(data)
-    return match.group(1), Cost(
+    return match.group(1).strip(), Cost(
         easy=int(match.group(2).replace(",", "")),
         medium=int(match.group(3).replace(",", "")),
         hard=int(match.group(4).replace(",", "")),
