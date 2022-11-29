@@ -3,9 +3,10 @@ from typing import Callable, Union, List
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.game_classes.script.script_dataclasses import GameMetadata, CreateTowerEntry, UpgradeTowerEntry, \
-    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, PauseEntry, WaitForMoneyEntry, \
-    ITowerModifyingScriptEntry
+from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, \
+    ITowerModifyingScriptEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
+    ChangeSpecialTargetingEntry
 from common.towers_info.game_info import g_heroes_info
 from common.towers_info.info_classes import TowerInfo
 from script_maker.gui.gui_colors import GLOBAL_ENTRIES_COLOR

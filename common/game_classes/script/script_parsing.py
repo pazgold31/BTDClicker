@@ -1,10 +1,12 @@
 from typing import Dict, List
 
-from common.game_classes.script.script_dataclasses import ACTION_KEYWORD, Actions, CreateTowerEntry, \
-    UpgradeTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, SellTowerEntry, IScriptEntry, GameMetadata, \
-    WaitForMoneyEntry, PauseEntry
+from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, WaitForMoneyEntry, \
+    CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.game_classes.tower import Tower, Hero, BaseTower
 from script_maker.script.script_container import ScriptContainer
+
+ACTION_KEYWORD = "action"
 
 
 def import_script(script_dict: Dict) -> ScriptContainer:

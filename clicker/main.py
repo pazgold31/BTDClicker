@@ -18,8 +18,9 @@ from clicker.clicker_state import g_clicker_state
 from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY, \
     KEYBOARD_LAYOUT_DELAY
 from common.game_classes.enums import UpgradeTier
-from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, \
-    SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, GameMetadata, PauseEntry, WaitForMoneyEntry
+from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, CreateTowerEntry, \
+    UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.game_classes.tower import BaseTower, Tower
 from common.hotkeys import Hotkeys

@@ -1,7 +1,7 @@
 from typing import Dict
 
-from common.game_classes.script.script_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, \
-    GameMetadata
+from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_entries_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry
 from common.game_classes.tower import Tower
 from common.utils.cost_utils import get_base_cost, get_upgrade_cost, get_hero_base_cost
 from script_maker.script.script_container import ScriptContainer
