@@ -75,10 +75,14 @@ class ActivityContainer:
         self._script_container.change_tower_type(tower_id=tower_id, tower_type=tower_type)
 
     def upgrade_tower(self, tower_id: int, tier: UpgradeTier, index: int = None):
-        if not is_tier_upgradeable(tower=self._towers_container[tower_id], tier=tier):
+        current_tower = self._towers_container[tower_id]
+        if not isinstance(current_tower, Tower):
+            raise TypeError("Cannot upgrade non-tower towers")
+
+        if not is_tier_upgradeable(tower=current_tower, tier=tier):
             raise ValueError("Tier is at max level")
 
-        self._towers_container[tower_id].tier_map[tier] += 1
+        current_tower.tier_map[tier] += 1
         self._add_entry(UpgradeTowerEntry(id=tower_id, tier=tier), index=index)
 
     def sell_tower(self, tower_id: int, index: int = None):
@@ -111,7 +115,10 @@ class ActivityContainer:
                 self._towers_container.pop(entry.id)
 
             if isinstance(entry, UpgradeTowerEntry):
-                self._towers_container[entry.id].tier_map[entry.tier] -= 1
+                current_tower = self._towers_container[entry.id]
+                if not isinstance(current_tower, Tower):
+                    raise TypeError("Upgrade entry on non-tower tower")
+                current_tower.tier_map[entry.tier] -= 1
             elif isinstance(entry, SellTowerEntry):
                 self._towers_container[entry.id].sold = False
             elif isinstance(entry, ChangeTargetingEntry):
