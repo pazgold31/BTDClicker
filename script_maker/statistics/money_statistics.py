@@ -33,5 +33,5 @@ def calculate_cost(script_container: ScriptContainer, towers_container: TowersCo
             tower.tier_map[entry.tier] += 1
         elif isinstance(entry, SellTowerEntry):
             tower_cost_map[entry.id] *= (1 - sell_ratio)
-    
+
     return sum(tower_cost_map.values())

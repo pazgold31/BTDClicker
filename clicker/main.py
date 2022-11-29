@@ -14,7 +14,7 @@ from clicker.actions.PauseGameAction import PauseGameAction
 from clicker.actions.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.SellTowerAction import SellTowerAction
 from clicker.actions.WaitForMoneyAction import WaitForMoneyAction
-from clicker.clicker_state import ClickerState
+from clicker.clicker_state import g_clicker_state
 from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY, \
     KEYBOARD_LAYOUT_DELAY
 from common.game_classes.enums import UpgradeTier
@@ -90,8 +90,8 @@ def main():
         raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
 
     ahk = AHK()
-    Hotkeys.add_hotkey("ctrl + shift + s", ClickerState().stop)
-    Hotkeys.add_hotkey("ctrl + shift + c", ClickerState().run)
+    Hotkeys.add_hotkey("ctrl + shift + s", g_clicker_state.stop)
+    Hotkeys.add_hotkey("ctrl + shift + c", g_clicker_state.run)
     total_dict = load_script_dict(file_path=get_script_path())
     metadata = parse_metadata(json_dict=total_dict)
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
@@ -105,7 +105,7 @@ def main():
                 time.sleep(KEYBOARD_LAYOUT_DELAY)
                 continue
 
-            if not ClickerState().is_stopped() and action.can_act():
+            if not g_clicker_state.is_stopped() and action.can_act():
                 action.act()
                 break
 
