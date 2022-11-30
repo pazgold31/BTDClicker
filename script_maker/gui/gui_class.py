@@ -10,8 +10,8 @@ import PySimpleGUI as sg
 from pydantic.json import pydantic_encoder
 
 from common.game_classes.enums import UpgradeTier, TowerType
-from common.game_classes.script.script_dataclasses import Script
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
+from common.game_classes.script.script_dataclasses import Script
 from common.game_classes.script.script_entries_dataclasses import IScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.monkey_knowledge.monkey_knowledge import g_monkey_knowledge
@@ -431,7 +431,7 @@ class GuiClass:
             return
 
         with self._selected_file_path.open("w") as of:
-            json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container), of,
+            json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container.data), of,
                       default=pydantic_encoder)
 
     def handle_import_button(self, values: ValuesType):
