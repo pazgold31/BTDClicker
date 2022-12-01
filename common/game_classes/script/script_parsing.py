@@ -3,7 +3,7 @@ from typing import Dict, List, Generator, Tuple
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, \
     WaitForMoneyEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry
+    ChangeSpecialTargetingEntry, CreateHeroEntry
 from common.game_classes.tower import Tower, Hero
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
@@ -19,8 +19,10 @@ def import_script(script_dict: Dict) -> ScriptContainer:
             script.append(PauseEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.wait_for_money:
             script.append(WaitForMoneyEntry.parse_obj(action))
-        elif action[ACTION_KEYWORD] == Actions.create:
+        elif action[ACTION_KEYWORD] == Actions.create_tower:
             script.append(CreateTowerEntry.parse_obj(action))
+        elif action[ACTION_KEYWORD] == Actions.create_hero:
+            script.append(CreateHeroEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.upgrade:
             script.append(UpgradeTowerEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.sell:
@@ -33,17 +35,16 @@ def import_script(script_dict: Dict) -> ScriptContainer:
     return ScriptContainer(script)
 
 
-def dynamic_script_parsing(script_entries: ScriptContainer,
-                           metadata: GameMetadata) -> Generator[Tuple[TowersContainer, IScriptEntry], None, None]:
-    # TODO: remove the metadata since heroes don't need names
+def dynamic_script_parsing(
+        script_entries: ScriptContainer) -> Generator[Tuple[TowersContainer, IScriptEntry], None, None]:
+
     towers_container = TowersContainer()
     for script_entry in script_entries:
         if isinstance(script_entry, CreateTowerEntry):
-            if "Hero" == script_entry.name:
-                tower = Hero(name=metadata.hero_type, x=script_entry.x, y=script_entry.y)
-            else:
-                tower = Tower(name=script_entry.name, x=script_entry.x, y=script_entry.y)
-            towers_container[script_entry.id] = tower
+            towers_container[script_entry.id] = Tower(name=script_entry.name, x=script_entry.x, y=script_entry.y)
+
+        elif isinstance(script_entry, CreateHeroEntry):
+            towers_container[script_entry.id] = Hero(x=script_entry.x, y=script_entry.y)
 
         elif isinstance(script_entry, UpgradeTowerEntry):
             tower_obj = towers_container[script_entry.id]
@@ -62,8 +63,8 @@ def dynamic_script_parsing(script_entries: ScriptContainer,
         yield towers_container, script_entry
 
 
-def parse_towers_from_script(script_entries: ScriptContainer, metadata: GameMetadata) -> TowersContainer:
-    *_, last_output = dynamic_script_parsing(script_entries=script_entries, metadata=metadata)
+def parse_towers_from_script(script_entries: ScriptContainer) -> TowersContainer:
+    *_, last_output = dynamic_script_parsing(script_entries=script_entries)
     return last_output[0]  # Towers container
 
 

@@ -1,5 +1,7 @@
+import copy
 from typing import Dict
 
+from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry
 from common.game_classes.tower import Tower
@@ -13,8 +15,10 @@ def calculate_cost(script_container: ScriptContainer, towers_container: TowersCo
     tower_cost_map: Dict[int, int] = {tower_id: 0 for tower_id, _ in towers_container.items()}
     end = end if end is not None else len(script_container)
 
-    tower_tier_map: Dict[int, Tower] = {tower_id: Tower(name=tower.name, x=tower.x, y=tower.y) for tower_id, tower in
-                                        towers_container.items()}
+    new_towers_container = copy.deepcopy(towers_container)
+    for single_tower in new_towers_container.values():
+        if isinstance(single_tower, Tower):
+            single_tower.tier_map = {j: 0 for j in UpgradeTier}
 
     for entry in script_container[start: end + 1]:
         if isinstance(entry, CreateTowerEntry):
@@ -24,7 +28,9 @@ def calculate_cost(script_container: ScriptContainer, towers_container: TowersCo
             else:
                 tower_cost_map[entry.id] += get_base_cost(tower_name=entry.name, difficulty=metadata.difficulty)
         elif isinstance(entry, UpgradeTowerEntry):
-            tower = tower_tier_map[entry.id]
+            tower = new_towers_container[entry.id]
+            if not isinstance(tower, Tower):
+                raise RuntimeError("Invalid tower")
 
             upgrade_price = get_upgrade_cost(tower_name=tower.name, tier=entry.tier, difficulty=metadata.difficulty,
                                              upgrade_index=(tower.tier_map[entry.tier] + 1))
