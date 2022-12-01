@@ -6,7 +6,8 @@ from common.game_classes.enums import UpgradeTier
 class Actions:
     pause = "pause"
     wait_for_money = "wait_for_money"
-    create = "create"
+    create_tower = "create_tower"
+    create_hero = "create_hero"
     upgrade = "upgrade"
     sell = "sell"
     change_targeting = "change_targeting"
@@ -30,11 +31,18 @@ class ITowerModifyingScriptEntry(IScriptEntry):
     id: int
 
 
-class CreateTowerEntry(ITowerModifyingScriptEntry):
-    action: str = Actions.create
-    name: str
+class ITowerCreationEntry(ITowerModifyingScriptEntry):
     x: int
     y: int
+
+
+class CreateTowerEntry(ITowerCreationEntry):
+    action: str = Actions.create_tower
+    name: str
+
+
+class CreateHeroEntry(ITowerCreationEntry):
+    action: str = Actions.create_hero
 
 
 class UpgradeTowerEntry(ITowerModifyingScriptEntry):

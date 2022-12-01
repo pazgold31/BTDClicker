@@ -1,12 +1,11 @@
-from dataclasses import dataclass, field
 from typing import Dict
+
+from pydantic import BaseModel
 
 from common.game_classes.enums import UpgradeTier
 
 
-@dataclass
-class BaseTower:
-    name: str
+class BaseTower(BaseModel):
     x: int
     y: int
 
@@ -15,11 +14,10 @@ class BaseTower:
     s_targeting: int = 0
 
 
-@dataclass
 class Tower(BaseTower):
-    tier_map: Dict[UpgradeTier, int] = field(default_factory=lambda: {i: 0 for i in UpgradeTier})
+    name: str
+    tier_map: Dict[UpgradeTier, int] = {i: 0 for i in UpgradeTier}
 
 
-@dataclass
 class Hero(BaseTower):
     pass

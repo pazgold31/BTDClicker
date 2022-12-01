@@ -28,9 +28,9 @@ class TowersContainer(UserDict[int, BaseTower]):
         self[tower_id] = Tower(name=name, x=x, y=y)
         return tower_id
 
-    def add_hero(self, name: str, x: int, y: int) -> int:
+    def add_hero(self, x: int, y: int) -> int:
         tower_id = self.generate_new_id()
-        self[tower_id] = Hero(name=name, x=x, y=y)
+        self[tower_id] = Hero(x=x, y=y)
         return tower_id
 
     def get_tower_color(self, tower_id: int) -> str:

@@ -56,7 +56,7 @@ class GuiFormatters:
         output = []
         for tower_id, tower in towers_container.items():
             if isinstance(tower, Hero):
-                output.append(f"{tower_id}: {tower.name} | {GuiFormatters.format_tower_position(tower)} |"
+                output.append(f"{tower_id}: Hero | {GuiFormatters.format_tower_position(tower)} |"
                               f"{GuiFormatters.format_tower_targeting(tower)} | "
                               f"{GuiFormatters.format_tower_sold_status(tower)}")
             elif isinstance(tower, Tower):

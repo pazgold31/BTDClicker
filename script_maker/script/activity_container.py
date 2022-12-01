@@ -4,7 +4,7 @@ from typing import List, Dict
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_entries_dataclasses import IScriptEntry, PauseEntry, WaitForMoneyEntry, \
     ITowerModifyingScriptEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry
+    ChangeSpecialTargetingEntry, CreateHeroEntry
 from common.game_classes.tower import Tower
 from common.utils.upgrades_utils import is_tier_upgradeable
 from script_maker.script.script_container import ScriptContainer
@@ -59,10 +59,10 @@ class ActivityContainer:
         self._add_entry(CreateTowerEntry(name=name, id=tower_id, x=x, y=y), index=index)
         return tower_id
 
-    def add_hero(self, name: str, x: int, y: int, index: int = None) -> int:
-        tower_id = self._towers_container.add_hero(name=name, x=x, y=y)
+    def add_hero(self, x: int, y: int, index: int = None) -> int:
+        tower_id = self._towers_container.add_hero(x=x, y=y)
 
-        self._add_entry(CreateTowerEntry(name=name, id=tower_id, x=x, y=y), index=index)
+        self._add_entry(CreateHeroEntry(id=tower_id, x=x, y=y), index=index)
         return tower_id
 
     def change_position(self, tower_id: int, x: int, y: int):
@@ -71,7 +71,11 @@ class ActivityContainer:
         self._script_container.change_position(tower_id=tower_id, x=x, y=y)
 
     def change_tower_type(self, tower_id: int, tower_type: str):
-        self._towers_container[tower_id].name = tower_type
+        tower = self._towers_container[tower_id]
+        if not isinstance(tower, Tower):
+            raise RuntimeError("Invalid tower!")
+
+        tower.name = tower_type
         self._script_container.change_tower_type(tower_id=tower_id, tower_type=tower_type)
 
     def upgrade_tower(self, tower_id: int, tier: UpgradeTier, index: int = None):

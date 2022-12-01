@@ -234,8 +234,7 @@ class GuiClass:
                     sg.popup("Your Hero is already placed!")
                     raise ValueError
 
-                return self._activity_container.add_hero(name=tower_name,
-                                                         x=tower_x,
+                return self._activity_container.add_hero(x=tower_x,
                                                          y=tower_y,
                                                          index=entry_index_to_select)
 
@@ -449,8 +448,7 @@ class GuiClass:
 
         self._activity_container.script_container = import_script(script_dict=json_dict["script"])
         self._activity_container.towers_container = parse_towers_from_script(
-            script_entries=self._activity_container.script_container,
-            metadata=self._metadata)
+            script_entries=self._activity_container.script_container)
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 

@@ -1,5 +1,6 @@
 import json
 import time
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -20,7 +21,7 @@ from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, C
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, CreateTowerEntry, \
-    UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
+    UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, CreateHeroEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.game_classes.tower import Tower
 from common.hotkeys import Hotkeys
@@ -49,7 +50,7 @@ def remove_towers_upgrades(towers_container: TowersContainer):
 
 def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], TowersContainer]:
     script_entries = import_script(script_dict=script_dict)
-    towers_container: TowersContainer = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
+    towers_container: TowersContainer = parse_towers_from_script(script_entries=script_entries)
     remove_towers_upgrades(towers_container=towers_container)
 
     def get_tower_from_map(tower_id: int) -> Tower:
@@ -66,13 +67,10 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
         if isinstance(script_entry, WaitForMoneyEntry):
             script.append(WaitForMoneyAction(ahk=ahk, amount=script_entry.amount))
         if isinstance(script_entry, CreateTowerEntry):
-            if "Hero" == script_entry.name:
-                script.append(PlaceHeroAction(ahk=ahk, hero=towers_container[script_entry.id],
-                                              difficulty=metadata.difficulty))
-            else:
-                script.append(PlaceTowerAction(ahk=ahk, tower=towers_container[script_entry.id],
-                                               difficulty=metadata.difficulty))
-
+            script.append(PlaceTowerAction(ahk=ahk, tower=towers_container[script_entry.id],
+                                           difficulty=metadata.difficulty))
+        elif isinstance(script_entry, CreateHeroEntry):
+            script.append(PlaceHeroAction(ahk=ahk, hero=towers_container[script_entry.id], metadata=metadata))
         elif isinstance(script_entry, UpgradeTowerEntry):
             script.append(UpgradeTowerAction(ahk=ahk, tower=get_tower_from_map(script_entry.id),
                                              tier=UpgradeTier(script_entry.tier),
@@ -87,16 +85,27 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
     return script, towers_container
 
 
+def parse_args() -> Namespace:
+    argument_parser = ArgumentParser("BTD6 script player")
+    argument_parser.add_argument("-s", "--script", type=Path, required=False, default=None)
+    return argument_parser.parse_args()
+
+
 def main():
+    args = parse_args()
+
     if not is_language_valid():
         raise RuntimeError("Invalid keyboard language selected. Please change it and execute again.")
+
+    total_dict = load_script_dict(file_path=args.script or get_script_path())
+    metadata = parse_metadata(json_dict=total_dict)
 
     ahk = AHK()
     Hotkeys.add_hotkey("ctrl + shift + s", g_clicker_state.stop)
     Hotkeys.add_hotkey("ctrl + shift + c", g_clicker_state.run)
-    total_dict = load_script_dict(file_path=get_script_path())
-    metadata = parse_metadata(json_dict=total_dict)
+
     script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
+
     time.sleep(CLICKER_START_DELAY)
 
     for action in script:
