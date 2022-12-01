@@ -16,7 +16,7 @@ def calculate_cost(script_container: ScriptContainer, towers_container: TowersCo
     end = end if end is not None else len(script_container)
 
     new_towers_container = copy.deepcopy(towers_container)
-    for _, single_tower in new_towers_container.items():
+    for single_tower in new_towers_container.values():
         if isinstance(single_tower, Tower):
             single_tower.tier_map = {j: 0 for j in UpgradeTier}
 
