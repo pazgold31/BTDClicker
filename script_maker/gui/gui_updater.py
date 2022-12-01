@@ -3,10 +3,13 @@ from typing import Callable, Union, List
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
+from common.game_classes.enums import Difficulty
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, \
     ITowerModifyingScriptEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
     ChangeSpecialTargetingEntry
+from common.game_classes.script.script_parsing import dynamic_script_parsing
+from common.game_classes.tower import Tower
 from common.towers_info.game_info import g_heroes_info
 from common.towers_info.info_classes import TowerInfo
 from script_maker.gui.gui_colors import GLOBAL_ENTRIES_COLOR
@@ -98,21 +101,35 @@ class GuiUpdater:
 
     def update_script_box(self, activity_container: ActivityContainer, selected_index: Union[int, List[int]] = None):
         script_box_values: List[str] = []
-        for action in activity_container.script_container:
+        # TODO: the metadata is really temporary
+        for towers_container, action in dynamic_script_parsing(script_entries=activity_container.script_container,
+                                                               metadata=GameMetadata(difficulty=Difficulty.easy,
+                                                                                     hero_type="Obin")):
             if isinstance(action, PauseEntry):
                 script_box_values.append("Pause game.")
-            if isinstance(action, WaitForMoneyEntry):
+            elif isinstance(action, WaitForMoneyEntry):
                 script_box_values.append(f"Wait for {action.amount}$")
-            if isinstance(action, CreateTowerEntry):
-                script_box_values.append(f"Create: {action.name}({action.id}) | X: {action.x} Y: {action.y}")
-            elif isinstance(action, UpgradeTowerEntry):
-                script_box_values.append(f"Upgrade: ({action.id}) | tier: {action.tier}")
-            elif isinstance(action, SellTowerEntry):
-                script_box_values.append(f"Sell: ({action.id})")
-            elif isinstance(action, ChangeTargetingEntry):
-                script_box_values.append(f"Change targeting: ({action.id})")
-            elif isinstance(action, ChangeSpecialTargetingEntry):
-                script_box_values.append(f"Change special targeting: ({action.id})")
+
+            # Tower specific
+            else:
+                if not isinstance(action, ITowerModifyingScriptEntry):
+                    raise RuntimeError("Invalid action!")
+                current_tower = towers_container[action.id]
+
+                if isinstance(action, CreateTowerEntry):
+                    script_box_values.append(f"Create: {action.name}({action.id}) | X: {action.x} Y: {action.y}")
+                elif isinstance(action, UpgradeTowerEntry):
+                    if not isinstance(current_tower, Tower):
+                        raise RuntimeError("Invalid action!")
+                    formatted_tiers = GuiFormatters.format_tower_tiers(current_tower)
+                    script_box_values.append(
+                        f"Upgrade: {current_tower.name}({action.id}) | tier: {action.tier} | {formatted_tiers}")
+                elif isinstance(action, SellTowerEntry):
+                    script_box_values.append(f"Sell: {current_tower.name}({action.id})")
+                elif isinstance(action, ChangeTargetingEntry):
+                    script_box_values.append(f"Change targeting: {current_tower.name}({action.id})")
+                elif isinstance(action, ChangeSpecialTargetingEntry):
+                    script_box_values.append(f"Change special targeting: {current_tower.name}({action.id})")
 
         self._controls_utils.update_listbox(key=GuiKeys.ScriptBox, values=script_box_values,
                                             set_to_index=selected_index)
