@@ -22,9 +22,10 @@ from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, CreateTowerEntry, \
     UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
-from common.game_classes.tower import BaseTower, Tower
+from common.game_classes.tower import Tower
 from common.hotkeys import Hotkeys
 from common.keyboard import is_language_valid
+from script_maker.script.towers_container import TowersContainer
 
 
 def load_script_dict(file_path: Path) -> Dict:
@@ -36,8 +37,8 @@ def get_script_path() -> Path:
     return Path(input("Enter script path: "))
 
 
-def remove_towers_upgrades(tower_map: Dict[int, BaseTower]):
-    for t in tower_map.values():
+def remove_towers_upgrades(towers_container: TowersContainer):
+    for t in towers_container.values():
         if not isinstance(t, Tower):
             continue
 
@@ -46,13 +47,13 @@ def remove_towers_upgrades(tower_map: Dict[int, BaseTower]):
         t.tier_map[UpgradeTier.bottom] = 0
 
 
-def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], Dict[int, BaseTower]]:
+def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], TowersContainer]:
     script_entries = import_script(script_dict=script_dict)
-    tower_map: Dict[int, BaseTower] = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
-    remove_towers_upgrades(tower_map=tower_map)
+    towers_container: TowersContainer = parse_towers_from_script(script_entries=script_entries, metadata=metadata)
+    remove_towers_upgrades(towers_container=towers_container)
 
     def get_tower_from_map(tower_id: int) -> Tower:
-        tower = tower_map[tower_id]
+        tower = towers_container[tower_id]
         if not isinstance(tower, Tower):
             raise RuntimeError
 
@@ -66,10 +67,10 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
             script.append(WaitForMoneyAction(ahk=ahk, amount=script_entry.amount))
         if isinstance(script_entry, CreateTowerEntry):
             if "Hero" == script_entry.name:
-                script.append(PlaceHeroAction(ahk=ahk, hero=tower_map[script_entry.id],
+                script.append(PlaceHeroAction(ahk=ahk, hero=towers_container[script_entry.id],
                                               difficulty=metadata.difficulty))
             else:
-                script.append(PlaceTowerAction(ahk=ahk, tower=tower_map[script_entry.id],
+                script.append(PlaceTowerAction(ahk=ahk, tower=towers_container[script_entry.id],
                                                difficulty=metadata.difficulty))
 
         elif isinstance(script_entry, UpgradeTowerEntry):
@@ -83,7 +84,7 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
         elif isinstance(script_entry, ChangeSpecialTargetingEntry):
             script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
 
-    return script, tower_map
+    return script, towers_container
 
 
 def main():

@@ -1,8 +1,9 @@
 from typing import Dict, List, Generator, Tuple
 
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
-from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, WaitForMoneyEntry, \
-    CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry
+from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, \
+    WaitForMoneyEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
+    ChangeSpecialTargetingEntry
 from common.game_classes.tower import Tower, Hero
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer

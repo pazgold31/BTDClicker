@@ -110,8 +110,7 @@ class GuiUpdater:
             elif isinstance(action, WaitForMoneyEntry):
                 script_box_values.append(f"Wait for {action.amount}$")
 
-            # Tower specific
-            else:
+            else:  # Tower specific
                 if not isinstance(action, ITowerModifyingScriptEntry):
                     raise RuntimeError("Invalid action!")
                 current_tower = towers_container[action.id]
