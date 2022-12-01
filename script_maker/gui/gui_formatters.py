@@ -2,7 +2,7 @@ from typing import Callable, List
 
 from clicker.consts.keymap import TOWER_KEY_MAP
 from common.game_classes.enums import UpgradeTier, Difficulty
-from common.game_classes.tower import Hero, Tower
+from common.game_classes.tower import Hero, Tower, BaseTower
 from common.towers_info.game_info import g_towers_info, g_heroes_info
 from common.towers_info.info_classes import TowerInfo
 from common.utils.cost_utils import get_base_cost
@@ -28,28 +28,42 @@ class GuiFormatters:
                 g_heroes_info.items()]
 
     @staticmethod
-    def format_targeting(targeting: int):
+    def format_targeting(targeting: int) -> str:
         # TODO: support elite targeting and such
         targeting = targeting % 4
         return "First" if targeting == 0 else "Last" if targeting == 1 else "Close" if \
             targeting == 2 else "Strong"
 
     @staticmethod
-    def format_existing_towers(towers_container: TowersContainer):
+    def format_tower_tiers(tower: Tower) -> str:
+        tm = tower.tier_map
+        return f"{tm[UpgradeTier.top]}-{tm[UpgradeTier.middle]}-{tm[UpgradeTier.bottom]}"
+
+    @staticmethod
+    def format_tower_position(tower: BaseTower) -> str:
+        return f"x: {tower.x} y: {tower.y}"
+
+    @staticmethod
+    def format_tower_targeting(tower: BaseTower) -> str:
+        return f"Targeting: {GuiFormatters.format_targeting(tower.targeting)} | S.Targeting: {tower.s_targeting}"
+
+    @staticmethod
+    def format_tower_sold_status(tower: BaseTower) -> str:
+        return "SOLD" if tower.sold else ""
+
+    @staticmethod
+    def format_existing_towers(towers_container: TowersContainer) -> List[str]:
         output = []
         for tower_id, tower in towers_container.items():
             if isinstance(tower, Hero):
-                output.append(f"{tower_id}: {tower.name} | x: {tower.x} y: {tower.y} |"
-                              f"Targeting: {GuiFormatters.format_targeting(tower.targeting)} | "
-                              f"S.Targeting: {tower.s_targeting}"
-                              f"{' SOLD' if tower.sold else ''}")
+                output.append(f"{tower_id}: {tower.name} | {GuiFormatters.format_tower_position(tower)} |"
+                              f"{GuiFormatters.format_tower_targeting(tower)} | "
+                              f"{GuiFormatters.format_tower_sold_status(tower)}")
             elif isinstance(tower, Tower):
-                output.append(
-                    f"{tower_id}: {tower.name} | x: {tower.x} y: {tower.y} | {tower.tier_map[UpgradeTier.top]}-"
-                    f"{tower.tier_map[UpgradeTier.middle]}-{tower.tier_map[UpgradeTier.bottom]} | "
-                    f"Targeting: {GuiFormatters.format_targeting(tower.targeting)} | "
-                    f"S.Targeting: {tower.s_targeting}"
-                    f"{' SOLD' if tower.sold else ''}")
+                output.append(f"{tower_id}: {tower.name} | {GuiFormatters.format_tower_position(tower)} | "
+                              f"{GuiFormatters.format_tower_tiers(tower)} | "
+                              f"{GuiFormatters.format_tower_targeting(tower)} | "
+                              f"{GuiFormatters.format_tower_sold_status(tower)}")
             else:
                 raise RuntimeError
 

@@ -3,6 +3,7 @@ import json
 import os
 import time
 from functools import wraps
+from pathlib import Path
 from typing import Dict, Optional, List, Callable, Tuple
 
 # noinspection PyPep8Naming
@@ -55,7 +56,7 @@ def update_existing_towers_and_script(method):
 class GuiClass:
     def __init__(self):
         self._window = sg.Window(title="BTD6 Scripter", layout=get_layout())
-        self._selected_file_path: Optional[str] = None
+        self._selected_file_path: Optional[Path] = None
         self._activity_container = ActivityContainer()
         self._controls_utils = GuiControlsUtils(window=self._window)
         _, values = self._window.read(0)
@@ -434,14 +435,7 @@ class GuiClass:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container.data), of,
                       default=pydantic_encoder)
 
-    def handle_import_button(self, values: ValuesType):
-        try:
-            self._selected_file_path = popup_get_file(message="Please select file to import",
-                                                      default_path=get_files_dir(),
-                                                      file_types=(("Json files", "json"),))
-        except ValueError:
-            return
-
+    def _import_selected_script(self):
         with self._selected_file_path.open("r") as of:
             json_dict = json.load(of)
 
@@ -459,6 +453,19 @@ class GuiClass:
             metadata=self._metadata)
 
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
+
+    def import_script(self, script_path: Path):
+        self._selected_file_path = script_path
+        self._import_selected_script()
+
+    def handle_import_button(self, values: ValuesType):
+        try:
+            selected_file_path = popup_get_file(message="Please select file to import",
+                                                default_path=get_files_dir(),
+                                                file_types=(("Json files", "json"),))
+            self.import_script(script_path=selected_file_path)
+        except ValueError:
+            pass
 
     def _handle_view_towers(self, values: ValuesType, towers_filter: Callable[[TowerInfo], bool]):
         self._gui_updater.update_tower_types(towers_filter=towers_filter)
