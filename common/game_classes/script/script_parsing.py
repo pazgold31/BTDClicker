@@ -12,7 +12,7 @@ ACTION_KEYWORD = "action"
 
 
 def import_script(script_dict: Dict) -> ScriptContainer:
-    script: List[IScriptEntry] = []
+    script: list[IScriptEntry] = []
 
     for action in script_dict:
         if action[ACTION_KEYWORD] == Actions.pause:

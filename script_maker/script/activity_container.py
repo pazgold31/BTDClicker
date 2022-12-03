@@ -21,7 +21,7 @@ class ActivityContainer:
         return self._script_container
 
     @script_container.setter
-    def script_container(self, value: List[IScriptEntry]):
+    def script_container(self, value: list[IScriptEntry]):
         self._script_container = ScriptContainer(value)
 
     @property
@@ -29,7 +29,7 @@ class ActivityContainer:
         return self._towers_container
 
     @towers_container.setter
-    def towers_container(self, value: Dict[int, Tower]):
+    def towers_container(self, value: dict[int, Tower]):
         self._towers_container.set_towers(value=value)
 
     def reset_activity(self):
@@ -179,7 +179,7 @@ class ActivityContainer:
         else:
             raise RuntimeError
 
-    def duplicate_script_entries(self, entries: List[IScriptEntry], new_index: int = None) -> int:
+    def duplicate_script_entries(self, entries: list[IScriptEntry], new_index: int = None) -> int:
         new_tower_id = None
         if isinstance(entries[0], CreateTowerEntry):
             new_tower_id = self._towers_container.generate_new_id()

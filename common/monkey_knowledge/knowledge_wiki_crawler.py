@@ -12,7 +12,7 @@ KNOWLEDGE_PAGE_URL = urljoin(BASE_WIKI_URL, r"wiki/Monkey_Knowledge_(BTD6)")
 KNOWLEDGE_IMAGE_SIZE = (122, 122)
 
 
-def crawl_table(table_body: bs4.Tag) -> Dict[str, str]:
+def crawl_table(table_body: bs4.Tag) -> dict[str, str]:
     output = {}
     rows = table_body.find_all('tr')
     for row in rows[1:]:  # Skip the headlines
@@ -24,11 +24,11 @@ def crawl_table(table_body: bs4.Tag) -> Dict[str, str]:
     return output
 
 
-def read_images(urls_dict: Dict[str, str]) -> Dict[str, Image.Image]:
+def read_images(urls_dict: dict[str, str]) -> dict[str, Image.Image]:
     return {key: read_image(url) for key, url in urls_dict.items()}
 
 
-def crawl_knowledge_pictures() -> Dict[str, Dict[str, Image.Image]]:
+def crawl_knowledge_pictures() -> dict[str, dict[str, Image.Image]]:
     urls_dict = {}
     soup = get_page_soup(url=KNOWLEDGE_PAGE_URL)
     tables = soup.find_all("table", class_="article-table")
@@ -43,7 +43,7 @@ def resize_image(image: Image.Image, new_size: Tuple[int, int] = KNOWLEDGE_IMAGE
     image.thumbnail(size=new_size, resample=Image.LANCZOS)
 
 
-def save_knowledge_pictures(total_dict: Dict[str, Dict[str, Image.Image]]):
+def save_knowledge_pictures(total_dict: dict[str, dict[str, Image.Image]]):
     for category, pictures_dict in total_dict.items():
         for knowledge_name, picture in pictures_dict.items():
             output_path = (get_knowledge_images_dir(subdirectory=category) / knowledge_name).with_suffix(".png")

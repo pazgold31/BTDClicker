@@ -14,19 +14,19 @@ class GuiControlsUtils:
         self._window = window
 
     @staticmethod
-    def update_listbox_item(listbox: sg.Listbox, values: Optional[List[str]] = None,
+    def update_listbox_item(listbox: sg.Listbox, values: Optional[list[str]] = None,
                             set_to_index: Optional[Union[int, Iterable[int]]] = None):
         listbox.update(values=values, set_to_index=set_to_index)
 
-    def update_listbox(self, key: str, values: Optional[List[str]] = None,
+    def update_listbox(self, key: str, values: Optional[list[str]] = None,
                        set_to_index: Optional[Union[int, Iterable[int]]] = None):
         self.update_listbox_item(listbox=self._window[key], values=values, set_to_index=set_to_index)
 
     @staticmethod
-    def update_combo_item(combo: sg.Combo, values: Optional[List[str]] = None, set_to_index: Optional[int] = None):
+    def update_combo_item(combo: sg.Combo, values: Optional[list[str]] = None, set_to_index: Optional[int] = None):
         combo.update(values=values, set_to_index=set_to_index)
 
-    def update_combo(self, key: str, values: Optional[List[str]] = None, set_to_index: Optional[int] = None):
+    def update_combo(self, key: str, values: Optional[list[str]] = None, set_to_index: Optional[int] = None):
         self.update_combo_item(combo=self._window[key], values=values, set_to_index=set_to_index)
 
     @staticmethod
@@ -75,7 +75,7 @@ class GuiControlsUtils:
         except KeyError:
             raise ValueError
 
-    def get_list_box_selected_indexes(self, key: str) -> List[int]:
+    def get_list_box_selected_indexes(self, key: str) -> list[int]:
         return self._window[key].get_indexes()
 
     def get_list_box_selected_index(self, key: str) -> int:

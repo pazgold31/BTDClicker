@@ -6,7 +6,7 @@ from common.game_classes.script.script_entries_dataclasses import IScriptEntry, 
 
 
 class ScriptContainer(UserList[IScriptEntry]):
-    def __init__(self, values: List[IScriptEntry] = None):
+    def __init__(self, values: list[IScriptEntry] = None):
         values = values or []
         super(ScriptContainer, self).__init__(values)
 
@@ -21,7 +21,7 @@ class ScriptContainer(UserList[IScriptEntry]):
             if isinstance(entry, CreateTowerEntry) and entry.id == tower_id:
                 entry.name = tower_type
 
-    def get_entries_for_id(self, tower_id: int) -> List[ITowerModifyingScriptEntry]:
+    def get_entries_for_id(self, tower_id: int) -> list[ITowerModifyingScriptEntry]:
         output = []
         for entry in self:
             if isinstance(entry, ITowerModifyingScriptEntry) and entry.id == tower_id:

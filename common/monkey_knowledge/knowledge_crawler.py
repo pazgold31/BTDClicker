@@ -102,7 +102,7 @@ def open_primary_monkey_knowledge(ahk: AHK):
     click_image(ahk=ahk, image=PRIMARY_KNOWLEDGE_ICON_IMAGE, threshold=PRIMARY_MENU_THRESHOLD)
 
 
-def get_knowledge_map(images_directory: Path, screenshot: Image.Image) -> Dict[str, bool]:
+def get_knowledge_map(images_directory: Path, screenshot: Image.Image) -> dict[str, bool]:
     output = {}
     for file_path in images_directory.glob("*.png"):
         knowledge_name = file_path.stem
@@ -121,14 +121,14 @@ def scroll_down(ahk: AHK):
     ahk.send("{WheelDown}")
 
 
-def get_category_knowledge(images_directory: Path, screenshots: List[Image.Image]) -> KnowledgeCategory:
+def get_category_knowledge(images_directory: Path, screenshots: list[Image.Image]) -> KnowledgeCategory:
     dicts = [get_knowledge_map(images_directory=images_directory, screenshot=i) for i in screenshots]
     combined_dict = {k: any(i[k] for i in dicts) for k in dicts[0].keys()}
     knowledge_entries = [KnowledgeEntry(name=k, purchased=v) for k, v in combined_dict.items()]
     return KnowledgeCategory(name=images_directory.stem, entries=knowledge_entries)
 
 
-def get_category_screenshots(ahk) -> List[Image.Image]:
+def get_category_screenshots(ahk) -> list[Image.Image]:
     output = [pyautogui.screenshot()]
     scroll_down(ahk=ahk)
     time.sleep(0.5)
@@ -148,7 +148,7 @@ def move_mouse_from_button(ahk: AHK):
 SLEEP_INTERVAL = 0.8
 
 
-def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
+def crawl_monkey_knowledge() -> list[KnowledgeCategory]:
     ahk = AHK()
     open_monkey_knowledge(ahk=ahk)
     time.sleep(SLEEP_INTERVAL)
@@ -161,7 +161,7 @@ def crawl_monkey_knowledge() -> List[KnowledgeCategory]:
         time.sleep(SLEEP_INTERVAL)
         category_screenshots = get_category_screenshots(ahk=ahk)
 
-        def run_and_add_to_queue(category_images_directory: Path, screenshots: List[Image.Image]):
+        def run_and_add_to_queue(category_images_directory: Path, screenshots: list[Image.Image]):
             output_queue.put(
                 get_category_knowledge(images_directory=category_images_directory, screenshots=screenshots))
 
@@ -185,9 +185,9 @@ def update_monkey_knowledge_info():
     save_dataclass_to_cache(path=path, info_data=info_data)
 
 
-def get_monkey_knowledge_info() -> Optional[List[KnowledgeCategory]]:
+def get_monkey_knowledge_info() -> Optional[list[KnowledgeCategory]]:
     path = get_files_dir() / "monkey_knowledge.json"
     try:
-        return load_cached_dataclass(path=path, output_type=List[KnowledgeCategory], update_time=KNOWLEDGE_UPDATE_TIME)
+        return load_cached_dataclass(path=path, output_type=list[KnowledgeCategory], update_time=KNOWLEDGE_UPDATE_TIME)
     except FileNotFoundError:
         return None

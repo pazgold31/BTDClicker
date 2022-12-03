@@ -13,12 +13,12 @@ class TowersContainer(UserDict[int, BaseTower]):
         self._id_generator = itertools.count()
 
         self._colors_generator = itertools.chain(EXISTING_TOWERS_COLORS)
-        self._colors_map: Dict[int, str] = {}
+        self._colors_map: dict[int, str] = {}
 
     def generate_new_id(self) -> int:
         return next(self._id_generator)
 
-    def set_towers(self, value: Dict[int, Tower]):
+    def set_towers(self, value: dict[int, Tower]):
         self.data = value
 
         self._id_generator = itertools.count(max(self.keys()) + 1)

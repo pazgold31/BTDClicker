@@ -44,7 +44,7 @@ def parse_tower_base_cost(data: str) -> Tuple[str, Cost]:
         impopable=int(match.group(5).replace(",", "")))
 
 
-def parse_upgrades_tier(data: List[str]) -> UpgradeTierCost:
+def parse_upgrades_tier(data: list[str]) -> UpgradeTierCost:
     return UpgradeTierCost(first=parse_single_upgrade(data[-6]),
                            second=parse_single_upgrade(data[-5]),
                            third=parse_single_upgrade(data[-4]),
@@ -53,14 +53,14 @@ def parse_upgrades_tier(data: List[str]) -> UpgradeTierCost:
                            paragon=None)  # TODO: support paragons
 
 
-def parse_upgrades(data: List[List[str]]) -> UpgradesCost:
+def parse_upgrades(data: list[list[str]]) -> UpgradesCost:
     return UpgradesCost(top=parse_upgrades_tier(data[0]),
                         middle=parse_upgrades_tier(data[1]),
                         bottom=parse_upgrades_tier(data[2]))
 
 
-def parse_towers_chunk(data: List[List[str]], towers_type: TowerType) -> List[TowerInfo]:
-    output: List[TowerInfo] = []
+def parse_towers_chunk(data: list[list[str]], towers_type: TowerType) -> list[TowerInfo]:
+    output: list[TowerInfo] = []
     for i in range(0, len(data), 3):
         tower_lines = [data[i], data[i + 1], data[i + 2]]
         tower_name, tower_cost = parse_tower_base_cost(tower_lines[0][0])
@@ -70,7 +70,7 @@ def parse_towers_chunk(data: List[List[str]], towers_type: TowerType) -> List[To
     return output
 
 
-def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> List[TowerInfo]:
+def parse_towers_table(table_body: bs4.Tag, towers_type: TowerType) -> list[TowerInfo]:
     rows = table_body.find_all('tr')
     towers_data = []
     for row in rows:
@@ -95,7 +95,7 @@ def get_tower_type(tower_type_name: str) -> TowerType:
             "Support Monkeys": TowerType.Support}[tower_type_name]
 
 
-def crawl_towers_info() -> List[TowerInfo]:
+def crawl_towers_info() -> list[TowerInfo]:
     soup = get_page_soup(TOWERS_PRICES_URL)
     tables = soup.find_all("table", class_="article-table")
     towers = []
@@ -142,7 +142,7 @@ def parse_hero_info(table_body: bs4.Tag):
                                                    impopable=int(re_search.group(4).replace(",", ""))))
 
 
-def crawl_hero_info() -> List[HeroInfo]:
+def crawl_hero_info() -> list[HeroInfo]:
     soup = get_page_soup(HERO_PRICES_URL)
 
     heroes = []
@@ -165,16 +165,16 @@ OutputInfoType = TypeVar('OutputInfoType', Type[HeroInfo], Type[TowerInfo])
 InfoType = TypeVar('InfoType', HeroInfo, TowerInfo)
 
 
-def convert_to_map(lst: List[InfoType]) -> Dict[str, InfoType]:
+def convert_to_map(lst: list[InfoType]) -> dict[str, InfoType]:
     return {i.name: i for i in lst}
 
 
-def get_heroes_info(force_scan: bool = False) -> Dict[str, HeroInfo]:
+def get_heroes_info(force_scan: bool = False) -> dict[str, HeroInfo]:
     path = get_files_dir() / "heroes_info.json"
     if not force_scan:
         try:
             return convert_to_map(
-                load_cached_dataclass(path=path, output_type=List[HeroInfo], update_time=INFO_UPDATE_TIME))
+                load_cached_dataclass(path=path, output_type=list[HeroInfo], update_time=INFO_UPDATE_TIME))
         except (FileNotFoundError, TypeError):
             pass
 
@@ -183,11 +183,11 @@ def get_heroes_info(force_scan: bool = False) -> Dict[str, HeroInfo]:
     return convert_to_map(info_data)
 
 
-def get_towers_info(force_scan: bool = False) -> Dict[str, TowerInfo]:
+def get_towers_info(force_scan: bool = False) -> dict[str, TowerInfo]:
     path = get_files_dir() / "towers_info.json"
     if not force_scan:
         try:
-            return convert_to_map(load_cached_dataclass(path=path, output_type=List[TowerInfo],
+            return convert_to_map(load_cached_dataclass(path=path, output_type=list[TowerInfo],
                                                         update_time=INFO_UPDATE_TIME))
         except (FileNotFoundError, TypeError):
             pass
