@@ -12,7 +12,7 @@ DIFFICULTY_MAP = {"easy": Difficulty.easy, "medium": Difficulty.medium,
                   "hard": Difficulty.hard, "impopable": Difficulty.impopable}
 
 
-def get_layout() -> List[List[Any]]:
+def get_layout() -> list[list[Any]]:
     file_menu = [GuiMenu.File.MenuName, [GuiMenu.File.New, GuiMenu.File.Import, GuiMenu.File.Save, GuiMenu.File.SaveAs]]
     viewed_towers_menu = [GuiMenu.ViewedTowers.MenuName,
                           [GuiMenu.ViewedTowers.All, GuiMenu.ViewedTowers.Primary, GuiMenu.ViewedTowers.Military,

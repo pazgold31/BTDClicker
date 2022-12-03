@@ -12,7 +12,7 @@ from script_maker.script.towers_container import TowersContainer
 
 def calculate_cost(script_container: ScriptContainer, towers_container: TowersContainer, metadata: GameMetadata,
                    start: int = 0, end: int = None, sell_ratio: float = 0.7) -> int:
-    tower_cost_map: Dict[int, int] = {tower_id: 0 for tower_id, _ in towers_container.items()}
+    tower_cost_map: dict[int, int] = {tower_id: 0 for tower_id, _ in towers_container.items()}
     end = end if end is not None else len(script_container)
 
     new_towers_container = copy.deepcopy(towers_container)

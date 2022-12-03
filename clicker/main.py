@@ -48,7 +48,7 @@ def remove_towers_upgrades(towers_container: TowersContainer):
         t.tier_map[UpgradeTier.bottom] = 0
 
 
-def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[List[IAction], TowersContainer]:
+def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[list[IAction], TowersContainer]:
     script_entries = import_script(script_dict=script_dict)
     towers_container: TowersContainer = parse_towers_from_script(script_entries=script_entries)
     remove_towers_upgrades(towers_container=towers_container)
@@ -60,7 +60,7 @@ def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[
 
         return tower
 
-    script: List[IAction] = []
+    script: list[IAction] = []
     for script_entry in script_entries:
         if isinstance(script_entry, PauseEntry):
             script.append(PauseGameAction(ahk=ahk))

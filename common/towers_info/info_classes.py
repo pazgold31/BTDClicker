@@ -14,7 +14,7 @@ class Cost(BaseModel):
     class Config:
         use_enum_values = True
 
-    def get_mapping(self) -> Dict[Difficulty, int]:
+    def get_mapping(self) -> dict[Difficulty, int]:
         return {Difficulty.easy: self.easy, Difficulty.medium: self.medium,
                 Difficulty.hard: self.hard, Difficulty.impopable: self.impopable}
 
@@ -35,7 +35,7 @@ class UpgradeTierCost(BaseModel):
     class Config:
         use_enum_values = True
 
-    def get_mapping(self) -> Dict[TierLevel, Upgrade]:
+    def get_mapping(self) -> dict[TierLevel, Upgrade]:
         return {TierLevel.first: self.first, TierLevel.second: self.second,
                 TierLevel.third: self.third, TierLevel.fourth: self.fourth,
                 TierLevel.fifth: self.fifth, TierLevel.paragon: self.paragon}
@@ -49,7 +49,7 @@ class UpgradesCost(BaseModel):
     class Config:
         use_enum_values = True
 
-    def get_mapping(self) -> Dict[UpgradeTier, UpgradeTierCost]:
+    def get_mapping(self) -> dict[UpgradeTier, UpgradeTierCost]:
         return {UpgradeTier.top: self.top, UpgradeTier.middle: self.middle,
                 UpgradeTier.bottom: self.bottom}
 

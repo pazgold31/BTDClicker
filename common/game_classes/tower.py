@@ -16,7 +16,7 @@ class BaseTower(BaseModel):
 
 class Tower(BaseTower):
     name: str
-    tier_map: Dict[UpgradeTier, int] = {i: 0 for i in UpgradeTier}
+    tier_map: dict[UpgradeTier, int] = {i: 0 for i in UpgradeTier}
 
 
 class Hero(BaseTower):

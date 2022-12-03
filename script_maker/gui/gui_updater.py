@@ -74,7 +74,7 @@ class GuiUpdater:
             self._controls_utils.disable_button(key=GuiKeys.BottomUpgradeButton)
 
     def update_total_cost(self, activity_container: ActivityContainer,
-                          selected_script_index: Union[int, List[int]] = None):
+                          selected_script_index: Union[int, list[int]] = None):
         total_cost = calculate_cost(script_container=activity_container.script_container,
                                     towers_container=activity_container.towers_container,
                                     metadata=self._metadata)
@@ -89,7 +89,7 @@ class GuiUpdater:
 
     def update_existing_towers(self, towers_container: TowersContainer):
         list_box_items = GuiFormatters.format_existing_towers(towers_container)
-        list_box_values: List[str] = list(list_box_items.values())
+        list_box_values: list[str] = list(list_box_items.values())
         self._controls_utils.update_listbox(
             key=GuiKeys.ExistingTowersListBox,
             values=list_box_values,
@@ -100,8 +100,8 @@ class GuiUpdater:
                                                    index=i,
                                                    color=towers_container.get_tower_color(tower_id=tower_id))
 
-    def update_script_box(self, activity_container: ActivityContainer, selected_index: Union[int, List[int]] = None):
-        script_box_values: List[str] = []
+    def update_script_box(self, activity_container: ActivityContainer, selected_index: Union[int, list[int]] = None):
+        script_box_values: list[str] = []
         for towers_container, action in dynamic_script_parsing(script_entries=activity_container.script_container):
             if isinstance(action, PauseEntry):
                 script_box_values.append("Pause game.")
@@ -153,7 +153,7 @@ class GuiUpdater:
             self._window[GuiKeys.ScriptBox].Widget.see(get_last_if_list(selected_index))
 
     def update_existing_towers_and_script(self, activity_container: ActivityContainer,
-                                          selected_script_index: Union[int, List[int]] = None):
+                                          selected_script_index: Union[int, list[int]] = None):
         self.update_existing_towers(towers_container=activity_container.towers_container)
         self.update_script_box(activity_container=activity_container, selected_index=selected_script_index)
         self.update_total_cost(activity_container=activity_container, selected_script_index=selected_script_index)

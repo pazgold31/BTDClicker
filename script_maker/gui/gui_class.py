@@ -64,7 +64,7 @@ class GuiClass:
                                       hero_type=GuiParsers.parse_selected_hero(values[GuiKeys.HeroCombo]))
 
         self._initialize_hotkey_classes()
-        self._clip_boarded_script_entries: List[IScriptEntry] = []
+        self._clip_boarded_script_entries: list[IScriptEntry] = []
 
         self._gui_updater = GuiUpdater(window=self._window, metadata=self._metadata,
                                        controls_utils=self._controls_utils)
@@ -177,7 +177,7 @@ class GuiClass:
         return (int(window_location[0] + (self._window.size[0] / 2)),
                 int(window_location[1] + (self._window.size[1] / 2)))
 
-    def _get_selected_towers_id(self) -> List[int]:
+    def _get_selected_towers_id(self) -> list[int]:
         selected_towers_indexes = self._controls_utils.get_list_box_selected_indexes(
             key=GuiKeys.ExistingTowersListBox)
         return [list(self._activity_container.towers_container.keys())[i] for i in selected_towers_indexes]
@@ -577,7 +577,7 @@ class GuiClass:
                              method=_scan, done_text="Done scanning, you can use your computer",
                              location=self._get_popups_position())
 
-    def get_callback_map(self) -> Dict[str, CallbackMethod]:
+    def get_callback_map(self) -> dict[str, CallbackMethod]:
         return {
             GuiKeys.DifficultyListBox: self.handle_change_difficulty,
             GuiKeys.HeroCombo: self.handle_change_hero,
