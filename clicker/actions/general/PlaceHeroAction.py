@@ -3,7 +3,6 @@ from ahk import AHK
 from clicker.actions.IAction import IAction
 from clicker.consts.keymap import Keymap
 from clicker.money_extracter import get_amount_of_money
-from common.game_classes.enums import Difficulty
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.tower import BaseTower
 from common.towers_info.game_info import g_heroes_info

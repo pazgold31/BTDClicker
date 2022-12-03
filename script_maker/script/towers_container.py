@@ -1,9 +1,11 @@
 import itertools
 from collections import UserDict
-from typing import Dict
+from typing import TypeVar, Type
 
 from common.game_classes.tower import Tower, Hero, BaseTower
 from script_maker.gui.gui_colors import EXISTING_TOWERS_COLORS
+
+T = TypeVar("T")
 
 
 class TowersContainer(UserDict[int, BaseTower]):
@@ -40,3 +42,9 @@ class TowersContainer(UserDict[int, BaseTower]):
             print(f"Tower id: {tower_id} | {self._colors_map[tower_id]}")
 
         return self._colors_map[tower_id]
+
+    def get_tower_in_type(self, tower_id: int, tower_type: Type[T]) -> T:
+        tower = self[tower_id]
+        if not isinstance(tower, tower_type):
+            raise RuntimeError
+        return tower
