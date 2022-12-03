@@ -6,26 +6,18 @@ from typing import Dict, Tuple
 
 from ahk import AHK
 
-from clicker.actions.general.PlaceTowerAction import PlaceTowerAction
-from clicker.actions.general.UpgradeTowerAction import UpgradeTowerAction
-from clicker.actions.general.ChangeSpecialTargetingAction import ChangeSpecialTargetingAction
-from clicker.actions.general.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
-from clicker.actions.general.PauseGameAction import PauseGameAction
-from clicker.actions.general.PlaceHeroAction import PlaceHeroAction
-from clicker.actions.general.SellTowerAction import SellTowerAction
-from clicker.actions.general.WaitForMoneyAction import WaitForMoneyAction
+from clicker.actions.factory.general_action_factory import GeneralActionFactory
 from clicker.clicker_state import g_clicker_state
 from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY, \
     KEYBOARD_LAYOUT_DELAY
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
-from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, CreateTowerEntry, \
-    UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, CreateHeroEntry
-from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
+from common.game_classes.script.script_parsing import parse_towers_from_script, parse_metadata, import_script
 from common.game_classes.tower import Tower
 from common.hotkeys import Hotkeys
 from common.keyboard import is_language_valid
+from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
 
 
@@ -48,41 +40,18 @@ def remove_towers_upgrades(towers_container: TowersContainer):
         t.tier_map[UpgradeTier.bottom] = 0
 
 
-def create_script(ahk: AHK, script_dict: Dict, metadata: GameMetadata) -> Tuple[list[IAction], TowersContainer]:
-    script_entries = import_script(script_dict=script_dict)
+def get_towers_from_script(script_entries: ScriptContainer) -> TowersContainer:
     towers_container: TowersContainer = parse_towers_from_script(script_entries=script_entries)
     remove_towers_upgrades(towers_container=towers_container)
+    return towers_container
 
-    def get_tower_from_map(tower_id: int) -> Tower:
-        tower = towers_container[tower_id]
-        if not isinstance(tower, Tower):
-            raise RuntimeError
 
-        return tower
+def create_script(ahk: AHK, script_entries: ScriptContainer,
+                  towers_container: TowersContainer, metadata: GameMetadata) -> Tuple[list[IAction], TowersContainer]:
+    actions_factory = GeneralActionFactory()
 
-    script: list[IAction] = []
-    for script_entry in script_entries:
-        if isinstance(script_entry, PauseEntry):
-            script.append(PauseGameAction(ahk=ahk))
-        if isinstance(script_entry, WaitForMoneyEntry):
-            script.append(WaitForMoneyAction(ahk=ahk, amount=script_entry.amount))
-        if isinstance(script_entry, CreateTowerEntry):
-            script.append(PlaceTowerAction(ahk=ahk, tower=towers_container[script_entry.id],
-                                           difficulty=metadata.difficulty))
-        elif isinstance(script_entry, CreateHeroEntry):
-            script.append(PlaceHeroAction(ahk=ahk, hero=towers_container[script_entry.id], metadata=metadata))
-        elif isinstance(script_entry, UpgradeTowerEntry):
-            script.append(UpgradeTowerAction(ahk=ahk, tower=get_tower_from_map(script_entry.id),
-                                             tier=UpgradeTier(script_entry.tier),
-                                             difficulty=metadata.difficulty))
-        elif isinstance(script_entry, SellTowerEntry):
-            script.append(SellTowerAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
-        elif isinstance(script_entry, ChangeTargetingEntry):
-            script.append(ChangeTargetingAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
-        elif isinstance(script_entry, ChangeSpecialTargetingEntry):
-            script.append(ChangeSpecialTargetingAction(ahk=ahk, tower=get_tower_from_map(script_entry.id)))
-
-    return script, towers_container
+    return [actions_factory.create(script_entry=i, towers_container=towers_container,
+                                   ahk=ahk, metadata=metadata) for i in script_entries], towers_container
 
 
 def parse_args() -> Namespace:
@@ -104,7 +73,11 @@ def main():
     Hotkeys.add_hotkey("ctrl + shift + s", g_clicker_state.stop)
     Hotkeys.add_hotkey("ctrl + shift + c", g_clicker_state.run)
 
-    script, tower_map = create_script(ahk=ahk, script_dict=total_dict["script"], metadata=metadata)
+    script_entries = import_script(script_dict=total_dict["script"])
+
+    towers_container = get_towers_from_script(script_entries=script_entries)
+    script, tower_map = create_script(ahk=ahk, script_entries=script_entries,
+                                      towers_container=towers_container, metadata=metadata)
 
     time.sleep(CLICKER_START_DELAY)
 

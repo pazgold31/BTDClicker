@@ -1,4 +1,7 @@
-class IAction:
+import abc
+
+
+class IAction(metaclass=abc.ABCMeta):
     def act(self) -> None:
         raise NotImplementedError
 
