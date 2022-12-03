@@ -3,7 +3,6 @@ from typing import Callable, Union, List
 # noinspection PyPep8Naming
 import PySimpleGUI as sg
 
-from common.game_classes.enums import Difficulty
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, \
     ITowerModifyingScriptEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
@@ -90,14 +89,16 @@ class GuiUpdater:
 
     def update_existing_towers(self, towers_container: TowersContainer):
         list_box_items = GuiFormatters.format_existing_towers(towers_container)
+        list_box_values: List[str] = list(list_box_items.values())
         self._controls_utils.update_listbox(
             key=GuiKeys.ExistingTowersListBox,
-            values=list_box_items,
+            values=list_box_values,
             set_to_index=self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ExistingTowersListBox))
-        for i in range(len(list_box_items)):
+        for i, list_box_item in enumerate(list_box_items.items()):
+            tower_id, _ = list_box_item
             self._controls_utils.change_cell_color(key=GuiKeys.ExistingTowersListBox,
                                                    index=i,
-                                                   color=towers_container.get_tower_color(tower_id=i))
+                                                   color=towers_container.get_tower_color(tower_id=tower_id))
 
     def update_script_box(self, activity_container: ActivityContainer, selected_index: Union[int, List[int]] = None):
         script_box_values: List[str] = []

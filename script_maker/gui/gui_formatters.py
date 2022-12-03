@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Dict
 
 from clicker.consts.keymap import TOWER_KEY_MAP
 from common.game_classes.enums import UpgradeTier, Difficulty
@@ -52,18 +52,18 @@ class GuiFormatters:
         return "SOLD" if tower.sold else ""
 
     @staticmethod
-    def format_existing_towers(towers_container: TowersContainer) -> List[str]:
-        output = []
+    def format_existing_towers(towers_container: TowersContainer) -> Dict[int, str]:
+        output = {}
         for tower_id, tower in towers_container.items():
             if isinstance(tower, Hero):
-                output.append(f"{tower_id}: Hero | {GuiFormatters.format_tower_position(tower)} |"
-                              f"{GuiFormatters.format_tower_targeting(tower)} | "
-                              f"{GuiFormatters.format_tower_sold_status(tower)}")
+                output[tower_id] = (f"{tower_id}: Hero | {GuiFormatters.format_tower_position(tower)} |"
+                                    f"{GuiFormatters.format_tower_targeting(tower)} | "
+                                    f"{GuiFormatters.format_tower_sold_status(tower)}")
             elif isinstance(tower, Tower):
-                output.append(f"{tower_id}: {tower.name} | {GuiFormatters.format_tower_position(tower)} | "
-                              f"{GuiFormatters.format_tower_tiers(tower)} | "
-                              f"{GuiFormatters.format_tower_targeting(tower)} | "
-                              f"{GuiFormatters.format_tower_sold_status(tower)}")
+                output[tower_id] = (f"{tower_id}: {tower.name} | {GuiFormatters.format_tower_position(tower)} | "
+                                    f"{GuiFormatters.format_tower_tiers(tower)} | "
+                                    f"{GuiFormatters.format_tower_targeting(tower)} | "
+                                    f"{GuiFormatters.format_tower_sold_status(tower)}")
             else:
                 raise RuntimeError
 
