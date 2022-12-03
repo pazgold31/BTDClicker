@@ -2,19 +2,19 @@ import json
 import time
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 from ahk import AHK
 
-from actions.PlaceTowerAction import PlaceTowerAction
-from actions.UpgradeTowerAction import UpgradeTowerAction
-from clicker.actions.ChangeSpecialTargetingAction import ChangeSpecialTargetingAction
-from clicker.actions.ChangeTargetingAction import ChangeTargetingAction
+from clicker.actions.general.PlaceTowerAction import PlaceTowerAction
+from clicker.actions.general.UpgradeTowerAction import UpgradeTowerAction
+from clicker.actions.general.ChangeSpecialTargetingAction import ChangeSpecialTargetingAction
+from clicker.actions.general.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.IAction import IAction
-from clicker.actions.PauseGameAction import PauseGameAction
-from clicker.actions.PlaceHeroAction import PlaceHeroAction
-from clicker.actions.SellTowerAction import SellTowerAction
-from clicker.actions.WaitForMoneyAction import WaitForMoneyAction
+from clicker.actions.general.PauseGameAction import PauseGameAction
+from clicker.actions.general.PlaceHeroAction import PlaceHeroAction
+from clicker.actions.general.SellTowerAction import SellTowerAction
+from clicker.actions.general.WaitForMoneyAction import WaitForMoneyAction
 from clicker.clicker_state import g_clicker_state
 from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY, \
     KEYBOARD_LAYOUT_DELAY
