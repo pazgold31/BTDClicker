@@ -421,11 +421,12 @@ class GuiClass:
     def handle_new_button(self, values: ValuesType):
         self._activity_container.reset_activity()
 
-    def handle_save_button(self, values: ValuesType):
+    def _handle_save(self, selected_file_path: Path = None):
         try:
-            self._selected_file_path = self._selected_file_path or popup_get_file(
-                message="Please select file to import",
+            self._selected_file_path = selected_file_path or popup_get_file(
+                message="Please select save path",
                 default_path=get_files_dir(),
+                save_as=True,
                 file_types=(("Json files", "json"),))
         except ValueError:
             return
@@ -433,6 +434,12 @@ class GuiClass:
         with self._selected_file_path.open("w") as of:
             json.dump(Script(metadata=self._metadata, script=self._activity_container.script_container.data), of,
                       default=pydantic_encoder)
+
+    def handle_save_as_button(self, values: ValuesType):
+        self._handle_save()
+
+    def handle_save_button(self, values: ValuesType):
+        self._handle_save(selected_file_path=self._selected_file_path)
 
     def _import_selected_script(self):
         with self._selected_file_path.open("r") as of:
@@ -594,6 +601,7 @@ class GuiClass:
             GuiKeys.MoveUpInScriptButton: self.handle_move_up_on_script,
             GuiKeys.MoveDownInScriptButton: self.handle_move_down_on_script,
             GuiMenu.File.Save: self.handle_save_button,
+            GuiMenu.File.SaveAs: self.handle_save_as_button,
             GuiMenu.File.New: self.handle_new_button,
             GuiMenu.File.Import: self.handle_import_button,
             GuiMenu.ViewedTowers.All: self.handle_view_all_towers,
