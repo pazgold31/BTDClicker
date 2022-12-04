@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import Callable
 
 from common.game_classes.enums import Difficulty
 from common.towers_info.game_info import g_heroes_info, g_towers_info

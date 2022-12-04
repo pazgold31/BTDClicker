@@ -1,4 +1,4 @@
-from typing import Optional, Union, List
+from typing import Optional, Union
 
 
 def increment_if_set(value: Optional[int]) -> Optional[int]:

@@ -9,5 +9,3 @@ class GameMetadata(BaseModel):
 
     class Config:
         use_enum_values = True
-
-

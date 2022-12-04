@@ -3,7 +3,7 @@ import time
 from datetime import timedelta
 from pathlib import Path
 from queue import Queue
-from typing import Tuple, Dict, List, Optional
+from typing import Tuple, Optional
 
 import cv2
 import numpy as np

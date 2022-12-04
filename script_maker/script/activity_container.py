@@ -1,5 +1,4 @@
 import copy
-from typing import List, Dict
 
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_entries_dataclasses import IScriptEntry, PauseEntry, WaitForMoneyEntry, \

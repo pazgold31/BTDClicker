@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg

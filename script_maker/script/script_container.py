@@ -1,5 +1,4 @@
 from collections import UserList
-from typing import List
 
 from common.game_classes.script.script_entries_dataclasses import IScriptEntry, ITowerModifyingScriptEntry, \
     CreateTowerEntry
