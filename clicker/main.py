@@ -1,6 +1,7 @@
 import json
 import time
 from argparse import ArgumentParser, Namespace
+from enum import StrEnum
 from pathlib import Path
 from typing import Dict, Tuple
 
@@ -8,6 +9,9 @@ from ahk import AHK
 
 from clicker.actions.IAction import IAction
 from clicker.actions.factory.general_action_factory import GeneralActionFactory
+from clicker.actions.factory.iaction_factory import IActionFactory
+from clicker.actions.factory.sandbox_action_factory import SandboxGeneralActionFactory
+from clicker.actions.factory.sandbox_placement_only_action_factory import SandboxPlacementOnlyActionFactory
 from clicker.clicker_state import g_clicker_state
 from clicker.consts.timing_consts import ACTIONS_DELAY, ACTION_CHECKING_DELAY, CLICKER_START_DELAY, \
     KEYBOARD_LAYOUT_DELAY
@@ -19,6 +23,23 @@ from common.hotkeys import Hotkeys
 from common.keyboard import is_language_valid
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
+
+
+class ActionFactoryType(StrEnum):
+    General = "general"
+    Sandbox = "sandbox"
+    SandboxPlacementOnly = "sandbox_placement"
+
+
+def create_action_factory(factory_type: ActionFactoryType) -> IActionFactory:
+    if ActionFactoryType.General == factory_type:
+        return GeneralActionFactory()
+    elif ActionFactoryType.Sandbox == factory_type:
+        return SandboxGeneralActionFactory()
+    elif ActionFactoryType.SandboxPlacementOnly == factory_type:
+        return SandboxPlacementOnlyActionFactory()
+    else:
+        raise RuntimeError("Invalid factory type")
 
 
 def load_script_dict(file_path: Path) -> Dict:
@@ -46,17 +67,18 @@ def get_towers_from_script(script_entries: ScriptContainer) -> TowersContainer:
     return towers_container
 
 
-def create_script(ahk: AHK, script_entries: ScriptContainer,
+def create_script(ahk: AHK, action_factory: IActionFactory, script_entries: ScriptContainer,
                   towers_container: TowersContainer, metadata: GameMetadata) -> Tuple[list[IAction], TowersContainer]:
-    actions_factory = GeneralActionFactory()
-
-    return [actions_factory.create(script_entry=i, towers_container=towers_container,
-                                   ahk=ahk, metadata=metadata) for i in script_entries], towers_container
+    actions = [action_factory.create(script_entry=i, towers_container=towers_container,
+                                     ahk=ahk, metadata=metadata) for i in script_entries]
+    return [i for i in actions if i is not None], towers_container
 
 
 def parse_args() -> Namespace:
     argument_parser = ArgumentParser("BTD6 script player")
     argument_parser.add_argument("-s", "--script", type=Path, required=False, default=None)
+    argument_parser.add_argument("--action-factory", type=ActionFactoryType, required=False,
+                                 default=ActionFactoryType.General)
     return argument_parser.parse_args()
 
 
@@ -73,10 +95,13 @@ def main():
     Hotkeys.add_hotkey("ctrl + shift + s", g_clicker_state.stop)
     Hotkeys.add_hotkey("ctrl + shift + c", g_clicker_state.run)
 
+    action_factory = create_action_factory(factory_type=args.action_factory)
+
     script_entries = import_script(script_dict=total_dict["script"])
 
     towers_container = get_towers_from_script(script_entries=script_entries)
-    script, tower_map = create_script(ahk=ahk, script_entries=script_entries,
+
+    script, tower_map = create_script(ahk=ahk, script_entries=script_entries, action_factory=action_factory,
                                       towers_container=towers_container, metadata=metadata)
 
     time.sleep(CLICKER_START_DELAY)
