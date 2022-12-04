@@ -1,4 +1,4 @@
-from typing import Dict, Any, Callable
+from typing import Any, Callable
 
 EventType = str
 ValuesType = dict[str, Any]

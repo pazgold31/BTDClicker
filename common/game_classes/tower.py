@@ -1,5 +1,3 @@
-from typing import Dict
-
 from pydantic import BaseModel
 
 from common.game_classes.enums import UpgradeTier

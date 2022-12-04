@@ -4,7 +4,7 @@ import os
 import time
 from functools import wraps
 from pathlib import Path
-from typing import Dict, Optional, List, Callable, Tuple
+from typing import Optional, Callable, Tuple
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg

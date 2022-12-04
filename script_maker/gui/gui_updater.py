@@ -1,4 +1,4 @@
-from typing import Callable, Union, List
+from typing import Callable, Union
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg

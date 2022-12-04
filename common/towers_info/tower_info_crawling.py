@@ -1,6 +1,6 @@
 import re
 from datetime import timedelta
-from typing import List, Tuple, Dict, TypeVar, Type
+from typing import Tuple, TypeVar, Type
 from urllib.parse import urljoin
 
 import bs4

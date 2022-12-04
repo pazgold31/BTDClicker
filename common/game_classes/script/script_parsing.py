@@ -1,4 +1,4 @@
-from typing import Dict, List, Generator, Tuple
+from typing import Dict, Generator, Tuple
 
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, \
@@ -37,7 +37,6 @@ def import_script(script_dict: Dict) -> ScriptContainer:
 
 def dynamic_script_parsing(
         script_entries: ScriptContainer) -> Generator[Tuple[TowersContainer, IScriptEntry], None, None]:
-
     towers_container = TowersContainer()
     for script_entry in script_entries:
         if isinstance(script_entry, CreateTowerEntry):

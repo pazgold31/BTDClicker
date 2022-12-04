@@ -1,4 +1,4 @@
-from typing import Callable, List, Dict
+from typing import Callable
 
 from clicker.consts.keymap import TOWER_KEY_MAP
 from common.game_classes.enums import UpgradeTier, Difficulty

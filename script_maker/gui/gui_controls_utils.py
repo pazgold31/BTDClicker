@@ -1,6 +1,6 @@
 import tkinter
 from tkinter.ttk import Combobox
-from typing import List, Optional, Iterable, Union
+from typing import Optional, Iterable, Union
 
 # noinspection PyPep8Naming
 import PySimpleGUI as sg

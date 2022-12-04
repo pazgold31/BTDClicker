@@ -1,5 +1,4 @@
 import copy
-from typing import Dict
 
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
