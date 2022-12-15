@@ -32,3 +32,4 @@ class GuiKeys:
 
     CopyToClipboard = "-copy-to-clipboard-"
     PasteClipboard = "-paste-clipboard-"
+    DoubleClick = "-double-click-"

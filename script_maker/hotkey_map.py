@@ -46,6 +46,7 @@ class ScriptMakerHotkeys(BaseModel):
 
     copy_towers_to_clipboard: str = "<Control-c>"
     paste_towers_from_clipboard: str = "<Control-v>"
+    double_click: str = "<Double-Button-1>"
 
     save_upgraded: str = "<Control-Alt-s>"
     keyboard_mouse: str = "<Control-k>"
