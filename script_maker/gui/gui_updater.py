@@ -87,13 +87,16 @@ class GuiUpdater:
         self._controls_utils.update_text(key=GuiKeys.CostToSelectionText,
                                          value=f"Cost to selection: {to_selection_cost}$")
 
-    def update_existing_towers(self, towers_container: TowersContainer):
+    def update_existing_towers(self, towers_container: TowersContainer, selected_index: Union[int, list[int]] = None):
         list_box_items = GuiFormatters.format_existing_towers(towers_container)
         list_box_values: list[str] = list(list_box_items.values())
+        selected_index = selected_index if selected_index is not None else \
+            self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ExistingTowersListBox)
+
         self._controls_utils.update_listbox(
             key=GuiKeys.ExistingTowersListBox,
             values=list_box_values,
-            set_to_index=self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ExistingTowersListBox))
+            set_to_index=selected_index)
         for i, list_box_item in enumerate(list_box_items.items()):
             tower_id, _ = list_box_item
             self._controls_utils.change_cell_color(key=GuiKeys.ExistingTowersListBox,

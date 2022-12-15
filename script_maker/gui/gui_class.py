@@ -13,7 +13,7 @@ from pydantic.json import pydantic_encoder
 from common.game_classes.enums import UpgradeTier, TowerType
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_dataclasses import Script
-from common.game_classes.script.script_entries_dataclasses import IScriptEntry
+from common.game_classes.script.script_entries_dataclasses import IScriptEntry, ITowerModifyingScriptEntry
 from common.game_classes.script.script_parsing import import_script, parse_towers_from_script, parse_metadata
 from common.monkey_knowledge.monkey_knowledge import g_monkey_knowledge
 from common.towers_info.game_info import g_towers_info, g_heroes_info
@@ -120,6 +120,7 @@ class GuiClass:
 
         self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.copy_towers_to_clipboard, GuiKeys.CopyToClipboard)
         self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.paste_towers_from_clipboard, GuiKeys.PasteClipboard)
+        self._window[GuiKeys.ScriptBox].bind(ScriptHotkeyMap.double_click, GuiKeys.DoubleClick)
 
         self._window.bind(ScriptHotkeyMap.save_upgraded, GuiKeys.SaveUpgradedButton)
         self._window.bind(ScriptHotkeyMap.keyboard_mouse, GuiKeys.KeyboardMouseButton)
@@ -503,6 +504,17 @@ class GuiClass:
                                                           new_index=self.get_next_index_in_script_box())
         self._gui_updater.update_existing_towers_and_script(activity_container=self._activity_container)
 
+    def handle_double_click_on_script(self, values: ValuesType):
+        selected_indexes = self._controls_utils.get_list_box_selected_indexes(key=GuiKeys.ScriptBox)
+        if len(selected_indexes) != 1:
+            return
+
+        action = self._activity_container.script_container[selected_indexes[0]]
+        if isinstance(action, ITowerModifyingScriptEntry):
+            tower_index = list(self._activity_container.towers_container.keys()).index(action.id)
+            self._gui_updater.update_existing_towers(towers_container=self._activity_container.towers_container,
+                                                     selected_index=tower_index)
+
     def handle_pause_button(self, values: ValuesType):
         with self._retrieve_next_script_box_index_and_update_script() as selected_index:
             self._activity_container.add_pause_entry(index=selected_index)
@@ -614,6 +626,7 @@ class GuiClass:
             GuiMenu.Scan.MonkeyKnowledge: self.handle_scan_monkey_knowledge_info,
             GuiKeys.ScriptBox + GuiKeys.CopyToClipboard: self.handle_copy_on_script,
             GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script,
+            GuiKeys.ScriptBox + GuiKeys.DoubleClick: self.handle_double_click_on_script,
             GuiKeys.PauseGameButton: self.handle_pause_button,
             GuiKeys.WaitForMoneyButton: self.handle_wait_for_money
         }
