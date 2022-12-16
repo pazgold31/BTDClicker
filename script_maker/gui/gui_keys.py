@@ -26,6 +26,7 @@ class GuiKeys:
     MoveUpInScriptButton = "-move-up-in-script-"
     PauseGameButton = "-pause-game-"
     WaitForMoneyButton = "-wait-for-money-button-"
+    RemoveObstacleButton = "-remove-obstacle-button-"
     WaitForMoneyInput = "-wait-for-money-input-"
     TotalCostText = "-total-cost-text-"
     CostToSelectionText = "-cost-to-selection-text-"

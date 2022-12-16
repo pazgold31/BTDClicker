@@ -3,7 +3,7 @@ from typing import Dict, Generator, Tuple
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import Actions, IScriptEntry, PauseEntry, \
     WaitForMoneyEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry, CreateHeroEntry
+    ChangeSpecialTargetingEntry, CreateHeroEntry, RemoveObstacleEntry
 from common.game_classes.tower import Tower, Hero
 from script_maker.script.script_container import ScriptContainer
 from script_maker.script.towers_container import TowersContainer
@@ -19,6 +19,8 @@ def import_script(script_dict: Dict) -> ScriptContainer:
             script.append(PauseEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.wait_for_money:
             script.append(WaitForMoneyEntry.parse_obj(action))
+        elif action[ACTION_KEYWORD] == Actions.remove_obstacle:
+            script.append(RemoveObstacleEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.create_tower:
             script.append(CreateTowerEntry.parse_obj(action))
         elif action[ACTION_KEYWORD] == Actions.create_hero:

@@ -3,7 +3,7 @@ import copy
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.script_entries_dataclasses import IScriptEntry, PauseEntry, WaitForMoneyEntry, \
     ITowerModifyingScriptEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry, CreateHeroEntry
+    ChangeSpecialTargetingEntry, CreateHeroEntry, RemoveObstacleEntry
 from common.game_classes.tower import Tower
 from common.utils.upgrades_utils import is_tier_upgradeable
 from script_maker.script.script_container import ScriptContainer
@@ -51,6 +51,9 @@ class ActivityContainer:
 
     def add_wait_for_money_entry(self, amount: int, index: int = None):
         self._add_entry(WaitForMoneyEntry(amount=amount), index=index)
+
+    def add_remove_obstacle_entry(self, x: int, y: int, cost: int, index: int = None):
+        self._add_entry(RemoveObstacleEntry(x=x, y=y, cost=cost), index=index)
 
     def add_new_tower(self, name: str, x: int, y: int, index: int = None, tower_id: int = None) -> int:
         tower_id = self._towers_container.add_new_tower(name=name, x=x, y=y, tower_id=tower_id)

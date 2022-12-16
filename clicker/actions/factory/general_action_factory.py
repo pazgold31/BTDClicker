@@ -6,12 +6,13 @@ from clicker.actions.general.ChangeTargetingAction import ChangeTargetingAction
 from clicker.actions.general.PauseGameAction import PauseGameAction
 from clicker.actions.general.PlaceHeroAction import PlaceHeroAction
 from clicker.actions.general.PlaceTowerAction import PlaceTowerAction
+from clicker.actions.general.RemoveObstacleAaction import RemoveObstacleAction
 from clicker.actions.general.SellTowerAction import SellTowerAction
 from clicker.actions.general.UpgradeTowerAction import UpgradeTowerAction
 from clicker.actions.general.WaitForMoneyAction import WaitForMoneyAction
 from common.game_classes.enums import UpgradeTier
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
-from common.game_classes.script.script_entries_dataclasses import IScriptEntry, PauseEntry
+from common.game_classes.script.script_entries_dataclasses import IScriptEntry, PauseEntry, RemoveObstacleEntry
 from common.game_classes.script.script_entries_dataclasses import WaitForMoneyEntry, CreateTowerEntry, \
     UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, ChangeSpecialTargetingEntry, CreateHeroEntry
 from common.game_classes.tower import Tower
@@ -27,6 +28,8 @@ class GeneralActionFactory(IActionFactory):
             return PauseGameAction(ahk=ahk)
         elif isinstance(script_entry, WaitForMoneyEntry):
             return WaitForMoneyAction(ahk=ahk, amount=script_entry.amount)
+        elif isinstance(script_entry, RemoveObstacleEntry):
+            return RemoveObstacleAction(ahk=ahk, x=script_entry.x, y=script_entry.y, cost=script_entry.cost)
 
         elif isinstance(script_entry, CreateTowerEntry):
             return PlaceTowerAction(ahk=ahk,

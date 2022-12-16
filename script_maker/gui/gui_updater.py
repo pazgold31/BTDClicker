@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 from common.game_classes.script.game_metadata_dataclasses import GameMetadata
 from common.game_classes.script.script_entries_dataclasses import PauseEntry, WaitForMoneyEntry, \
     ITowerModifyingScriptEntry, CreateTowerEntry, UpgradeTowerEntry, SellTowerEntry, ChangeTargetingEntry, \
-    ChangeSpecialTargetingEntry, CreateHeroEntry
+    ChangeSpecialTargetingEntry, CreateHeroEntry, RemoveObstacleEntry
 from common.game_classes.script.script_parsing import dynamic_script_parsing
 from common.game_classes.tower import Tower, Hero
 from common.towers_info.game_info import g_heroes_info
@@ -110,6 +110,8 @@ class GuiUpdater:
                 script_box_values.append("Pause game.")
             elif isinstance(action, WaitForMoneyEntry):
                 script_box_values.append(f"Wait for {action.amount}$")
+            elif isinstance(action, RemoveObstacleEntry):
+                script_box_values.append(f"Remove obstacle at {action.x},{action.y} for {action.cost}$")
 
             else:  # Tower specific
                 if not isinstance(action, ITowerModifyingScriptEntry):
