@@ -3,10 +3,8 @@ import time
 from datetime import timedelta
 from pathlib import Path
 from queue import Queue
-from typing import Tuple, Optional
+from typing import Optional
 
-import cv2
-import numpy as np
 import pyautogui
 from PIL import Image
 from ahk import AHK
@@ -15,6 +13,7 @@ from common.monkey_knowledge.knowledge_dataclasses import KnowledgeCategory, Kno
 from common.monkey_knowledge.knowledge_wiki_crawler import download_knowledge_pictures
 from common.user_files import get_knowledge_images_dir, get_files_dir
 from common.utils.cashed_dataclasses.cashed_dataclasses_utils import load_cached_dataclass, save_dataclass_to_cache
+from common.utils.picture_processing.sub_image_utils import get_inner_image_position
 
 
 class KnowledgeDirectories:
@@ -54,34 +53,6 @@ def get_knowledge_threshold(knowledge_name: str):
         return 0.02
     else:
         return DEFAULT_KNOWLEDGE_THRESHOLD
-
-
-def convert_image_to_cv2(image: Image.Image) -> np.ndarray:
-    # noinspection PyTypeChecker
-    cv_image = np.array(image)  # 'image' Color order: RGBA
-    red = cv_image[:, :, 0].copy()  # Copy R from RGBA
-    cv_image[:, :, 0] = cv_image[:, :, 2].copy()  # Copy B to first order. Color order: BGBA
-    cv_image[:, :, 2] = red  # Copy R to the third order. Color order: BGRA
-    return cv_image
-
-
-def get_inner_image_position(image: Image.Image, inner_image: Image.Image, threshold: float) -> Tuple[int, int]:
-    large_image = convert_image_to_cv2(image=image)
-    small_image = convert_image_to_cv2(image=inner_image)
-
-    # noinspection PyUnresolvedReferences
-    result = cv2.matchTemplate(large_image, small_image[..., :3], cv2.TM_SQDIFF_NORMED, mask=small_image[..., 3])
-
-    # noinspection PyUnresolvedReferences
-    mn, _, location, _ = cv2.minMaxLoc(result)
-
-    if mn > threshold:
-        raise ValueError
-
-    location_x, location_y = location
-    length, height = small_image.shape[:2]
-
-    return (location_x * 2 + length) / 2, (location_y * 2 + height) / 2
 
 
 def click_image(ahk: AHK, image: Image.Image, threshold: float):

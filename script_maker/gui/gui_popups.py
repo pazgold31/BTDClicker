@@ -33,6 +33,29 @@ def popup_get_text(message: str, validator: Callable[[str], bool] = None,
     return text
 
 
+def popup_get_cost(message: str, validator: Callable[[int], bool] = None,
+                   error_message: str = "", *args, **kwargs) -> int:
+    validators = [lambda c: c >= 0, validator]
+    cost = 0
+    while True:
+        cost_str = sg.popup_get_text(message, *args, **kwargs)
+        if cost_str is None:
+            raise ValueError
+
+        try:
+            cost: int = int(cost_str)
+        except TypeError:
+            continue
+
+        if bool(validator) and not all(i(cost) for i in validators):
+            sg.popup(error_message)
+            continue
+
+        break
+
+    return cost
+
+
 def popup_yes_no(*args: str, title: str, **kwargs) -> bool:
     return "Yes" == sg.popup_yes_no(*args, **kwargs, title=title)
 

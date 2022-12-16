@@ -72,6 +72,7 @@ def get_layout() -> list[list[Any]]:
          sg.Frame("", layout=[[sg.In(size=(12, 1), enable_events=True, key=GuiKeys.WaitForMoneyInput),
                                sg.Button("Wait for amount", size=(15, 1), enable_events=True,
                                          key=GuiKeys.WaitForMoneyButton)]])],
+        [sg.Button("Remove obstacle", size=(15, 1), enable_events=True, key=GuiKeys.RemoveObstacleButton)],
         [sg.HSeparator()],
         [sg.Text("Total cost: ", key=GuiKeys.TotalCostText)],
         [sg.Text("Cost to selection: ", key=GuiKeys.CostToSelectionText)]

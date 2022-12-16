@@ -26,7 +26,7 @@ from script_maker.gui.gui_layout import get_layout, DIFFICULTY_MAP
 from script_maker.gui.gui_menu import GuiMenu
 from script_maker.gui.gui_parsers import GuiParsers
 from script_maker.gui.gui_popups import popup_get_position, popup_get_file, popup_get_tower_type, popup_get_text, \
-    popup_yes_no, popup_execute_method
+    popup_yes_no, popup_execute_method, popup_get_cost
 from script_maker.gui.gui_types import ValuesType, CallbackMethod
 from script_maker.gui.gui_updater import GuiUpdater
 from script_maker.hotkey_map import ScriptHotkeyMap
@@ -519,7 +519,7 @@ class GuiClass:
         with self._retrieve_next_script_box_index_and_update_script() as selected_index:
             self._activity_container.add_pause_entry(index=selected_index)
 
-    def handle_wait_for_money(self, values: ValuesType):
+    def handle_wait_for_money_button(self, values: ValuesType):
         try:
             amount_of_money = GuiParsers.parse_amount_of_money(values[GuiKeys.WaitForMoneyInput])
         except ValueError:
@@ -528,6 +528,17 @@ class GuiClass:
 
         with self._retrieve_next_script_box_index_and_update_script() as selected_index:
             self._activity_container.add_wait_for_money_entry(amount=amount_of_money, index=selected_index)
+
+    def handle_remove_obstacle_button(self, values: ValuesType):
+
+        with self._tower_position_hotkeys.pause_capture():
+            try:
+                x, y = popup_get_position(title=f"Select obstacle position")
+                cost = popup_get_cost(message="Enter cost for the obstacle removal")
+                with self._retrieve_next_script_box_index_and_update_script() as selected_index:
+                    self._activity_container.add_remove_obstacle_entry(x=x, y=y, cost=cost, index=selected_index)
+            except ValueError:
+                sg.popup("Error. please try again")
 
     def handle_scan_towers_info(self, values: ValuesType):
         if not popup_yes_no(
@@ -628,5 +639,6 @@ class GuiClass:
             GuiKeys.ScriptBox + GuiKeys.PasteClipboard: self.handle_paste_on_script,
             GuiKeys.ScriptBox + GuiKeys.DoubleClick: self.handle_double_click_on_script,
             GuiKeys.PauseGameButton: self.handle_pause_button,
-            GuiKeys.WaitForMoneyButton: self.handle_wait_for_money
+            GuiKeys.WaitForMoneyButton: self.handle_wait_for_money_button,
+            GuiKeys.RemoveObstacleButton: self.handle_remove_obstacle_button
         }

@@ -6,6 +6,7 @@ from common.game_classes.enums import UpgradeTier
 class Actions:
     pause = "pause"
     wait_for_money = "wait_for_money"
+    remove_obstacle = "remove_obstacle"
     create_tower = "create_tower"
     create_hero = "create_hero"
     upgrade = "upgrade"
@@ -25,6 +26,13 @@ class PauseEntry(IScriptEntry):
 class WaitForMoneyEntry(IScriptEntry):
     action = Actions.wait_for_money
     amount: int
+
+
+class RemoveObstacleEntry(IScriptEntry):
+    action = Actions.remove_obstacle
+    x: int
+    y: int
+    cost: int
 
 
 class ITowerModifyingScriptEntry(IScriptEntry):
