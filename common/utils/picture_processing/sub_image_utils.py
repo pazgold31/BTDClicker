@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import cv2
 from PIL import Image
 

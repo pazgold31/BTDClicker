@@ -15,3 +15,7 @@ def get_knowledge_images_dir(subdirectory: str = "") -> Path:
     if not path.exists():
         path.mkdir(parents=True)
     return path
+
+
+def get_const_images_dir() -> Path:
+    return get_files_dir() / "ConstImages"
