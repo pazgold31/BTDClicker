@@ -255,7 +255,8 @@ class GuiClass:
         try:
             text = popup_get_text(message="Enter tower upgrade(e.g: 102): ",
                                   validator=is_tiers_text_valid,
-                                  error_message="Invalid tower upgrades entered!")
+                                  error_message="Invalid tower upgrades entered!",
+                                  location=self._get_popups_position())
             selected_tower_id = self._handle_save_tower(values=values)
         except ValueError:
             return
@@ -335,7 +336,8 @@ class GuiClass:
         for selected_tower_id in self._get_selected_towers_id():
             with self._tower_position_hotkeys.pause_capture():
                 try:
-                    x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}")
+                    x, y = popup_get_position(title=f"Modify position for tower: {selected_tower_id}",
+                                              location=self._get_popups_position())
                     self._activity_container.change_position(tower_id=selected_tower_id, x=x, y=y)
                 except ValueError:
                     pass
@@ -344,7 +346,8 @@ class GuiClass:
     def handle_modify_tower_type(self, values: ValuesType):
         for selected_tower_id in self._get_selected_towers_id():
             try:
-                tower_type = popup_get_tower_type(title=f"Select type for tower: {selected_tower_id}")
+                tower_type = popup_get_tower_type(title=f"Select type for tower: {selected_tower_id}",
+                                                  location=self._get_popups_position())
             except ValueError:
                 continue
 
@@ -355,7 +358,8 @@ class GuiClass:
         for selected_tower_id in self._get_selected_towers_id():
             with self._tower_position_hotkeys.pause_capture():
                 try:
-                    x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}")
+                    x, y = popup_get_position(title=f"Set position for duplicated tower: {selected_tower_id}",
+                                              location=self._get_popups_position())
                     self._activity_container.duplicate_tower(tower_id=selected_tower_id, new_tower_x=x, new_tower_y=y)
                 except ValueError:
                     pass
@@ -428,7 +432,8 @@ class GuiClass:
                 message="Please select save path",
                 default_path=get_files_dir(),
                 save_as=True,
-                file_types=(("Json files", "json"),))
+                file_types=(("Json files", "json"),),
+                location=self._get_popups_position())
         except ValueError:
             return
 
@@ -468,7 +473,8 @@ class GuiClass:
         try:
             selected_file_path = popup_get_file(message="Please select file to import",
                                                 default_path=get_files_dir(),
-                                                file_types=(("Json files", "json"),))
+                                                file_types=(("Json files", "json"),),
+                                                location=self._get_popups_position())
             self.import_script(script_path=selected_file_path)
         except ValueError:
             pass
@@ -533,8 +539,10 @@ class GuiClass:
 
         with self._tower_position_hotkeys.pause_capture():
             try:
-                x, y = popup_get_position(title=f"Select obstacle position")
-                cost = popup_get_cost(message="Enter cost for the obstacle removal")
+                x, y = popup_get_position(title=f"Select obstacle position",
+                                          location=self._get_popups_position())
+                cost = popup_get_cost(message="Enter cost for the obstacle removal",
+                                      location=self._get_popups_position())
                 with self._retrieve_next_script_box_index_and_update_script() as selected_index:
                     self._activity_container.add_remove_obstacle_entry(x=x, y=y, cost=cost, index=selected_index)
             except ValueError:
