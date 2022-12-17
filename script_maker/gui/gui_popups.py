@@ -60,7 +60,7 @@ def popup_yes_no(*args: str, title: str, **kwargs) -> bool:
     return "Yes" == sg.popup_yes_no(*args, **kwargs, title=title)
 
 
-def popup_get_position(title: str, ):
+def popup_get_position(title: str, *args, **kwargs):
     x_pos_key = "-x-"
     y_pos_key = "-y-"
     save_button_key = "-save-"
@@ -74,7 +74,7 @@ def popup_get_position(title: str, ):
               ],
               [sg.Button("Save", enable_events=True, key=save_button_key)]]
 
-    window = sg.Window(title, layout, modal=True)
+    window = sg.Window(title, layout, *args, modal=True, **kwargs)
     gui_controls_utils = GuiControlsUtils(window=window)
     try:
         with TowerPositionHotkeys(
@@ -95,14 +95,14 @@ def popup_get_position(title: str, ):
         window.close()
 
 
-def popup_get_tower_type(title: str, ):
+def popup_get_tower_type(title: str, *args, **kwargs):
     combo_key = "-combo-"
     save_button_key = "-save-"
     layout = [[sg.Text(f"Select type"),
                sg.Combo(values=list(g_towers_info.keys()), key=combo_key, enable_events=True, readonly=True)],
               [sg.Button("Save", enable_events=True, key=save_button_key)]]
 
-    window = sg.Window(title, layout, modal=True)
+    window = sg.Window(title, layout, *args, modal=True, **kwargs)
     try:
         while True:
             event, values = window.read()
